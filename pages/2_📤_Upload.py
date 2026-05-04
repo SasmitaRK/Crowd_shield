@@ -63,6 +63,30 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
+st.markdown(
+    """
+    <style>
+    .stFileUploader {
+      background: #ffffff !important;
+      border-radius: 12px !important;
+    }
+    .stButton > button:not([kind="primary"]) {
+      background: #ffffff !important;
+      color: #111827 !important;
+      border: 1px solid #d1d5db !important;
+    }
+    .stButton > button:not([kind="primary"]):hover {
+      background: #f9fafb !important;
+      border-color: #9ca3af !important;
+    }
+    .stMarkdown, .stCaption, .stText, .stFileUploader, .stMetric {
+      color: #111827 !important;
+    }
+    </style>
+    """,
+    unsafe_allow_html=True,
+)
+
 MAX_HALF = MAX_IMAGES_PER_SEGMENT // 2
 
 # ---------------------------------------------------------------------------
@@ -138,7 +162,7 @@ for i, seg in enumerate(SEGMENTS):
             )
         else:
             st.markdown(
-                "<div style='margin-top:.5rem;font-size:.78rem;color:#d1d5db'>"
+                "<div style='margin-top:.5rem;font-size:.78rem;color:#6b7280'>"
                 "No images yet</div>",
                 unsafe_allow_html=True,
             )
