@@ -342,7 +342,7 @@ BORDER_MOD  = "#d97706"
 BORDER_HIGH = "#ea580c"
 BORDER_CRIT = "#dc2626"
 
-fig2, ax2 = plt.subplots(figsize=(10, max(3.8, len(segs_list) * 1.0)))
+fig2, ax2 = plt.subplots(figsize=(10, max(4.4, len(segs_list) * 1.12)))
 fig2.patch.set_facecolor("#f8fafc")
 ax2.set_facecolor("#f8fafc")
 for sp in ax2.spines.values():
@@ -382,7 +382,7 @@ for yi, seg in enumerate(segs_list):
         ax2.annotate(
             f" {div_lbl} ",
             xy=(div_x, yi + bar_h / 2),
-            xytext=(div_x, yi + bar_h / 2 + 0.05),
+            xytext=(div_x, yi + bar_h / 2 + 0.10),
             va="bottom", ha="center",
             fontsize=7, fontweight="bold", color="white",
             bbox=dict(boxstyle="round,pad=0.2",
@@ -391,8 +391,8 @@ for yi, seg in enumerate(segs_list):
         )
 
     # ── Shadow bar ────────────────────────────────────────────────────────────
-    ax2.barh(yi - 0.09, display_count, height=bar_h,
-             color=SHADOW_COL, zorder=2, linewidth=0, alpha=0.65)
+    ax2.barh(yi - 0.14, display_count, height=bar_h,
+             color=SHADOW_COL, zorder=2, linewidth=0, alpha=0.50)
 
     # ── Gradient occupancy bar ────────────────────────────────────────────────
     _grad_bar_h(ax2, yi, display_count, bar_h,
@@ -421,7 +421,7 @@ for yi, seg in enumerate(segs_list):
         (w_to_crit, max(count, high) + w_to_crit / 2, BORDER_CRIT),
     ]:
         if width > x_ceiling * 0.05:
-            ax2.text(cx, yi, f"+{int(width)}",
+            ax2.text(cx, yi + 0.18, f"+{int(width)}",
                      ha="center", va="center",
                      color=lc, fontsize=8.5, fontweight="bold", zorder=6)
 
