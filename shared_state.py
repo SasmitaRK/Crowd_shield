@@ -165,6 +165,7 @@ GLOBAL_CSS = """
     padding: 1.25rem;
     border: 1px solid #e5e7eb;
     box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    color: #111827;
   }
   .metric-card {
     background: #ffffff;
@@ -173,6 +174,7 @@ GLOBAL_CSS = """
     border: 1px solid #e5e7eb;
     box-shadow: 0 2px 8px rgba(0,0,0,0.05);
     text-align: center;
+    color: #111827;
   }
   .feature-card {
     background: #ffffff;
@@ -361,6 +363,15 @@ GLOBAL_CSS = """
     font-weight: 600 !important;
     font-size: 0.9rem !important;
   }
+  .stButton > button:not([kind="primary"]) {
+    background: #ffffff !important;
+    color: #111827 !important;
+    border: 1px solid #d1d5db !important;
+  }
+  .stButton > button:not([kind="primary"]):hover {
+    background: #f9fafb !important;
+    border-color: #9ca3af !important;
+  }
   .stButton > button[kind="primary"] {
     background: #0d9488 !important;
     border-color: #0d9488 !important;
@@ -373,6 +384,15 @@ GLOBAL_CSS = """
   .stTextInput > div > div > input {
     border-radius: 8px !important;
     border-color: #d1d5db !important;
+  }
+  .stNumberInput input {
+    color: #111827 !important;
+  }
+  .stSelectbox div[data-baseweb="select"] {
+    color: #111827 !important;
+  }
+  .stMarkdown, .stCaption, .stText, .stRadio, .stSelectbox, .stNumberInput {
+    color: #111827 !important;
   }
   .stProgress > div > div > div {
     background: #0d9488 !important;

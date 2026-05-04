@@ -273,6 +273,26 @@ with st.expander("How to enable email alerts", expanded=not email_configured()):
 
 st.markdown("---")
 
+st.markdown("""
+<style>
+.stButton > button:not([kind="primary"]) {
+  background: #ffffff !important;
+  color: #111827 !important;
+  border: 1px solid #d1d5db !important;
+}
+.stButton > button:not([kind="primary"]):hover {
+  background: #f9fafb !important;
+  border-color: #9ca3af !important;
+}
+.stNumberInput input {
+  color: #111827 !important;
+}
+.stExpander {
+  background: #ffffff !important;
+}
+</style>
+""", unsafe_allow_html=True)
+
 # ---------------------------------------------------------------------------
 # 5. Reset controls
 # ---------------------------------------------------------------------------

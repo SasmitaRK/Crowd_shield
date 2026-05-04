@@ -247,7 +247,7 @@ st.markdown('<div class="section-label">Crowd Count vs Risk Thresholds</div>',
             unsafe_allow_html=True)
 
 x_pos = list(range(len(segs_list)))
-fig1, ax1 = plt.subplots(figsize=(10, 5.0))
+fig1, ax1 = plt.subplots(figsize=(10, 5.8))
 fig1.patch.set_facecolor("#f8fafc")
 ax1.set_facecolor("#f8fafc")
 for sp in ax1.spines.values():
@@ -256,7 +256,7 @@ ax1.tick_params(colors=TEXT_COL, labelsize=11)
 ax1.set_axisbelow(True)
 ax1.yaxis.grid(True, color="#e2e8f0", linewidth=0.9, zorder=0)
 ax1.set_xlim(-0.65, len(segs_list) - 0.35)
-ax1.set_ylim(0, y_ceiling)
+ax1.set_ylim(0, y_ceiling * 1.10)
 ax1.spines["right"].set_visible(False)
 ax1.spines["top"].set_visible(False)
 
@@ -287,7 +287,7 @@ for xi, seg in zip(x_pos, segs_list):
         ax1.annotate(
             f" {val} ",
             xy=(x1, val),
-            xytext=(x1 + 0.03, val),
+            xytext=(x1 + 0.05, val),
             va="center", ha="left",
             fontsize=7.5, fontweight="bold", color="white",
             bbox=dict(boxstyle="round,pad=0.25",
@@ -309,9 +309,10 @@ legend_items = [
     plt.Line2D([0],[0], color="#ea580c", lw=2,   ls="-.", label="High Risk threshold"),
     plt.Line2D([0],[0], color="#dc2626", lw=2.5, ls="-",  label="Critical threshold"),
 ]
-ax1.legend(handles=legend_items, loc="upper left",
+ax1.legend(handles=legend_items, loc="upper center",
+           bbox_to_anchor=(0.5, 1.18), ncol=2,
            facecolor="white", edgecolor="#e2e8f0",
-           labelcolor=TEXT_COL, fontsize=8.5, framealpha=0.96, ncol=2)
+           labelcolor=TEXT_COL, fontsize=8.5, framealpha=0.96)
 
 fig1.tight_layout()
 st.pyplot(fig1)
