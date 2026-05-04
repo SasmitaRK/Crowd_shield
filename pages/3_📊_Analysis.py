@@ -362,7 +362,7 @@ for yi, seg in enumerate(segs_list):
     display_count = min(count, crit)
     overflow      = max(0, count - crit)
 
-    # ── Zone tint bands (each segment's own thresholds, shared X scale) ──────
+    # ── Zone tint bands ───────────────────────────────────────────────────────
     for bx0, bx1, bfc in [
         (0,    mod,  Z_MOD),
         (mod,  high, Z_HIGH),
@@ -371,28 +371,14 @@ for yi, seg in enumerate(segs_list):
         ax2.barh(yi, bx1 - bx0, left=bx0, height=bar_h,
                  color=bfc, edgecolor="none", zorder=1, alpha=0.65)
 
-    # ── Zone divider lines with value badges above ────────────────────────────
-    for div_x, div_col, div_lbl in [
-        (mod,  BORDER_MOD,  str(mod)),
-        (high, BORDER_HIGH, str(high)),
-        (crit, BORDER_CRIT, str(crit)),
+    # ── Zone divider lines (span full bar height, no badges here) ────────────
+    for div_x, div_col in [
+        (mod,  BORDER_MOD),
+        (high, BORDER_HIGH),
+        (crit, BORDER_CRIT),
     ]:
         ax2.vlines(div_x, yi - bar_h / 2, yi + bar_h / 2,
-                   colors=div_col, linewidths=2.0, zorder=4, alpha=0.80)
-        ax2.annotate(
-            f" {div_lbl} ",
-            xy=(div_x, yi + bar_h / 2),
-            xytext=(div_x, yi + bar_h / 2 + 0.10),
-            va="bottom", ha="center",
-            fontsize=7, fontweight="bold", color="white",
-            bbox=dict(boxstyle="round,pad=0.2",
-                      facecolor=div_col, edgecolor="none", alpha=0.82),
-            zorder=8,
-        )
-
-    # ── Shadow bar ────────────────────────────────────────────────────────────
-    ax2.barh(yi - 0.14, display_count, height=bar_h,
-             color=SHADOW_COL, zorder=2, linewidth=0, alpha=0.50)
+                   colors=div_col, linewidths=1.8, zorder=4, alpha=0.75)
 
     # ── Gradient occupancy bar ────────────────────────────────────────────────
     _grad_bar_h(ax2, yi, display_count, bar_h,
@@ -411,7 +397,7 @@ for yi, seg in enumerate(segs_list):
                  color="white", fontsize=9, fontweight="bold",
                  zorder=6)
 
-    # Headroom "+N" labels inside remaining zones
+    # Headroom "+N" labels — centred vertically in each remaining zone
     w_to_mod  = max(0, min(mod,  crit) - count)
     w_to_high = max(0, min(high, crit) - max(count, mod))
     w_to_crit = max(0, crit            - max(count, high))
@@ -421,14 +407,40 @@ for yi, seg in enumerate(segs_list):
         (w_to_crit, max(count, high) + w_to_crit / 2, BORDER_CRIT),
     ]:
         if width > x_ceiling * 0.05:
-            ax2.text(cx, yi + 0.18, f"+{int(width)}",
+            ax2.text(cx, yi, f"+{int(width)}",
                      ha="center", va="center",
                      color=lc, fontsize=8.5, fontweight="bold", zorder=6)
+
+# ── Threshold badges — drawn ONCE above the top axis, outside the plot ───────
+y_badge = len(segs_list) - 0.5   # top of highest bar
+seen_x: set = set()
+for seg in segs_list:
+    t = seg_info[seg]["thresholds"]
+    for div_x, div_col, div_lbl in [
+        (t["moderate"], BORDER_MOD,  str(t["moderate"])),
+        (t["high"],     BORDER_HIGH, str(t["high"])),
+        (t["critical"], BORDER_CRIT, str(t["critical"])),
+    ]:
+        if div_x not in seen_x:
+            seen_x.add(div_x)
+            ax2.annotate(
+                f" {div_lbl} ",
+                xy=(div_x, y_badge),
+                xytext=(div_x, y_badge + 0.28),
+                va="bottom", ha="center",
+                fontsize=7.5, fontweight="bold", color="white",
+                bbox=dict(boxstyle="round,pad=0.25",
+                          facecolor=div_col, edgecolor="none", alpha=0.88),
+                annotation_clip=False,
+                zorder=9,
+            )
 
 ax2.set_yticks(y_pos)
 ax2.set_yticklabels([f"Segment {s}" for s in segs_list],
                     color=TEXT_COL, fontsize=11)
 ax2.set_xlabel("People count", color=TEXT_COL, fontsize=10)
+# Give enough headroom at top for the badges
+ax2.set_ylim(-0.6, len(segs_list) - 0.5 + 0.7)
 
 legend_items2 = [
     mpatches.Patch(facecolor="#10b981", edgecolor="white", label="Safe"),
@@ -439,9 +451,10 @@ legend_items2 = [
     mpatches.Patch(facecolor=Z_HIGH, edgecolor=BORDER_HIGH, alpha=0.8, label="Room to High Risk"),
     mpatches.Patch(facecolor=Z_CRIT, edgecolor=BORDER_CRIT, alpha=0.8, label="Room to Critical"),
 ]
-ax2.legend(handles=legend_items2, loc="lower right",
+ax2.legend(handles=legend_items2, loc="upper center",
+           bbox_to_anchor=(0.5, -0.12), ncol=4,
            facecolor="white", edgecolor="#e2e8f0",
-           labelcolor=TEXT_COL, fontsize=8.5, framealpha=0.96, ncol=2)
+           labelcolor=TEXT_COL, fontsize=8.5, framealpha=0.96)
 
 fig2.tight_layout()
 st.pyplot(fig2)

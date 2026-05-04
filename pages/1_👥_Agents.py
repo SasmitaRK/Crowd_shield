@@ -30,12 +30,19 @@ st.caption("Assign a Gmail address to each segment. Alerts will be emailed direc
 
 EMAIL_RE = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
 
+# Pre-populate widget state from saved agents only on first load
+for seg in SEGMENTS:
+    key = f"agent_input_{seg}"
+    if key not in st.session_state:
+        st.session_state[key] = st.session_state.agents.get(seg, "")
+
 cols = st.columns(5)
 new_vals = {}
 for i, seg in enumerate(SEGMENTS):
     with cols[i]:
-        current_email = st.session_state.agents.get(seg, "")
-        is_set = bool(current_email)
+        saved_email  = st.session_state.agents.get(seg, "")
+        current_input = st.session_state.get(f"agent_input_{seg}", saved_email)
+        is_set       = bool(saved_email)
         status_color = "#10b981" if is_set else "#9ca3af"
         status_label = "Assigned" if is_set else "Unassigned"
 
@@ -59,7 +66,6 @@ for i, seg in enumerate(SEGMENTS):
         )
         new_vals[seg] = st.text_input(
             f"Agent email — Segment {seg}",
-            value=current_email,
             placeholder="agent@gmail.com",
             label_visibility="collapsed",
             key=f"agent_input_{seg}",
@@ -71,6 +77,7 @@ if st.button("Save agent assignments", type="primary", use_container_width=True)
     if invalid:
         st.error(f"Invalid email format for segment(s): {', '.join(invalid)}")
     else:
-        st.session_state.agents = new_vals
+        st.session_state.agents = {s: v.strip() for s, v in new_vals.items()}
         assigned_count = sum(1 for v in new_vals.values() if v)
         st.success(f"Saved — {assigned_count} / 5 segments have agents assigned.")
+        st.rerun()
