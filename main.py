@@ -41,13 +41,13 @@ st.markdown(
         <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
           <circle cx="5" cy="5" r="5" fill="#0d9488"/>
         </svg>
-        Live Threat Detection
+        Crowd Risk Analysis
       </div>
       <h1>Prevent stampedes<br>before they start.</h1>
       <p>
-        AI-powered crowd monitoring for high-density environments.
-        Detect dangerous bottlenecks, analyse zone density,
-        and instantly alert response teams in real-time.
+        AI crowd monitoring for high-density venues.
+        Count people in CCTV and drone photos, rate each zone's risk,
+        and alert response teams by email.
       </p>
       <div class="hero-buttons">
         <a href="/Upload" class="btn-primary">
@@ -84,14 +84,14 @@ SVG_SHIELD = """<svg xmlns="http://www.w3.org/2000/svg" width="22" height="22"
 
 features = [
     (SVG_EYE,      "Computer Vision",
-     "Upload security footage for instant density mapping and individual "
-     "tracking with high-confidence bounding boxes."),
+     "Upload CCTV or drone photos to count people and map where the "
+     "crowd is densest."),
     (SVG_ACTIVITY, "Zone Analysis",
      "Automatically segment crowds into operational zones (A–E) to isolate "
      "risk levels and manage flow effectively."),
     (SVG_SHIELD,   "Automated Dispatch",
-     "When high-risk density is detected, relevant zone agents are immediately "
-     "alerted with localised crowd data."),
+     "When a zone turns high-risk, its agent and the receiving zone's agent "
+     "get an email with the counts and a relocation plan."),
 ]
 
 cols = st.columns(3)

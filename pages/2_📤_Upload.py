@@ -136,6 +136,15 @@ for i, seg in enumerate(SEGMENTS):
             label_visibility="collapsed",
         )
 
+        st.radio(
+            f"Photos in Segment {seg} show",
+            options=["sum", "max"],
+            format_func=lambda m: ("Different parts: add counts" if m == "sum"
+                                   else "Same area: keep highest"),
+            key=f"combine_{seg}",
+            help="Adding up two photos of the same spot counts those people twice.",
+        )
+
         if cctv_files or drone_files:
             cctv_clipped  = cctv_files[:MAX_HALF]  if cctv_files  else []
             drone_clipped = drone_files[:MAX_HALF]  if drone_files else []
@@ -433,7 +442,9 @@ requestAnimationFrame(frame);
     for idx, seg in enumerate(segs_ready):
         img_list = st.session_state.uploaded_images[seg]
         img_srcs = st.session_state.image_sources.get(seg, [])
-        results[seg] = process_segment(img_list, per_image_sources=img_srcs)
+        results[seg] = process_segment(
+            img_list, per_image_sources=img_srcs,
+            combine=st.session_state.get(f"combine_{seg}", "sum"))
 
     anim_slot.empty()
     st.session_state.crowd_data     = results
