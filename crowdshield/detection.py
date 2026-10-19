@@ -43,6 +43,8 @@ def load_detector(model_key: str):
 def _face_cascades():
     import cv2
 
+    if not hasattr(cv2, "CascadeClassifier"):
+        raise RuntimeError("Haar face cascades need OpenCV 4.x; OpenCV 5 removed them.")
     root = cv2.data.haarcascades
     return (cv2.CascadeClassifier(root + "haarcascade_frontalface_default.xml"),
             cv2.CascadeClassifier(root + "haarcascade_profileface.xml"))
@@ -74,13 +76,17 @@ def _hog_people(gray: np.ndarray) -> list[tuple]:
 
 
 def detect_people(img: np.ndarray, model_key: str = DEFAULT_MODEL_KEY, *,
-                  use_faces: bool = True, conf: float = 0.25, imgsz: int = 640,
+                  use_faces: bool = False, conf: float = 0.25, imgsz: int = 640,
                   max_det: int = MAX_DETECTIONS, allow_fallback: bool = True) -> dict:
     """Count people in a BGR image. Boxes are (x, y, width, height).
 
-    YOLO finds bodies. With `use_faces`, Haar cascades add faces that don't sit
-    inside a detected body: people whose bodies are hidden. If YOLO is missing
-    or fails and `allow_fallback` is set, OpenCV's HOG person detector is used.
+    YOLO finds bodies. If YOLO is missing or fails and `allow_fallback` is set,
+    OpenCV's HOG person detector is used instead.
+
+    `use_faces` restores the original app's add-on: Haar cascades add faces that
+    don't sit inside a detected body. It is off by default: OpenCV 5 dropped the
+    cascades, and not processing faces is better for privacy. The evaluation
+    still runs it (on OpenCV 4) to measure what it contributed.
     """
     import cv2
 
