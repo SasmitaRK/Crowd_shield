@@ -35,7 +35,17 @@ METHODS = {
 }
 
 
-def count_with(name: str, img: np.ndarray) -> int:
+# Density-map models; their weights file comes from --density-weights.
+DENSITY_METHODS = ("dmcount",)
+_density_weights: str | None = None
+
+
+def count_with(name: str, img: np.ndarray) -> float:
+    if name in DENSITY_METHODS:
+        from crowdshield.density import estimate_density
+
+        return estimate_density(img, _density_weights)["count"]
+
     from crowdshield.detection import detect_people
 
     key, settings = METHODS[name]
@@ -139,15 +149,19 @@ def main(argv=None) -> None:
     parser.add_argument("--part", choices=["A", "B"], default="A")
     parser.add_argument("--split", choices=["train", "test"], default="test")
     parser.add_argument("--methods", default=",".join(METHODS),
-                        help="Comma-separated names from: " + ", ".join(METHODS))
+                        help="Comma-separated names from: "
+                             + ", ".join([*METHODS, *DENSITY_METHODS]))
+    parser.add_argument("--density-weights", help="Weights file for density methods")
     parser.add_argument("--limit", type=int, default=0, help="Only the first N images")
     parser.add_argument("--out", type=Path, default=Path("results"))
     args = parser.parse_args(argv)
 
     methods = [m.strip() for m in args.methods.split(",") if m.strip()]
-    unknown = sorted(set(methods) - METHODS.keys())
+    unknown = sorted(set(methods) - METHODS.keys() - set(DENSITY_METHODS))
     if unknown:
         parser.error(f"unknown methods: {', '.join(unknown)}")
+    global _density_weights
+    _density_weights = args.density_weights
 
     samples = load_shanghaitech(args.data, args.part, args.split)
     if args.limit:
