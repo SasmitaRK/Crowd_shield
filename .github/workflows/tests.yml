@@ -24,5 +24,7 @@ jobs:
           python-version: "3.11"
       - run: sudo apt-get update && sudo apt-get install -y libgl1 libglib2.0-0
       - run: pip install torch torchvision --index-url https://download.pytorch.org/whl/cpu
-      - run: pip install ultralytics opencv-python-headless scipy pytest
+      # Ultralytics brings opencv-python; adding the headless build too breaks cv2.
+      # dill is needed to load the older custom crowd model.
+      - run: pip install ultralytics dill scipy pytest
       - run: pytest -q tests/test_detection_smoke.py
