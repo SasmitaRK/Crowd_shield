@@ -15,11 +15,11 @@ from pathlib import Path
 import numpy as np
 
 from .config import REPO_ROOT
+from .weights import RELEASES, fetch
 
 # Trained on ShanghaiTech A + B with an honest held-out split; see the release notes.
 DEFAULT_WEIGHTS = REPO_ROOT / "models" / "dmcount_shab.pth"
-WEIGHTS_URL = ("https://github.com/khushi-git-7/Crowd_shield/releases/download/"
-               "dmcount-shab-v1/dmcount_shab.pth")
+WEIGHTS_URL = f"{RELEASES}/dmcount-shab-v1/dmcount_shab.pth"
 WEIGHTS_SHA256 = "d6f72bffcd1ea986011796b43a63e2738fe8c97d19d230ef99286b603ea207b9"
 # Very large photos are shrunk first: the network's memory grows with pixel count.
 # Small free servers can set CROWDSHIELD_MAX_SIDE lower (e.g. 1280).
@@ -65,23 +65,10 @@ def build_model():
 
 def ensure_weights(path: Path = DEFAULT_WEIGHTS) -> Path:
     """Download the trained weights from the GitHub release on first use, and check them."""
-    import hashlib
-    import urllib.request
-
     path = Path(path)
-    if path.exists():
-        return path
-    if path != DEFAULT_WEIGHTS:
+    if path != DEFAULT_WEIGHTS and not path.exists():
         raise FileNotFoundError(f"Density model weights not found: {path}")
-    path.parent.mkdir(parents=True, exist_ok=True)
-    partial = path.with_suffix(".part")
-    urllib.request.urlretrieve(WEIGHTS_URL, partial)
-    digest = hashlib.sha256(partial.read_bytes()).hexdigest()
-    if digest != WEIGHTS_SHA256:
-        partial.unlink()
-        raise RuntimeError("Downloaded density weights are corrupt (checksum mismatch)")
-    partial.replace(path)
-    return path
+    return fetch(path, WEIGHTS_URL, WEIGHTS_SHA256)
 
 
 @lru_cache(maxsize=2)

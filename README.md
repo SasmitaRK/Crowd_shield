@@ -17,7 +17,7 @@ with ordinary cameras.
 
 | | |
 |---|---|
-| **Count people** | A density-map model (DM-Count) estimates how many people are in each part of the image, so it keeps working when people overlap. YOLO draws boxes for display. |
+| **Count people** | A point model (PET) puts a dot on every head, so it keeps working when bodies overlap and shows exactly where people are. A density-map model (DM-Count) and YOLO are fallbacks. |
 | **People per m²** | Mark a rectangle of known size on the floor once (a few tiles, a doorway, parking lines). A homography maps every pixel to real ground area, so counts become densities. |
 | **Danger levels** | From crowd-safety research: about 2.2 people/m² is where normal walking breaks down (Fruin), above 5 is a serious risk (Still), and around 7 a crowd moves "almost as a fluid mass" (Fruin, quoted by Helbing et al.). |
 | **Crowd pressure** | Density × local velocity variance (Helbing, Johansson and Al-Abideen, 2007). In the 2006 Hajj disaster video, turbulent pushing began above 0.02 /s², and the crush came at its peak. |
@@ -46,11 +46,26 @@ streets (124 on average).
 |---|---|---|
 | Original app: YOLO boxes, faces add-on | **7%** accurate, off by 403 people per photo | **42%**, off by 72 |
 | DM-Count trained for this project | **84%**, off by 70 | **86%**, off by 17 |
+| **PET fine-tuned for this project, with count correction (the app's counter)** | **86.5%**, off by 58.5 | **92.7%**, off by 9.0 |
 
 *Accuracy = 1 − total counting error ÷ total true count.* Full table, per-photo
 results and the code that made them: [results/shanghaitech](results/shanghaitech),
 [eval/evaluate_counting.py](eval/evaluate_counting.py),
 [eval/compare_counting.py](eval/compare_counting.py).
+
+How the counter was built:
+
+- **PET** (Liu et al., ICCV 2023) started from its authors' JHU-Crowd++ model,
+  which had never seen ShanghaiTech, and was fine-tuned for 9.5 hours on a free
+  Kaggle GPU. The best round (240) was picked on 70 held-out training photos.
+- **One count correction**, true ≈ 1.375 × raw^0.942, was fitted on those same
+  70 held-out photos. It trims PET's overcounting in packed crowds and its
+  undercounting on streets. Fitting it on the test photos would have been cheating.
+- On packed crowds the error (58.5 people per photo) is a little better than
+  the DM-Count paper's 59.7, but behind PET's own paper (49.1), which picked its
+  best round on the test set and trained a separate model per part.
+- PET isn't better everywhere: on the very largest crowds (1,000+ people) DM-Count
+  is slightly more accurate (85% against 83%).
 
 What we learned along the way:
 
@@ -63,13 +78,12 @@ What we learned along the way:
   because the detectors almost never found 300 people to begin with.
 - **The faces add-on wasn't worth it.** It added about 5 people per photo and
   made counting 2–6× slower, so it's off by default (OpenCV 5 also dropped it).
-- **Honest model selection.** DM-Count's own scripts pick the best training
-  round by looking at the test photos. Here 10% of the *training* photos were
-  held back to pick it, so the test photos stayed unseen. That partly explains
-  why our numbers sit below the paper's (59.7 and 7.4 people per photo).
+- **Honest model selection.** DM-Count's and PET's own scripts pick the best
+  training round by looking at the test photos. Here 10% of the *training*
+  photos were held back to pick it, so the test photos stayed unseen.
 
-The model was trained on a free Kaggle GPU: 870 rounds, best at round 130.
-The weights are published as a [release](https://github.com/khushi-git-7/Crowd_shield/releases/tag/dmcount-shab-v1)
+Both trained models are published as releases ([PET](https://github.com/khushi-git-7/Crowd_shield/releases/tag/pet-shab-v1),
+[DM-Count](https://github.com/khushi-git-7/Crowd_shield/releases/tag/dmcount-shab-v1))
 and download automatically, with a checksum check, the first time the app counts.
 
 ### Spotting panic
@@ -115,8 +129,11 @@ and renders every page.
 
 ```
 crowdshield/          the core, with no UI code
-  detection.py        YOLO boxes; the app's count (density model first, YOLO as fallback)
-  density.py          DM-Count network, weight download and checks
+  detection.py        YOLO boxes; the app's count (point model, then density model, then YOLO)
+  points.py           PET point model and its count correction
+  pet/                PET's network code (MIT licence), adapted to run on CPU
+  density.py          DM-Count network
+  weights.py          downloads trained weights from the releases, with checksums
   geometry.py         camera calibration: homography, pixel areas, ground speed
   safety.py           people per m², danger levels, crowd pressure
   motion.py           optical flow statistics and the panic alarm
@@ -146,7 +163,8 @@ picked the VisDrone-trained YOLO model and built the first prototype; Sasmita
 built the app's interface. Version 2 (counting accuracy, real units, crowd
 pressure, video and the evaluations) is Khushi's work on this fork.
 
-Built on: [DM-Count](https://github.com/cvlab-stonybrook/DM-Count) (Wang et al.,
+Built on: [PET](https://github.com/cxliu0/PET) (Liu et al., ICCV 2023, MIT licence,
+for academic use), [DM-Count](https://github.com/cvlab-stonybrook/DM-Count) (Wang et al.,
 NeurIPS 2020, MIT licence), [Ultralytics YOLO](https://github.com/ultralytics/ultralytics),
 [ShanghaiTech](https://github.com/desenzhou/ShanghaiTechDataset) (Zhang et al.,
 CVPR 2016), the [UMN unusual crowd activity](http://mha.cs.umn.edu/) videos,

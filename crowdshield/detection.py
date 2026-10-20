@@ -131,14 +131,21 @@ def detect_people(img: np.ndarray, model_key: str = DEFAULT_MODEL_KEY, *,
 
 
 def render_overlay(img: np.ndarray, person_boxes, extra_heads,
-                   density: np.ndarray | None = None) -> np.ndarray:
-    """Heat overlay of where people are, with bodies in green and extra faces in yellow.
+                   density: np.ndarray | None = None, points=None) -> np.ndarray:
+    """Heat overlay of where people are.
 
-    The heat comes from the density map when there is one, else from where boxes pile up.
+    With head points (from the point model), each head gets a dot and the heat
+    shows where they cluster. Otherwise the heat comes from the density map, or
+    from where YOLO's boxes pile up, with bodies in green and extra faces in yellow.
     """
     import cv2
 
     h, w = img.shape[:2]
+    if points is not None:
+        from .monitor import points_to_grid
+
+        density = points_to_grid(points, img.shape)
+        person_boxes, extra_heads = [], []
     if density is not None:
         heat = cv2.resize(density.astype(np.float32), (w, h), interpolation=cv2.INTER_LINEAR)
         heat = cv2.GaussianBlur(heat, (0, 0), 4)
@@ -153,26 +160,37 @@ def render_overlay(img: np.ndarray, person_boxes, extra_heads,
     for boxes, colour in ((person_boxes, (0, 255, 0)), (extra_heads, (0, 255, 255))):
         for x, y, bw, bh in boxes:
             cv2.rectangle(overlay, (x, y), (x + bw, y + bh), colour, 2)
+    radius = max(2, round(min(h, w) / 300))
+    for row, col in (points if points is not None else []):
+        cv2.circle(overlay, (int(col), int(row)), radius, (0, 255, 0), -1, cv2.LINE_AA)
     return overlay
 
 
 def count_people(img: np.ndarray, model_key: str = DEFAULT_MODEL_KEY) -> dict:
     """The app's count for one photo.
 
-    The density model gives the count: on ShanghaiTech it beat both YOLO models
-    at every crowd size. YOLO still draws the boxes people see, and gives the
-    count if the density model can't run (no PyTorch, or the weights can't be
-    downloaded).
+    In order of accuracy on the ShanghaiTech test photos: the point model (PET),
+    then the density model (DM-Count), then YOLO boxes, using the first one that
+    can run here (it needs PyTorch and a one-time weights download).
     """
     det = detect_people(img, model_key)
+    base = {**det, "detector_count": det["count"], "density": None, "points": None}
+    try:
+        from .points import count_points
+
+        pts = count_points(img)
+        return {**base, "count": int(round(pts["count"])), "points": pts["points"],
+                "counter": "points"}
+    except Exception:
+        pass
     try:
         from .density import estimate_density
 
         dens = estimate_density(img)
-        return {**det, "count": int(round(dens["count"])), "detector_count": det["count"],
-                "density": dens["density"], "counter": "density"}
+        return {**base, "count": int(round(dens["count"])), "density": dens["density"],
+                "counter": "density"}
     except Exception:
-        return {**det, "detector_count": det["count"], "density": None, "counter": "detector"}
+        return {**base, "counter": "detector"}
 
 
 def analyse_image_bytes(image_bytes: bytes, model_key: str = DEFAULT_MODEL_KEY) -> dict:
@@ -191,6 +209,6 @@ def analyse_image_bytes(image_bytes: bytes, model_key: str = DEFAULT_MODEL_KEY) 
         "detector_count": res["detector_count"],
         "counter":        res["counter"],
         "overlay":        render_overlay(img, res["person_boxes"], res["extra_heads"],
-                                         res["density"]),
+                                         res["density"], res["points"]),
         "model_key":      model_key,
     }

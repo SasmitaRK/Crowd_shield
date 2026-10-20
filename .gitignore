@@ -161,3 +161,4 @@ cython_debug/
 # Model weights downloaded on first use
 models/dmcount_shab.pth
 models/*.part
+models/pet_shab.pth

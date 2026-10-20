@@ -37,4 +37,4 @@ jobs:
       # Ultralytics brings opencv-python; adding the headless build too breaks cv2.
       # dill is needed to load the older custom crowd model.
       - run: pip install ultralytics dill scipy pytest
-      - run: pytest -q tests/test_detection_smoke.py tests/test_density_smoke.py
+      - run: pytest -q tests/test_detection_smoke.py tests/test_density_smoke.py tests/test_points_smoke.py
