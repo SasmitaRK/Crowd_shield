@@ -29,6 +29,11 @@ from .motion import MOVING_PX, SpeedAlarm, flow_stats, optical_flow
 from .safety import _inside, crowd_pressure, density_level
 
 CELL = 8  # density grid cell size in pixels
+# Crowd pressure uses velocity variance among neighbours: within 1 m ground cells
+# when calibrated, else within 32-pixel cells.
+PRESSURE_CELL_M = 1.0
+PRESSURE_CELL_PX = 32
+MIN_CELL_SAMPLES = 8
 
 
 @dataclass
@@ -105,10 +110,13 @@ class VideoMonitor:
                               (rows * step + 0.5) / self.flow_scale]
             if self.calib is not None:
                 v = self.calib.ground_velocity(points_px, flow_px, self.fps)
-                v = v[np.isfinite(v).all(axis=1)]
+                cells = np.floor(self.calib.to_ground(points_px) / PRESSURE_CELL_M)
+                ok = np.isfinite(v).all(axis=1) & np.isfinite(cells).all(axis=1)
+                v, cells = v[ok], cells[ok]
             else:
                 v = flow_px * self.fps
-            self._velocities[z.name].append(v)
+                cells = np.floor(points_px / PRESSURE_CELL_PX)
+            self._velocities[z.name].append((cells.astype(np.int64), v))
 
     def _read_zones(self, t: float, frame: np.ndarray):
         grid = self.counter(frame)
@@ -119,9 +127,10 @@ class VideoMonitor:
             area = self._areas[z.name]
             per_m2 = people / area if area > 0 else float("nan")
             samples = self._velocities[z.name]
-            v = np.concatenate(samples) if samples else np.zeros((0, 2))
+            v = np.concatenate([s[1] for s in samples]) if samples else np.zeros((0, 2))
             speed = float(np.hypot(v[:, 0], v[:, 1]).mean()) if len(v) else 0.0
-            pressure = crowd_pressure(per_m2, v) if len(v) and np.isfinite(per_m2) else float("nan")
+            pressure = (self._local_pressure(per_m2, samples)
+                        if len(v) and np.isfinite(per_m2) else float("nan"))
             times, values = self._history[z.name]
             times.append(t)
             values.append(per_m2)
@@ -133,6 +142,22 @@ class VideoMonitor:
                 "eta_s": seconds_until(times, values) if np.isfinite(per_m2) else None,
             })
             self._velocities[z.name] = []
+
+    @staticmethod
+    def _local_pressure(per_m2: float, samples) -> float:
+        """Helbing's pressure with the velocity variance taken among neighbours.
+
+        Variance across a whole zone would count people walking calmly in
+        different directions as turbulence; within one small cell it only grows
+        when people next to each other are pushed in different ways.
+        """
+        cells = np.concatenate([s[0] for s in samples])
+        v = np.concatenate([s[1] for s in samples])
+        _, cell_id, counts = np.unique(cells, axis=0, return_inverse=True, return_counts=True)
+        cell_id = cell_id.ravel()
+        values = [crowd_pressure(per_m2, v[cell_id == c])
+                  for c in np.nonzero(counts >= MIN_CELL_SAMPLES)[0]]
+        return float(np.mean(values)) if values else 0.0
 
     def run(self, frames: Iterable[np.ndarray], progress: Callable[[int], None] | None = None):
         """Process every frame; returns (zone readings, alarm events)."""

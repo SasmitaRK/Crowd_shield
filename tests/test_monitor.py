@@ -68,3 +68,16 @@ def test_monitor_reads_density_speed_and_pressure_per_zone():
     assert last["left"]["speed"] == pytest.approx(2.0, rel=0.15)
     assert last["left"]["pressure"] < 0.2  # uniform motion: almost no velocity variance
     assert events == []  # steady motion is not a panic
+
+
+def test_pressure_counts_neighbours_pushing_apart_not_calm_opposite_streams():
+    from crowdshield.monitor import VideoMonitor
+
+    rng = np.random.default_rng(0)
+    # Two calm streams in different cells walking opposite ways: no local variance.
+    calm = [(np.array([[0, 0]] * 50), np.tile([1.0, 0.0], (50, 1))),
+            (np.array([[5, 0]] * 50), np.tile([-1.0, 0.0], (50, 1)))]
+    # One cell where neighbours are shoved in random directions.
+    shoved = [(np.array([[0, 0]] * 100), rng.normal(0, 1.0, (100, 2)))]
+    assert VideoMonitor._local_pressure(4.0, calm) == pytest.approx(0.0, abs=1e-9)
+    assert VideoMonitor._local_pressure(4.0, shoved) == pytest.approx(4.0 * 2.0, rel=0.3)
