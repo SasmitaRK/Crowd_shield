@@ -2,10 +2,12 @@
 
 import streamlit as st
 
-SEGMENTS = ["A", "B", "C", "D", "E"]
-MAX_IMAGES_PER_SEGMENT = 4
+# Constants live in the core package; re-exported here for the pages.
+from crowdshield.config import (  # noqa: F401
+    DEFAULT_THRESHOLDS, FRUIN_PRESETS, MAX_IMAGES_PER_SEGMENT, RISK_LEVELS,
+    SEGMENTS, SOURCE_MODEL_MAP,
+)
 
-RISK_LEVELS = ["Safe", "Moderate", "High Risk", "Critical"]
 RISK_COLORS = {
     "Safe":      "#10b981",
     "Moderate":  "#f59e0b",
@@ -19,45 +21,10 @@ RISK_ICONS = {
     "Critical":  "Critical",
 }
 
-DEFAULT_THRESHOLDS = {
-    "moderate": 30,
-    "high":     60,
-    "critical": 90,
-}
-
 SOURCE_LABELS = {
     "auto":   "Auto (global model)",
     "drone":  "Drone / Aerial",
     "ground": "CCTV / Ground level",
-}
-
-SOURCE_MODEL_MAP = {
-    "auto":   None,
-    "drone":  "crowd_yolo",
-    "ground": "yolov8l",
-}
-
-FRUIN_PRESETS = {
-    "Conservative (outdoor open areas)": {
-        "moderate": 0.5,
-        "high":     1.0,
-        "critical": 2.0,
-    },
-    "Standard (mixed venues)": {
-        "moderate": 1.0,
-        "high":     2.0,
-        "critical": 3.5,
-    },
-    "Crowded events / concerts": {
-        "moderate": 1.5,
-        "high":     3.0,
-        "critical": 4.5,
-    },
-    "Enclosed corridors / gates": {
-        "moderate": 0.5,
-        "high":     1.0,
-        "critical": 1.5,
-    },
 }
 
 

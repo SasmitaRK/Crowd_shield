@@ -21,6 +21,7 @@ st.markdown(
         <a href="/Agents">Agents</a>
         <a href="/Upload">Upload</a>
         <a href="/Analysis">Analysis</a>
+        <a href="/Video">Video</a>
         <a href="/Settings">Settings</a>
       </div>
     </div>
@@ -134,6 +135,15 @@ for i, seg in enumerate(SEGMENTS):
             accept_multiple_files=True,
             key=f"drone_{seg}",
             label_visibility="collapsed",
+        )
+
+        st.radio(
+            f"Photos in Segment {seg} show",
+            options=["sum", "max"],
+            format_func=lambda m: ("Different parts: add counts" if m == "sum"
+                                   else "Same area: keep highest"),
+            key=f"combine_{seg}",
+            help="Adding up two photos of the same spot counts those people twice.",
         )
 
         if cctv_files or drone_files:
@@ -433,7 +443,9 @@ requestAnimationFrame(frame);
     for idx, seg in enumerate(segs_ready):
         img_list = st.session_state.uploaded_images[seg]
         img_srcs = st.session_state.image_sources.get(seg, [])
-        results[seg] = process_segment(img_list, per_image_sources=img_srcs)
+        results[seg] = process_segment(
+            img_list, per_image_sources=img_srcs,
+            combine=st.session_state.get(f"combine_{seg}", "sum"))
 
     anim_slot.empty()
     st.session_state.crowd_data     = results
@@ -480,7 +492,7 @@ if st.session_state.crowd_data:
                 st.metric(
                     f"Segment {seg}",
                     d["count"],
-                    help=(f"Bodies: {d['body_count']} · Heads: {d['head_count']} · "
+                    help=(f"YOLO boxed {d['body_count']} · "
                           f"{n_c} CCTV, {n_d} Drone"),
                 )
             else:

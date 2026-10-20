@@ -16,6 +16,7 @@ import streamlit as st
 from shared_state import (init_state, GLOBAL_CSS, SEGMENTS,
                           RISK_COLORS, RISK_ICONS, get_seg_thresholds)
 from detection import risk_level, MODEL_REGISTRY
+from crowdshield.risk import plan_relocations
 from emailer import (email_configured, send_email,
                      build_critical_email, build_receiving_email)
 
@@ -33,6 +34,7 @@ st.markdown(
         <a href="/Agents">Agents</a>
         <a href="/Upload">Upload</a>
         <a href="/Analysis">Analysis</a>
+        <a href="/Video">Video</a>
         <a href="/Settings">Settings</a>
       </div>
     </div>
@@ -127,7 +129,7 @@ for i, (seg, info) in enumerate(seg_info.items()):
             if lead["overlay"] is not None:
                 rgb = cv2.cvtColor(lead["overlay"], cv2.COLOR_BGR2RGB)
                 st.image(rgb, use_container_width=True,
-                         caption=f"Peak — {lead['count']} detections")
+                         caption=f"Peak — {lead['count']} people")
             if len(per_img) > 1:
                 with st.expander(f"All {len(per_img)} images"):
                     for j, r in enumerate(per_img, start=1):
@@ -144,7 +146,7 @@ for i, (seg, info) in enumerate(seg_info.items()):
             f"<span style='font-size:.8rem;color:#6b7280;margin-left:.3rem'>people</span>"
             f"</div>",
             unsafe_allow_html=True)
-        st.caption(f"{info['body_count']} bodies · {info['head_count']} heads")
+        st.caption(f"{info['body_count']} people boxed by YOLO")
         st.caption(f"Thresholds: {t['moderate']} / {t['high']} / {t['critical']}")
         st.markdown(f'<span class="risk-badge {css}">{risk}</span>',
                     unsafe_allow_html=True)
@@ -633,31 +635,8 @@ st.markdown("---")
 st.markdown('<div class="section-label">Alert Plan & Operational Orders</div>',
             unsafe_allow_html=True)
 
-action_segs = sorted(
-    [s for s, i in seg_info.items() if i["risk"] in ("High Risk", "Critical")],
-    key=lambda s: (0 if seg_info[s]["risk"] == "Critical" else 1,
-                   -seg_info[s]["count"]))
-safe_segs = sorted(
-    [s for s, i in seg_info.items() if i["risk"] == "Safe"],
-    key=lambda s: seg_info[s]["count"])
-
-pairings  = []
-available = list(safe_segs)
-for h in action_segs:
-    target   = available.pop(0) if available else None
-    h_count  = seg_info[h]["count"]
-    t_thresh = seg_info[h]["thresholds"]
-    t_count  = seg_info[target]["count"] if target else 0
-    move     = max(1, h_count - (t_thresh["high"] - 1))
-    if target:
-        can_take = max(0, seg_info[target]["thresholds"]["high"] - 1 - t_count)
-        if can_take > 0:
-            move = min(move, can_take)
-    pairings.append({
-        "high": h, "high_count": h_count, "risk": seg_info[h]["risk"],
-        "target": target, "target_count": t_count, "move": move,
-        "thresholds": t_thresh,
-    })
+pairings = plan_relocations(seg_info,
+                            adjacency=st.session_state.get("zone_adjacency"))
 
 for seg in SEGMENTS:
     if seg not in seg_info:

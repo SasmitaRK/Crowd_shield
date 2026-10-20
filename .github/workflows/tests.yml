@@ -1,0 +1,40 @@
+name: tests
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  core:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: pip install numpy scipy pytest
+      - run: pytest -q
+
+  app:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: pip install streamlit matplotlib seaborn opencv-python-headless numpy scipy pytest
+      - run: pytest -q tests/test_app_pages.py
+
+  detection:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: sudo apt-get update && sudo apt-get install -y libgl1 libglib2.0-0
+      - run: pip install torch torchvision --index-url https://download.pytorch.org/whl/cpu
+      # Ultralytics brings opencv-python; adding the headless build too breaks cv2.
+      # dill is needed to load the older custom crowd model.
+      - run: pip install ultralytics dill scipy pytest
+      - run: pytest -q tests/test_detection_smoke.py tests/test_density_smoke.py tests/test_points_smoke.py

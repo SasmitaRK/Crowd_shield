@@ -14,6 +14,10 @@ seaborn = "^0.13"
 ultralytics = "^8.0"
 opencv-python = "^4.13.0.92"
 
+[tool.pytest.ini_options]
+pythonpath = ["."]
+testpaths = ["tests"]
+
 [tool.pyright]
 # https://github.com/microsoft/pyright/blob/main/docs/configuration.md
 useLibraryCodeForTypes = true
