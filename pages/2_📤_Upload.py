@@ -21,6 +21,7 @@ st.markdown(
         <a href="/Agents">Agents</a>
         <a href="/Upload">Upload</a>
         <a href="/Analysis">Analysis</a>
+        <a href="/Video">Video</a>
         <a href="/Settings">Settings</a>
       </div>
     </div>
@@ -491,7 +492,7 @@ if st.session_state.crowd_data:
                 st.metric(
                     f"Segment {seg}",
                     d["count"],
-                    help=(f"Bodies: {d['body_count']} · Heads: {d['head_count']} · "
+                    help=(f"YOLO boxed {d['body_count']} · "
                           f"{n_c} CCTV, {n_d} Drone"),
                 )
             else:

@@ -34,6 +34,7 @@ st.markdown(
         <a href="/Agents">Agents</a>
         <a href="/Upload">Upload</a>
         <a href="/Analysis">Analysis</a>
+        <a href="/Video">Video</a>
         <a href="/Settings">Settings</a>
       </div>
     </div>
@@ -128,7 +129,7 @@ for i, (seg, info) in enumerate(seg_info.items()):
             if lead["overlay"] is not None:
                 rgb = cv2.cvtColor(lead["overlay"], cv2.COLOR_BGR2RGB)
                 st.image(rgb, use_container_width=True,
-                         caption=f"Peak — {lead['count']} detections")
+                         caption=f"Peak — {lead['count']} people")
             if len(per_img) > 1:
                 with st.expander(f"All {len(per_img)} images"):
                     for j, r in enumerate(per_img, start=1):
@@ -145,7 +146,7 @@ for i, (seg, info) in enumerate(seg_info.items()):
             f"<span style='font-size:.8rem;color:#6b7280;margin-left:.3rem'>people</span>"
             f"</div>",
             unsafe_allow_html=True)
-        st.caption(f"{info['body_count']} bodies · {info['head_count']} heads")
+        st.caption(f"{info['body_count']} people boxed by YOLO")
         st.caption(f"Thresholds: {t['moderate']} / {t['high']} / {t['critical']}")
         st.markdown(f'<span class="risk-badge {css}">{risk}</span>',
                     unsafe_allow_html=True)

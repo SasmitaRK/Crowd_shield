@@ -103,7 +103,8 @@ def detect_people(img: np.ndarray, model_key: str = DEFAULT_MODEL_KEY, *,
         bodies = [(int(x1), int(y1), int(x2 - x1), int(y2 - y1))
                   for x1, y1, x2, y2 in result.boxes.xyxy.tolist()]
     except Exception:
-        if not allow_fallback:
+        # OpenCV 5 dropped the HOG people detector, so there may be no fallback.
+        if not allow_fallback or not hasattr(cv2, "HOGDescriptor"):
             raise
         bodies, detector = _hog_people(gray), "hog"
 
@@ -129,14 +130,22 @@ def detect_people(img: np.ndarray, model_key: str = DEFAULT_MODEL_KEY, *,
     }
 
 
-def render_overlay(img: np.ndarray, person_boxes, extra_heads) -> np.ndarray:
-    """Heat overlay of where boxes pile up; bodies in green, extra faces in yellow."""
+def render_overlay(img: np.ndarray, person_boxes, extra_heads,
+                   density: np.ndarray | None = None) -> np.ndarray:
+    """Heat overlay of where people are, with bodies in green and extra faces in yellow.
+
+    The heat comes from the density map when there is one, else from where boxes pile up.
+    """
     import cv2
 
     h, w = img.shape[:2]
-    heat = np.zeros((h, w), dtype=np.float32)
-    for x, y, bw, bh in [*person_boxes, *extra_heads]:
-        heat[max(0, y):min(y + bh, h), max(0, x):min(x + bw, w)] += 1.0
+    if density is not None:
+        heat = cv2.resize(density.astype(np.float32), (w, h), interpolation=cv2.INTER_LINEAR)
+        heat = cv2.GaussianBlur(heat, (0, 0), 4)
+    else:
+        heat = np.zeros((h, w), dtype=np.float32)
+        for x, y, bw, bh in [*person_boxes, *extra_heads]:
+            heat[max(0, y):min(y + bh, h), max(0, x):min(x + bw, w)] += 1.0
     if heat.max() > 0:
         heat /= heat.max()
     heat_bgr = cv2.applyColorMap((heat * 255).astype(np.uint8), cv2.COLORMAP_JET)
@@ -147,19 +156,41 @@ def render_overlay(img: np.ndarray, person_boxes, extra_heads) -> np.ndarray:
     return overlay
 
 
+def count_people(img: np.ndarray, model_key: str = DEFAULT_MODEL_KEY) -> dict:
+    """The app's count for one photo.
+
+    The density model gives the count: on ShanghaiTech it beat both YOLO models
+    at every crowd size. YOLO still draws the boxes people see, and gives the
+    count if the density model can't run (no PyTorch, or the weights can't be
+    downloaded).
+    """
+    det = detect_people(img, model_key)
+    try:
+        from .density import estimate_density
+
+        dens = estimate_density(img)
+        return {**det, "count": int(round(dens["count"])), "detector_count": det["count"],
+                "density": dens["density"], "counter": "density"}
+    except Exception:
+        return {**det, "detector_count": det["count"], "density": None, "counter": "detector"}
+
+
 def analyse_image_bytes(image_bytes: bytes, model_key: str = DEFAULT_MODEL_KEY) -> dict:
     """Decode an uploaded photo, count people and draw the overlay."""
     import cv2
 
     img = cv2.imdecode(np.frombuffer(image_bytes, np.uint8), cv2.IMREAD_COLOR)
     if img is None:
-        return {"count": 0, "body_count": 0, "head_count": 0,
-                "overlay": None, "model_key": model_key}
-    det = detect_people(img, model_key)
+        return {"count": 0, "body_count": 0, "head_count": 0, "detector_count": 0,
+                "counter": None, "overlay": None, "model_key": model_key}
+    res = count_people(img, model_key)
     return {
-        "count":      det["count"],
-        "body_count": det["body_count"],
-        "head_count": det["head_count"],
-        "overlay":    render_overlay(img, det["person_boxes"], det["extra_heads"]),
-        "model_key":  model_key,
+        "count":          res["count"],
+        "body_count":     res["body_count"],
+        "head_count":     res["head_count"],
+        "detector_count": res["detector_count"],
+        "counter":        res["counter"],
+        "overlay":        render_overlay(img, res["person_boxes"], res["extra_heads"],
+                                         res["density"]),
+        "model_key":      model_key,
     }

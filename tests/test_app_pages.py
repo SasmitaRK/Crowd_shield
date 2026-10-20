@@ -60,3 +60,8 @@ def test_analysis_page_plans_a_relocation():
 
 def test_settings_page():
     render(PAGES["Settings"])
+
+
+def test_video_page_waits_for_a_clip():
+    app = render(PAGES["Video"])
+    assert any("Upload a clip" in block.value for block in app.info)
