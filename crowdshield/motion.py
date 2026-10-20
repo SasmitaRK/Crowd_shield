@@ -32,6 +32,8 @@ def flow_stats(flow: np.ndarray, mask: np.ndarray | None = None, grid: int = 8) 
     coherence   1 when everything moves the same way, near 0 when directions cancel out
     turbulence  velocity variance inside grid cells, averaged over cells with movement;
                 multiplied by density, this is Helbing's "crowd pressure"
+    energy      speed x moving: average movement over the whole view. Far-away
+                people running barely look faster, but far more of the picture moves
     """
     fx, fy = flow[..., 0], flow[..., 1]
     mag = np.hypot(fx, fy)
@@ -39,7 +41,8 @@ def flow_stats(flow: np.ndarray, mask: np.ndarray | None = None, grid: int = 8) 
     moving = valid & (mag > MOVING_PX)
     n_moving = int(moving.sum())
     if n_moving == 0:
-        return {"speed": 0.0, "moving": 0.0, "coherence": 0.0, "turbulence": 0.0}
+        return {"speed": 0.0, "moving": 0.0, "coherence": 0.0, "turbulence": 0.0,
+                "energy": 0.0}
 
     ux, uy = fx[moving] / mag[moving], fy[moving] / mag[moving]
     h, w = mag.shape
@@ -56,6 +59,7 @@ def flow_stats(flow: np.ndarray, mask: np.ndarray | None = None, grid: int = 8) 
         "moving":     n_moving / int(valid.sum()),
         "coherence":  float(np.hypot(ux.mean(), uy.mean())),
         "turbulence": float(np.mean(cell_var)) if cell_var else 0.0,
+        "energy":     float(mag[moving].sum()) / int(valid.sum()),
     }
 
 
@@ -96,3 +100,39 @@ class SpeedAlarm:
         if self.active and self._below >= self.hold_frames:
             self.active = False
         return False
+
+
+class MotionAlarm:
+    """Panic alarm on two signals, either of which can fire it.
+
+    - speed:  the moving pixels go `speed_ratio` x faster than normal
+    - energy: the movement summed over the whole view reaches `energy_ratio` x
+      normal. This catches crowds filmed from far away, where running people
+      barely look faster but suddenly much more of the picture moves.
+
+    On the UMN escape videos speed alone caught 8 of 11 escapes, missing three
+    in the indoor hall. Adding energy at 8x caught all 11 with no false alarms,
+    and 8x was also the level chosen when each scene was held out in turn.
+    """
+
+    def __init__(self, baseline_frames: int = 90, speed_ratio: float = 2.0,
+                 energy_ratio: float = 8.0, hold_frames: int = 15):
+        self.speed = SpeedAlarm(baseline_frames, speed_ratio, hold_frames)
+        self.energy = SpeedAlarm(baseline_frames, energy_ratio, hold_frames)
+        self.reason = None
+
+    @property
+    def active(self) -> bool:
+        return self.speed.active or self.energy.active
+
+    def update(self, stats: dict) -> bool:
+        """Feed one frame's flow_stats; returns True only on the frame an alarm starts."""
+        was_active = self.active
+        by_speed = self.speed.update(stats["speed"])
+        by_energy = self.energy.update(stats["energy"])
+        if was_active or not (by_speed or by_energy):
+            return False
+        self.reason = ("crowd moving at {:g}x its normal pace".format(self.speed.ratio)
+                       if by_speed else
+                       "{:g}x the normal amount of movement".format(self.energy.ratio))
+        return True

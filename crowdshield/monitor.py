@@ -25,7 +25,7 @@ import numpy as np
 
 from .forecast import seconds_until
 from .geometry import GroundCalibration
-from .motion import MOVING_PX, SpeedAlarm, flow_stats, optical_flow
+from .motion import MOVING_PX, MotionAlarm, flow_stats, optical_flow
 from .safety import _inside, crowd_pressure, density_level
 
 CELL = 8  # density grid cell size in pixels
@@ -68,7 +68,7 @@ class VideoMonitor:
     def __init__(self, counter: Callable[[np.ndarray], np.ndarray], fps: float,
                  zones: list[Zone], calib: GroundCalibration | None = None,
                  count_every_s: float = 1.0, flow_scale: float = 0.5,
-                 sample_step: int = 4, alarm: SpeedAlarm | None = None):
+                 sample_step: int = 4, alarm: MotionAlarm | None = None):
         self.counter = counter
         self.fps = float(fps)
         self.zones = zones
@@ -76,8 +76,8 @@ class VideoMonitor:
         self.count_every = max(1, round(count_every_s * self.fps))
         self.flow_scale = flow_scale
         self.sample_step = sample_step
-        self.alarm = alarm or SpeedAlarm(baseline_frames=round(3 * self.fps),
-                                         hold_frames=max(1, round(0.5 * self.fps)))
+        self.alarm = alarm or MotionAlarm(baseline_frames=round(3 * self.fps),
+                                          hold_frames=max(1, round(0.5 * self.fps)))
         self.rows: list[dict] = []
         self.events: list[dict] = []
         self._velocities = {z.name: [] for z in zones}
@@ -174,10 +174,9 @@ class VideoMonitor:
                 flow = optical_flow(prev, gray)
                 self._collect_velocities(flow)
                 stats = flow_stats(flow)
-                if self.alarm.update(stats["speed"] / self.flow_scale):
+                if self.alarm.update(stats):
                     self.events.append({"t": round(i / self.fps, 2),
-                                        "event": "Sudden movement: crowd moving at "
-                                                 f"{self.alarm.ratio:g}x its normal pace"})
+                                        "event": f"Sudden movement: {self.alarm.reason}"})
             if i % self.count_every == 0:
                 self._read_zones(i / self.fps, frame)
             prev = gray

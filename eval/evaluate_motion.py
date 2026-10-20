@@ -8,7 +8,7 @@ crowdshield.motion on each clip, and measure:
 
 - how many escapes it catches, and when, relative to the label
 - false alarms while people are still walking normally
-- frame-level ROC AUC of the speed-versus-normal score
+- frame-level ROC AUC of the alarm score (speed or movement energy versus normal)
 
 The label runs late: looking at the frames, people are already running 1 to
 1.5 seconds before it appears. So an alarm up to --label-lag seconds (default
@@ -29,7 +29,7 @@ from pathlib import Path
 
 import numpy as np
 
-from crowdshield.motion import SpeedAlarm, flow_stats, optical_flow
+from crowdshield.motion import MotionAlarm, flow_stats, optical_flow
 
 # Where the ground-truth label is drawn, in the 320 x 240 frames: rows, columns.
 LABEL_BOX = (slice(0, 30), slice(0, 175))
@@ -64,7 +64,8 @@ def read_video(path: Path):
             mask = np.ones(gray.shape, dtype=bool)
             mask[LABEL_BOX] = False
         stats = (flow_stats(optical_flow(prev, gray), mask) if prev is not None
-                 else {"speed": 0.0, "moving": 0.0, "coherence": 0.0, "turbulence": 0.0})
+                 else {"speed": 0.0, "moving": 0.0, "coherence": 0.0, "turbulence": 0.0,
+                       "energy": 0.0})
         rows.append({"frame": len(rows), "abnormal": label_is_on(frame), **stats})
         prev = gray
     return rows, fps
@@ -94,7 +95,8 @@ def roc_auc(scores, labels) -> float:
     return float((ranks[labels].sum() - pos * (pos + 1) / 2) / (pos * neg))
 
 
-def evaluate(rows, fps, ratio=2.0, hold_frames=15, baseline_frames=90, label_lag_s=2.0):
+def evaluate(rows, fps, ratio=2.0, hold_frames=15, baseline_frames=90, label_lag_s=2.0,
+             energy_ratio=8.0):
     lag = int(round(label_lag_s * fps))
     clips, scores = [], np.zeros(len(rows))
     ambiguous = np.zeros(len(rows), dtype=bool)
@@ -102,15 +104,19 @@ def evaluate(rows, fps, ratio=2.0, hold_frames=15, baseline_frames=90, label_lag
         onset = next((i for i in range(start, end) if rows[i]["abnormal"]), None)
         if onset is None:  # a few trailing frames after the last escape
             continue
-        alarm = SpeedAlarm(baseline_frames, ratio, hold_frames)
-        fired = []
+        alarm = MotionAlarm(baseline_frames, ratio, energy_ratio, hold_frames)
+        fired, reasons = [], []
         for i in range(start + 1, end):  # the first frame's flow spans the scene cut
-            if alarm.update(rows[i]["speed"]):
+            if alarm.update(rows[i]):
                 fired.append(i)
-            if alarm.normal is not None:
-                scores[i] = rows[i]["speed"] / alarm.normal
+                reasons.append("speed" if "pace" in alarm.reason else "energy")
+            if alarm.speed.normal is not None:
+                # 1.0 = alarm level on whichever signal is closer to it
+                scores[i] = max(rows[i]["speed"] / alarm.speed.normal / ratio,
+                                rows[i]["energy"] / alarm.energy.normal / energy_ratio)
         ambiguous[max(start, onset - lag):onset] = True
         hits = [f for f in fired if f >= onset - lag]
+        first_hit = fired.index(hits[0]) if hits else None
         clips.append({
             "clip": len(clips) + 1,
             "scene": SCENES[len(clips)] if len(clips) < len(SCENES) else "",
@@ -120,6 +126,7 @@ def evaluate(rows, fps, ratio=2.0, hold_frames=15, baseline_frames=90, label_lag
             # negative: the alarm fired before the (late) label appeared
             "alarm_vs_label_s": round((hits[0] - onset) / fps, 2) if hits else None,
             "false_alarms": sum(1 for f in fired if f < onset - lag),
+            "caught_by": reasons[first_hit] if hits else None,
         })
 
     scored = [i for i in range(len(rows)) if scores[i] > 0 and not ambiguous[i]]
@@ -132,12 +139,38 @@ def evaluate(rows, fps, ratio=2.0, hold_frames=15, baseline_frames=90, label_lag
         "false_alarms": sum(c["false_alarms"] for c in clips),
         "median_alarm_vs_label_s": float(np.median(timings)) if timings else None,
         "latest_alarm_vs_label_s": max(timings) if timings else None,
-        "frame_auc_speed_ratio": roc_auc([scores[i] for i in scored], labels),
-        "rule": f"alarm when speed > {ratio}x the clip's normal pace for {hold_frames} frames; "
-                f"normal pace = median of the first {baseline_frames} frames",
+        "frame_auc_alarm_score": roc_auc([scores[i] for i in scored], labels),
+        "rule": f"alarm when speed > {ratio}x or movement energy > {energy_ratio}x the clip's "
+                f"normal for {hold_frames} frames; normal = median of the first "
+                f"{baseline_frames} frames",
         "label_lag_allowed_s": label_lag_s,
     }
     return clips, scores, summary
+
+
+def held_out_scene_check(rows, fps, candidates=(3.0, 4.0, 5.0, 6.0, 8.0)) -> list[dict]:
+    """Choose the energy level on two scenes, then test it on the third, for each scene.
+
+    Picking the level on the same clips it is scored on would flatter the
+    result; this shows whether the choice carries over to an unseen scene.
+    """
+    clip_ids = {scene: [i for i, sc in enumerate(SCENES) if sc == scene]
+                for scene in dict.fromkeys(SCENES)}
+
+    def score(level, ids):
+        clips = evaluate(rows, fps, energy_ratio=level)[0]
+        chosen = [clips[i] for i in ids]
+        return (sum(c["detected"] for c in chosen), sum(c["false_alarms"] for c in chosen))
+
+    report = []
+    for scene, held in clip_ids.items():
+        others = [i for ids in clip_ids.values() if ids is not held for i in ids]
+        # fewest false alarms first, then most catches, then the stricter level
+        level = max(candidates, key=lambda c: (-score(c, others)[1], score(c, others)[0], c))
+        caught, false = score(level, held)
+        report.append({"held_out": scene, "chosen_energy_ratio": level,
+                       "caught": f"{caught}/{len(held)}", "false_alarms": false})
+    return report
 
 
 def plot(rows, scores, clips, fps, ratio, out: Path) -> None:
@@ -150,13 +183,13 @@ def plot(rows, scores, clips, fps, ratio, out: Path) -> None:
     fig, ax = plt.subplots(figsize=(12, 3.6))
     ax.fill_between(t, 0, 1, where=abnormal, transform=ax.get_xaxis_transform(),
                     color="#f4c7c3", label="People running away (ground truth)")
-    ax.plot(t, scores, color="#1f5fa8", linewidth=1, label="Speed ÷ normal pace")
-    ax.axhline(ratio, color="#666666", linestyle="--", linewidth=1, label=f"Alarm level ({ratio}x)")
+    ax.plot(t, scores, color="#1f5fa8", linewidth=1, label="Alarm score (speed or energy vs normal)")
+    ax.axhline(1.0, color="#666666", linestyle="--", linewidth=1, label="Alarm level")
     for c in clips:
         if c["alarm_vs_label_s"] is not None:
             ax.axvline(c["label_s"] + c["alarm_vs_label_s"], color="#b3261e", linewidth=1.2)
-    ax.set(xlabel="Seconds", ylabel="Speed ÷ normal", xlim=(0, t[-1]),
-           ylim=(0, max(ratio * 2.5, float(np.percentile(scores, 99.5)))),
+    ax.set(xlabel="Seconds", ylabel="Alarm score", xlim=(0, t[-1]),
+           ylim=(0, max(2.5, float(np.percentile(scores, 99.5)))),
            title="UMN crowd-escape videos: movement alarm (red lines = alarm raised)")
     ax.legend(loc="upper left", fontsize=8, frameon=False)
     fig.tight_layout()
@@ -169,6 +202,7 @@ def main(argv=None) -> None:
     parser.add_argument("--video", type=Path, required=True)
     parser.add_argument("--out", type=Path, default=Path("results/umn"))
     parser.add_argument("--ratio", type=float, default=2.0)
+    parser.add_argument("--energy-ratio", type=float, default=8.0)
     parser.add_argument("--hold-frames", type=int, default=15)
     parser.add_argument("--label-lag", type=float, default=2.0,
                         help="Seconds before the label in which an alarm still counts as a catch")
@@ -176,7 +210,7 @@ def main(argv=None) -> None:
 
     rows, fps = read_video(args.video)
     clips, scores, summary = evaluate(rows, fps, args.ratio, args.hold_frames,
-                                      label_lag_s=args.label_lag)
+                                      label_lag_s=args.label_lag, energy_ratio=args.energy_ratio)
 
     args.out.mkdir(parents=True, exist_ok=True)
     with open(args.out / "per_frame.csv", "w", newline="") as f:
@@ -187,6 +221,7 @@ def main(argv=None) -> None:
         writer = csv.DictWriter(f, fieldnames=list(clips[0]))
         writer.writeheader()
         writer.writerows(clips)
+    summary["held_out_scene_check"] = held_out_scene_check(rows, fps)
     (args.out / "summary.json").write_text(json.dumps(summary, indent=2))
     plot(rows, scores, clips, fps, args.ratio, args.out)
 

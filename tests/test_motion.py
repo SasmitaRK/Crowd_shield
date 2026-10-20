@@ -62,3 +62,24 @@ def test_roc_auc():
 def test_clips_split_where_the_escape_label_turns_off():
     rows = [{"abnormal": bool(a)} for a in [0, 0, 1, 1, 0, 0, 1, 0]]
     assert split_clips(rows) == [(0, 4), (4, 7), (7, 8)]
+
+
+def test_far_away_escape_is_caught_by_movement_energy_not_speed():
+    from crowdshield.motion import MotionAlarm
+
+    alarm = MotionAlarm(baseline_frames=10, speed_ratio=2.0, energy_ratio=8.0, hold_frames=3)
+    calm = {"speed": 1.0, "energy": 0.02}
+    for _ in range(10):
+        assert not alarm.update(calm)
+    # People far away start running: they look only 1.5x faster, but 10x more of the view moves.
+    run = {"speed": 1.5, "energy": 0.2}
+    fired = [alarm.update(run) for _ in range(5)]
+    assert fired == [False, False, True, False, False]
+    assert "movement" in alarm.reason
+
+
+def test_energy_is_speed_times_moving_share():
+    flow = np.zeros((10, 10, 2))
+    flow[:5, :, 0] = 4.0  # half the view moves at 4 px per frame
+    s = flow_stats(flow)
+    assert s["energy"] == pytest.approx(s["speed"] * s["moving"]) == pytest.approx(2.0)
