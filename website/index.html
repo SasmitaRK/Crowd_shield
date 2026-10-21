@@ -79,6 +79,24 @@
            box-shadow: 0 30px 80px rgba(0,0,0,.45); }
   .frame iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
 
+  /* live demo */
+  .demo { background: var(--ink); padding: 0 0 88px; }
+  .demo .sec-head h2 { color: #fff; } .demo .lead { color: #cbd5e1; } .demo .eyebrow { color: var(--brand-300); }
+  .window { border: 1px solid var(--ink-line); border-radius: var(--radius); overflow: hidden; background: var(--ink-2);
+            box-shadow: 0 30px 80px rgba(0,0,0,.45); }
+  .chrome { display: flex; align-items: center; gap: 8px; padding: 10px 14px; border-bottom: 1px solid var(--ink-line); }
+  .chrome i { width: 11px; height: 11px; border-radius: 50%; background: #334155; }
+  .chrome .url { margin-left: 10px; flex: 1; font-size: .78rem; color: #94a3b8; background: #0b1220; border: 1px solid var(--ink-line);
+                 border-radius: 7px; padding: 4px 10px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .chrome a { font-size: .78rem; color: var(--brand-300); text-decoration: none; white-space: nowrap; }
+  .stage { position: relative; height: 760px; }
+  .stage iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; background: #fff; }
+  .launch { position: absolute; inset: 0; display: grid; place-items: center; text-align: center; padding: 24px;
+            background: radial-gradient(600px 300px at 50% 40%, rgba(20,184,166,.18), transparent 70%), var(--ink-2); }
+  .launch p { color: #94a3b8; font-size: .9rem; margin-top: 12px; max-width: 460px; }
+  .launch ul { list-style: none; padding: 0; margin: 22px 0 0; display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; }
+  .launch li { font-size: .8rem; color: #cbd5e1; border: 1px solid #334155; border-radius: 99px; padding: 5px 12px; }
+
   /* cards */
   .grid { display: grid; gap: 20px; }
   .g2 { grid-template-columns: repeat(2, 1fr); }
@@ -157,6 +175,7 @@
   footer .fine { margin-top: 32px; padding-top: 20px; border-top: 1px solid var(--ink-line); font-size: .78rem; color: #64748b; line-height: 1.6; }
 
   @media (max-width: 960px) {
+    .stage { height: 640px; }
     nav .links { display: none; }
     nav .wrap .btn { margin-left: auto; }
     .stats { grid-template-columns: repeat(2, 1fr); }
@@ -181,6 +200,7 @@
     <a class="brand" href="#top"><img src="assets/mark.svg" alt="">Crowd Shield</a>
     <div class="links">
       <a href="#problem">Why</a>
+      <a href="#demo">Live demo</a>
       <a href="#how">How it works</a>
       <a href="#map-section">Site maps</a>
       <a href="#results">Results</a>
@@ -198,7 +218,7 @@
       people per square metre on a satellite map, and raises an alarm when a crowd starts to surge.
       These are the warning signs crowd-safety research says appear minutes before a crush.</p>
     <div class="cta">
-      <a class="btn primary" href="https://crowd-shield-india.streamlit.app" target="_blank" rel="noopener">Try the live app</a>
+      <a class="btn primary" href="#demo">Try the live demo</a>
       <a class="btn ghost" href="report.pdf" target="_blank" rel="noopener">Technical report (PDF)</a>
       <a class="btn ghost" href="https://github.com/khushi-git-7/Crowd_shield" target="_blank" rel="noopener">Source code</a>
     </div>
@@ -216,6 +236,32 @@
 <div class="video" id="video" data-youtube="">
   <div class="wrap"><div class="frame" id="frame"></div></div>
 </div>
+
+<section class="demo" id="demo">
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="eyebrow">Live demo</div>
+      <h2>Use the real app, right here</h2>
+      <p class="lead">This is the working system, not a recording. Count a crowd photo, run the Kumbh and Madurai
+        site maps, or open the India benchmark.</p>
+    </div>
+    <div class="window">
+      <div class="chrome"><i></i><i></i><i></i>
+        <span class="url">crowd-shield-india.streamlit.app</span>
+        <a href="https://crowd-shield-india.streamlit.app" target="_blank" rel="noopener">Open full screen ↗</a>
+      </div>
+      <div class="stage" id="stage">
+        <div class="launch">
+          <div>
+            <button class="btn primary" id="launch" type="button" style="border:0;cursor:pointer;font:inherit;font-weight:600">▶ Launch Crowd Shield</button>
+            <p>Runs on free hosting. If nobody has used it for a while, it takes about 30 seconds to wake up.</p>
+            <ul><li>Dashboard</li><li>Photo counting</li><li>Video monitor</li><li>Site maps</li><li>India benchmark</li></ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
 
 <section id="problem">
   <div class="wrap">
@@ -406,6 +452,13 @@
       allow="accelerometer; encrypted-media; picture-in-picture" allowfullscreen></iframe>`;
   v.classList.add("on");
 })();
+
+// Live demo: load the app only when asked, so the page itself stays fast
+document.getElementById("launch").onclick = () => {
+  document.getElementById("stage").innerHTML =
+    '<iframe src="https://crowd-shield-india.streamlit.app/?embed=true&embed_options=light_theme" title="Crowd Shield live app"' +
+    ' allow="clipboard-write; fullscreen"></iframe>';
+};
 
 // Accuracy table (results/shanghaitech/comparison.md)
 (function () {
