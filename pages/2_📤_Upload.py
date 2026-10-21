@@ -23,6 +23,7 @@ st.markdown(
         <a href="/Upload">Upload</a>
         <a href="/Analysis">Analysis</a>
         <a href="/Video">Video</a>
+        <a href="/Map">Map</a>
         <a href="/Settings">Settings</a>
       </div>
     </div>

@@ -59,6 +59,25 @@ def _hops_from(start: str, adjacency: dict) -> dict:
     return hops
 
 
+def route(start: str, goal: str, adjacency: dict) -> list[str]:
+    """Shortest zone-to-zone path from start to goal (both included), or [] if unreachable."""
+    previous = {start: None}
+    queue = deque([start])
+    while queue:
+        zone = queue.popleft()
+        if zone == goal:
+            path = []
+            while zone is not None:
+                path.append(zone)
+                zone = previous[zone]
+            return path[::-1]
+        for neighbour in adjacency.get(zone, ()):
+            if neighbour not in previous:
+                previous[neighbour] = zone
+                queue.append(neighbour)
+    return []
+
+
 def plan_relocations(zones: dict, adjacency: dict | None = None) -> list[dict]:
     """Pair each High Risk or Critical zone with a Safe zone that can absorb people.
 

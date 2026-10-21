@@ -66,3 +66,11 @@ def test_settings_page():
 def test_video_page_waits_for_a_clip():
     app = render(PAGES["Video"])
     assert any("Upload a clip" in block.value for block in app.info)
+
+
+def test_map_page_shows_the_kumbh_demo_with_an_evacuation_plan():
+    pytest.importorskip("streamlit_folium")
+    app = render(PAGES["Map"])
+    text = " ".join(block.value for block in app.markdown)
+    assert "Sangam Nose bathing area" in text
+    assert "CRITICAL" in text and "A → B → D" in text

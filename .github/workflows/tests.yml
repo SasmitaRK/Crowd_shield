@@ -22,7 +22,7 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
-      - run: pip install streamlit matplotlib seaborn opencv-python-headless numpy scipy pytest
+      - run: pip install streamlit matplotlib seaborn opencv-python-headless numpy scipy pytest folium streamlit-folium
       - run: pytest -q tests/test_app_pages.py
 
   detection:
