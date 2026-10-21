@@ -24,13 +24,51 @@ def load_site(path: Path = DEMO_SITE) -> dict:
     return site
 
 
-def scenario_counts(site: dict) -> dict:
-    """People per zone in the site's simulated scenario: density x mapped area."""
-    return {z: round(info["scenario_density"] * ring_area_m2(info["ring"]))
+# How a simulated surge builds and eases, as a share of each zone's peak density.
+DEFAULT_TIMELINE = [
+    {"label": "T-90 min", "factor": 0.3},
+    {"label": "T-60 min", "factor": 0.5},
+    {"label": "T-30 min", "factor": 0.75},
+    {"label": "Peak", "factor": 1.0},
+    {"label": "T+30 min", "factor": 0.6},
+]
+
+
+def timeline(site: dict) -> list[dict]:
+    """The steps of a site's simulated surge (its own, or the default build-up)."""
+    return site.get("timeline") or DEFAULT_TIMELINE
+
+
+def scenario_counts(site: dict, factor: float = 1.0) -> dict:
+    """People per zone in the site's simulated scenario: density x mapped area x factor."""
+    return {z: round(info["scenario_density"] * factor * ring_area_m2(info["ring"]))
             for z, info in site["zones"].items() if "scenario_density" in info}
 
 
-def assess(site: dict, counts: dict, preset: dict, touch_m: float = 30.0) -> dict:
+def to_geojson(view: dict) -> dict:
+    """The assessed zones as a GeoJSON FeatureCollection, for GIS tools."""
+    features = []
+    for z, r in view["zones"].items():
+        features.append({
+            "type": "Feature",
+            "geometry": {"type": "Polygon", "coordinates": [r["ring"]]},
+            "properties": {
+                "zone": z, "name": r["name"], "area_m2": round(r["area_m2"], 1),
+                "people": r["count"],
+                "per_m2": None if r["per_m2"] is None else round(r["per_m2"], 3),
+                "risk": r["risk"], "connected_to": view["adjacency"][z],
+            },
+        })
+    return {"type": "FeatureCollection", "features": features}
+
+
+def list_sites() -> list[dict]:
+    """Every bundled demo site, with its file path, demo first."""
+    paths = [DEMO_SITE] + sorted(p for p in SITES_DIR.glob("*.json") if p != DEMO_SITE)
+    return [dict(load_site(p), path=str(p)) for p in paths]
+
+
+def assess(site: dict, counts: dict, preset: dict, touch_m: float | None = None) -> dict:
     """Everything the map shows, from zone shapes, people counts and a density standard.
 
     Returns {"zones": {zone: row}, "adjacency": graph, "plans": [...]} where each
@@ -39,7 +77,8 @@ def assess(site: dict, counts: dict, preset: dict, touch_m: float = 30.0) -> dic
     walk through. Zones without a count are kept for drawing, with count None.
     """
     rings = {z: info["ring"] for z, info in site["zones"].items()}
-    graph = adjacency(rings, touch_m)
+    # A site can say how far apart zones may be and still connect (streets between them).
+    graph = adjacency(rings, touch_m if touch_m is not None else site.get("touch_m", 30.0))
     rows = {}
     for z, info in site["zones"].items():
         area = ring_area_m2(info["ring"])

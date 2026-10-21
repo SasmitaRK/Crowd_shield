@@ -1,15 +1,17 @@
 """Site Map: every zone on real satellite terrain, coloured by live risk, with evacuation routes."""
 
 import html
+import json
 
 import folium
 import streamlit as st
-from folium.plugins import AntPath, Draw, Fullscreen, MiniMap
+from folium.plugins import AntPath, Draw, Fullscreen, MiniMap, PolyLineTextPath
 from streamlit_folium import st_folium
 
 from crowdshield.geo import ring_area_m2
 from crowdshield.risk import thresholds_from_area
-from crowdshield.sitemap import assess, load_site, scenario_counts, site_from_drawings
+from crowdshield.sitemap import (assess, list_sites, scenario_counts, site_from_drawings,
+                                 timeline, to_geojson)
 from shared_state import FRUIN_PRESETS, GLOBAL_CSS, RISK_COLORS, SEGMENTS, init_state
 
 st.set_page_config(page_title="Site Map • Crowd Shield", page_icon=None, layout="wide")
@@ -36,123 +38,170 @@ st.markdown(
 
 st.markdown("""
 <style>
-  .map-hero {
-    background: linear-gradient(135deg, #0b1220 0%, #10243a 55%, #0d3b3a 100%);
-    border-radius: 16px; padding: 1.4rem 1.6rem; color: #e5edf5; margin-bottom: 1rem;
-    border: 1px solid #1f3346; position: relative; overflow: hidden;
-  }
-  .map-hero h1 { color: #ffffff !important; font-size: 1.7rem; margin: 0 0 .3rem 0; letter-spacing: -.3px; }
-  .map-hero p  { color: #a9bccf; margin: 0; font-size: .95rem; max-width: 820px; }
-  .live-dot { display:inline-block; width:8px; height:8px; border-radius:50%;
-              background:#22c55e; margin-right:.45rem; box-shadow:0 0 0 0 rgba(34,197,94,.7);
+  .page-head { display:flex; justify-content:space-between; align-items:flex-end; gap:1rem;
+               margin: .2rem 0 1rem; flex-wrap:wrap; }
+  .page-head .eyebrow { font-size:.72rem; font-weight:700; letter-spacing:.14em; text-transform:uppercase;
+                        color:#0d9488; display:flex; align-items:center; gap:.45rem; }
+  .page-head h1 { font-size:1.75rem !important; margin:.15rem 0 .2rem !important; color:#0f172a !important;
+                  letter-spacing:-.4px; font-weight:800 !important; }
+  .page-head p { margin:0; color:#64748b; font-size:.92rem; max-width:760px; }
+  .live-dot { width:8px; height:8px; border-radius:50%; background:#10b981; display:inline-block;
               animation: livepulse 1.8s infinite; }
-  @keyframes livepulse { 0% {box-shadow:0 0 0 0 rgba(34,197,94,.7);}
-                         70% {box-shadow:0 0 0 9px rgba(34,197,94,0);}
-                         100% {box-shadow:0 0 0 0 rgba(34,197,94,0);} }
-  .hero-tag { font-size:.72rem; text-transform:uppercase; letter-spacing:.12em; color:#7dd3c8;
-              font-weight:700; margin-bottom:.5rem; }
-  .kpi { background:#ffffff; border:1px solid #e5e7eb; border-radius:14px; padding:.9rem 1rem;
-         box-shadow:0 1px 3px rgba(0,0,0,.05); }
-  .kpi .label { font-size:.72rem; color:#6b7280; text-transform:uppercase; letter-spacing:.08em; font-weight:600; }
-  .kpi .value { font-size:1.6rem; font-weight:800; color:#0f172a; line-height:1.2; margin-top:.15rem; }
-  .kpi .sub   { font-size:.78rem; color:#6b7280; }
-  .route-card { background:#ffffff; border:1px solid #e5e7eb; border-left:4px solid #ef4444;
-                border-radius:12px; padding:.75rem 1rem; margin:.4rem 0; font-size:.9rem; color:#111827; }
-  .route-card.high { border-left-color:#f97316; }
-  .route-path { font-family: ui-monospace, Menlo, monospace; font-size:.82rem; color:#334155;
-                background:#f1f5f9; padding:.1rem .4rem; border-radius:6px; }
-  .legend-row { display:flex; flex-wrap:wrap; gap:.9rem; font-size:.82rem; color:#334155; margin:.3rem 0 .2rem; }
-  .legend-row span.sw { display:inline-block; width:12px; height:12px; border-radius:3px;
-                        margin-right:.35rem; vertical-align:-1px; opacity:.85; }
-  .story { background:#fff7ed; border:1px solid #fed7aa; color:#7c2d12; border-radius:12px;
-           padding:.7rem 1rem; font-size:.86rem; margin:.6rem 0; }
+  @keyframes livepulse { 0% {box-shadow:0 0 0 0 rgba(16,185,129,.6);}
+                         70% {box-shadow:0 0 0 8px rgba(16,185,129,0);}
+                         100% {box-shadow:0 0 0 0 rgba(16,185,129,0);} }
+  .chip { display:inline-flex; align-items:center; gap:.35rem; padding:.18rem .55rem; border-radius:999px;
+          font-size:.72rem; font-weight:700; letter-spacing:.02em; }
+  .chip.sim { background:#fef3c7; color:#92400e; border:1px solid #fde68a; }
+  .chip.live { background:#d1fae5; color:#065f46; border:1px solid #a7f3d0; }
+  .kpi { background:#fff; border:1px solid #e2e8f0; border-radius:14px; padding:.85rem 1rem; height:100%;
+         box-shadow:0 1px 2px rgba(15,23,42,.04); }
+  .kpi .label { font-size:.68rem; color:#64748b; text-transform:uppercase; letter-spacing:.1em; font-weight:700; }
+  .kpi .value { font-size:1.55rem; font-weight:800; color:#0f172a; line-height:1.15; margin-top:.2rem;
+                font-variant-numeric: tabular-nums; white-space:nowrap; }
+  .kpi .sub { font-size:.76rem; color:#64748b; margin-top:.1rem; white-space:nowrap; overflow:hidden;
+              text-overflow:ellipsis; }
+  .story { border-left:3px solid #f59e0b; background:#fffbeb; color:#78350f; border-radius:0 10px 10px 0;
+           padding:.6rem .9rem; font-size:.85rem; margin:.2rem 0 1rem; }
+  .zone-card { background:#fff; border:1px solid #e2e8f0; border-radius:12px; padding:.65rem .75rem;
+               margin-bottom:.5rem; }
+  .zone-card .top { display:flex; align-items:center; gap:.55rem; }
+  .zone-card .badge { width:24px; height:24px; border-radius:7px; color:#fff; font-weight:800; font-size:.78rem;
+                      display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+  .zone-card .name { font-weight:700; font-size:.84rem; color:#0f172a; line-height:1.2; flex:1; }
+  .zone-card .risk { font-size:.68rem; font-weight:800; text-transform:uppercase; letter-spacing:.06em; }
+  .zone-card .meta { display:flex; justify-content:space-between; font-size:.74rem; color:#64748b;
+                     margin:.4rem 0 .3rem; font-variant-numeric: tabular-nums; }
+  .bar { position:relative; height:6px; border-radius:99px; background:#f1f5f9; overflow:visible; }
+  .bar .fill { position:absolute; left:0; top:0; bottom:0; border-radius:99px; }
+  .bar .tick { position:absolute; top:-3px; width:2px; height:12px; background:#cbd5e1; border-radius:1px; }
+  .route-card { background:#fff; border:1px solid #e2e8f0; border-radius:12px; padding:.75rem .9rem;
+                margin:.45rem 0; font-size:.88rem; color:#0f172a; display:flex; gap:.75rem; align-items:flex-start; }
+  .route-card .pill { font-size:.66rem; font-weight:800; letter-spacing:.06em; padding:.2rem .5rem; border-radius:6px;
+                      color:#fff; white-space:nowrap; margin-top:.1rem; }
+  .route-path { font-family: ui-monospace, Menlo, monospace; font-size:.8rem; color:#0f172a;
+                background:#f1f5f9; padding:.08rem .4rem; border-radius:6px; }
+  .panel-title { font-size:.72rem; font-weight:800; letter-spacing:.12em; text-transform:uppercase;
+                 color:#64748b; margin:.1rem 0 .5rem; }
 </style>
 """, unsafe_allow_html=True)
 
+
+def compact(n: float) -> str:
+    """547408 -> 547.4K, the way dashboards show big counts."""
+    for size, suffix in ((1e6, "M"), (1e3, "K")):
+        if abs(n) >= size:
+            return f"{n / size:.1f}{suffix}"
+    return f"{n:,.0f}"
+
+
+RISK_ORDER = ["Safe", "Moderate", "High Risk", "Critical"]
+GREY = "#94a3b8"
+SITES = {s["short"]: s for s in list_sites()}
+
+# ---------------------------------------------------------------------------
+# Controls
+# ---------------------------------------------------------------------------
 st.markdown("""
-<div class="map-hero">
-  <div class="hero-tag"><span class="live-dot"></span>Site map</div>
+<div class="page-head"><div>
+  <div class="eyebrow"><span class="live-dot"></span>Site map</div>
   <h1>Every zone on real terrain</h1>
-  <p>Zones are drawn on satellite imagery, so each one's ground area comes from the map,
-  not a guess. Crowd density (people per m²) sets its risk colour, and arrows show where to
-  move people along walkable routes.</p>
-</div>
+  <p>Zones sit on satellite imagery, so each one's ground area is measured from the map.
+  People per m² sets its risk, and animated routes show where to move people along paths
+  they can walk.</p>
+</div></div>
 """, unsafe_allow_html=True)
 
-
-# ---------------------------------------------------------------------------
-# Choose the site and the numbers to show
-# ---------------------------------------------------------------------------
-DEMO = load_site()
-has_custom = "custom_site" in st.session_state
-has_analysis = bool(st.session_state.crowd_data)
-
-c1, c2, c3 = st.columns([3, 3, 3])
-with c1:
-    site_choice = st.radio(
-        "Site", ["demo", "custom", "draw"], horizontal=True,
-        format_func={"demo": DEMO["short"], "custom": "My site",
-                     "draw": "Draw a new site"}.get,
-        index=1 if has_custom else 0,
-        help="The demo is the Maha Kumbh bathing area at the Sangam in Prayagraj.")
-with c2:
-    preset_name = st.selectbox("Density standard", list(FRUIN_PRESETS),
-                               index=list(FRUIN_PRESETS).index("Crowded events / concerts"),
-                               help="People per m² at which each risk level starts (Fruin).")
-with c3:
-    sources = (["scenario"] if site_choice == "demo" else []) + (["analysis"] if has_analysis else [])
-    source = st.radio(
-        "People counts", sources or ["none"], horizontal=True,
-        format_func={"scenario": "Simulated surge", "analysis": "My latest analysis",
-                     "none": "No counts yet"}.get)
-
-if site_choice == "custom" and not has_custom:
-    st.info("No saved site yet. Choose **Draw a new site**, draw your zones, then save them.")
-    site_choice = "draw"
+site_options = list(SITES) + (["My site"] if "custom_site" in st.session_state else []) + ["Draw a new site"]
+with st.container(border=True):
+    c1, c2, c3 = st.columns([5, 3, 3])
+    with c1:
+        site_choice = st.selectbox("Site", site_options,
+                                   help="Demo sites are real places with illustrative zones.")
+    is_draw = site_choice == "Draw a new site"
+    is_demo = site_choice in SITES
+    has_analysis = bool(st.session_state.crowd_data)
+    with c2:
+        sources = (["Simulated surge"] if is_demo else []) + (["My latest analysis"] if has_analysis else [])
+        source = st.selectbox("People counts", sources or ["No counts yet"], disabled=is_draw)
+    with c3:
+        preset_name = st.selectbox("Density standard", list(FRUIN_PRESETS),
+                                   index=list(FRUIN_PRESETS).index("Crowded events / concerts"),
+                                   help="People per m² at which each risk level starts (Fruin).")
+    step = None
+    if is_demo and source == "Simulated surge":
+        steps = timeline(SITES[site_choice])
+        label = st.select_slider("Simulation time", [s["label"] for s in steps],
+                                 value=next(s["label"] for s in steps if s["factor"] == 1.0),
+                                 help="Plays the simulated surge forward: watch zones fill and routes appear.")
+        step = next(s for s in steps if s["label"] == label)
 
 preset = FRUIN_PRESETS[preset_name]
-RISK_ORDER = ["Safe", "Moderate", "High Risk", "Critical"]
 
 
 def base_map(centre, zoom):
     m = folium.Map(location=[centre[1], centre[0]], zoom_start=zoom, tiles=None,
-                   control_scale=True, max_zoom=20)
-    folium.TileLayer("Esri.WorldImagery", name="Satellite", max_zoom=20,
-                     max_native_zoom=19).add_to(m)
-    folium.TileLayer("OpenStreetMap.Mapnik", name="Streets", max_zoom=20,
-                     max_native_zoom=19).add_to(m)
-    folium.TileLayer("Esri.WorldTopoMap", name="Terrain", max_zoom=20,
-                     max_native_zoom=19).add_to(m)
+                   control_scale=True, max_zoom=20, prefer_canvas=False)
+    folium.TileLayer("Esri.WorldImagery", name="Satellite", max_zoom=20, max_native_zoom=19).add_to(m)
+    folium.TileLayer("OpenStreetMap.Mapnik", name="Streets", max_zoom=20, max_native_zoom=19,
+                     show=False).add_to(m)
+    folium.TileLayer("Esri.WorldTopoMap", name="Terrain", max_zoom=20, max_native_zoom=19,
+                     show=False).add_to(m)
+    folium.TileLayer(
+        tiles="https://server.arcgisonline.com/ArcGIS/rest/services/Reference/"
+              "World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}",
+        attr="Esri", name="Place labels", overlay=True, control=True, max_zoom=20,
+        max_native_zoom=19, opacity=0.9).add_to(m)
     Fullscreen(position="topleft").add_to(m)
+    m.get_root().header.add_child(folium.Element("""
+<style>
+  .leaflet-container { font-family: Inter, system-ui, sans-serif; background:#0b1220; }
+  .leaflet-control-attribution { font-size:9px !important; background:rgba(255,255,255,.7) !important;
+                                 max-width:60%; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .leaflet-control-attribution:hover { white-space:normal; }
+  .leaflet-tooltip.zone-tip { border:0; border-radius:10px; box-shadow:0 8px 24px rgba(2,6,23,.25);
+                              padding:8px 10px; font-size:12px; color:#0f172a; }
+  .pin { position:relative; transform:translate(-50%,-50%); display:flex; align-items:center; gap:5px; }
+  .pin .b { width:26px; height:26px; border-radius:8px; color:#fff; font:800 12px/26px Inter, sans-serif;
+            text-align:center; border:2px solid #fff; box-shadow:0 2px 10px rgba(0,0,0,.45); }
+  .pin .d { background:rgba(15,23,42,.82); color:#fff; font:700 11px/1 Inter, sans-serif; padding:4px 6px;
+            border-radius:6px; white-space:nowrap; }
+  .pin .n { background:rgba(255,255,255,.95); color:#0f172a; font:700 11px/1 Inter, sans-serif; padding:4px 7px;
+            border-radius:6px; white-space:nowrap; box-shadow:0 1px 6px rgba(0,0,0,.3); }
+  .ring { position:absolute; left:13px; top:13px; width:26px; height:26px; margin:-13px 0 0 -13px;
+          border-radius:50%; border:3px solid currentColor; animation: ring 1.6s ease-out infinite; }
+  @keyframes ring { 0% {transform:scale(.7); opacity:.95} 100% {transform:scale(3.4); opacity:0} }
+  .map-legend { position:absolute; left:10px; bottom:26px; z-index:999; background:rgba(15,23,42,.86);
+                color:#e2e8f0; border-radius:10px; padding:8px 10px; font:600 11px/1.5 Inter, sans-serif;
+                box-shadow:0 4px 18px rgba(0,0,0,.35); }
+  .map-legend i { display:inline-block; width:10px; height:10px; border-radius:3px; margin-right:6px;
+                  vertical-align:-1px; }
+</style>"""))
     return m
 
 
 # ---------------------------------------------------------------------------
 # Draw mode: the user outlines zones and assigns each one a letter
 # ---------------------------------------------------------------------------
-if site_choice == "draw":
+if is_draw:
     st.markdown("#### Draw your zones")
-    st.caption("Use the polygon or rectangle tool on the left of the map to outline up to five "
-               "zones (A to E). Search the map by panning and zooming to your venue first. "
-               "Zones that touch or lie within 30 m of each other count as connected.")
-    start = st.session_state.get("custom_site", DEMO)
+    st.caption("Pan to your venue, then outline up to five zones with the polygon or rectangle "
+               "tool on the left of the map. Zones that touch, or lie within 30 m, count as connected.")
+    start = st.session_state.get("custom_site", next(iter(SITES.values())))
     m = base_map(start["centre"], start.get("zoom", 16))
     Draw(export=False, position="topleft",
-         draw_options={"polyline": False, "circle": False, "circlemarker": False,
-                       "marker": False,
+         draw_options={"polyline": False, "circle": False, "circlemarker": False, "marker": False,
                        "polygon": {"shapeOptions": {"color": "#38bdf8"}},
                        "rectangle": {"shapeOptions": {"color": "#38bdf8"}}},
          edit_options={"edit": True, "remove": True}).add_to(m)
     folium.LayerControl(collapsed=True).add_to(m)
-    out = st_folium(m, height=560, use_container_width=True,
+    out = st_folium(m, height=580, use_container_width=True,
                     returned_objects=["all_drawings"], key="draw_map")
     shapes = [f for f in (out or {}).get("all_drawings") or []
               if (f.get("geometry") or {}).get("type") == "Polygon"]
-
     if not shapes:
         st.info("Nothing drawn yet.")
         st.stop()
-
     st.markdown(f"**{len(shapes)} shape(s) drawn.** Give each one a zone letter and a name.")
     letters, names = {}, {}
     for i, f in enumerate(shapes[:5]):
@@ -168,123 +217,142 @@ if site_choice == "draw":
         st.success("Saved. Choose **My site** above to see it with live risk.")
     st.stop()
 
-
 # ---------------------------------------------------------------------------
-# View mode
+# Assess the site
 # ---------------------------------------------------------------------------
-site = DEMO if site_choice == "demo" else st.session_state.custom_site
-if source == "scenario":
-    counts = scenario_counts(site)
-elif source == "analysis":
+site = SITES[site_choice] if is_demo else st.session_state.custom_site
+if source == "Simulated surge":
+    counts = scenario_counts(site, step["factor"])
+elif source == "My latest analysis":
     counts = {z: d["count"] for z, d in st.session_state.crowd_data.items() if z in site["zones"]}
 else:
     counts = {}
 view = assess(site, counts, preset)
 zones, plans = view["zones"], view["plans"]
 
-if site_choice == "demo":
-    st.markdown(f"<div class='story'><b>Why this site.</b> {html.escape(DEMO['story'])}</div>",
+if is_demo:
+    st.markdown(f"<div class='story'><b>Why this place.</b> {html.escape(site['story'])}</div>",
                 unsafe_allow_html=True)
 
-# KPI strip
 counted = [r for r in zones.values() if r["count"] is not None]
 total_area = sum(r["area_m2"] for r in zones.values())
 peak = max(counted, key=lambda r: r["per_m2"]) if counted else None
 at_risk = [z for z, r in zones.items() if r["risk"] in ("High Risk", "Critical")]
-k = st.columns(4)
+moving = sum(p["move"] for p in plans if p["target"])
+chip = ("<span class='chip sim'>SIMULATED</span>" if source == "Simulated surge"
+        else "<span class='chip live'>FROM YOUR PHOTOS</span>" if counted else "")
 kpis = [
-    ("People in zones", f"{sum(r['count'] for r in counted):,}" if counted else "–",
+    ("People in zones", compact(sum(r["count"] for r in counted)) if counted else "–",
      f"{len(counted)} of {len(zones)} zones counted"),
-    ("Area monitored", f"{total_area / 10_000:,.1f} ha", f"{total_area:,.0f} m² from the map"),
+    ("Area monitored", f"{total_area / 10_000:,.1f} ha", f"{total_area:,.0f} m² measured on the map"),
     ("Peak density", f"{peak['per_m2']:.1f} /m²" if peak else "–",
      html.escape(peak["name"]) if peak else "no counts yet"),
-    ("Zones at risk", f"{len(at_risk)}", ", ".join(at_risk) or "none"),
+    ("Zones at risk", f"{len(at_risk)} / {len(zones)}", ", ".join(at_risk) or "none"),
+    ("People to move", compact(moving) if plans else "0",
+     f"{len(plans)} route(s) planned" if plans else "no moves needed"),
 ]
-for col, (label, value, sub) in zip(k, kpis):
+cols = st.columns(len(kpis))
+for col, (label, value, sub) in zip(cols, kpis):
     col.markdown(f"<div class='kpi'><div class='label'>{label}</div>"
                  f"<div class='value'>{value}</div><div class='sub'>{sub}</div></div>",
                  unsafe_allow_html=True)
+st.markdown(f"<div style='margin:.6rem 0 .2rem'>{chip}</div>", unsafe_allow_html=True)
 
-st.markdown(
-    "<div class='legend-row'>" + "".join(
-        f"<span><span class='sw' style='background:{RISK_COLORS[r]}'></span>{r} "
-        f"(from {preset[{'Moderate': 'moderate', 'High Risk': 'high', 'Critical': 'critical'}[r]]}/m²)"
-        f"</span>" if r != "Safe" else
-        f"<span><span class='sw' style='background:{RISK_COLORS[r]}'></span>Safe "
-        f"(under {preset['moderate']}/m²)</span>"
-        for r in RISK_ORDER) +
-    "<span><span class='sw' style='background:#94a3b8'></span>Not counted</span></div>",
-    unsafe_allow_html=True)
+# ---------------------------------------------------------------------------
+# Map + zone panel
+# ---------------------------------------------------------------------------
+map_col, panel_col = st.columns([7, 3], gap="medium")
+with map_col:
+    show_names = st.toggle("Zone names on the map", value=False)
+    m = base_map(site["centre"], site.get("zoom", 16))
+    zone_layer = folium.FeatureGroup(name="Zones").add_to(m)
+    for z, r in zones.items():
+        colour = RISK_COLORS.get(r["risk"], GREY)
+        hot = r["risk"] in ("High Risk", "Critical")
+        density = "not counted" if r["count"] is None else f"{r['per_m2']:.2f} people/m²"
+        tip = (f"<div style='font-weight:800;margin-bottom:4px'>Zone {z} · {html.escape(r['name'])}</div>"
+               f"<div>Area <b>{r['area_m2']:,.0f} m²</b></div>"
+               + ("" if r["count"] is None else f"<div>People <b>{r['count']:,}</b></div>")
+               + f"<div>Density <b>{density}</b></div>"
+               f"<div>Risk <b style='color:{colour}'>{r['risk'] or '–'}</b></div>"
+               f"<div style='color:#64748b'>Connects to {', '.join(view['adjacency'][z]) or 'nothing'}</div>")
+        style = {"color": colour, "weight": 3 if hot else 2, "fillColor": colour,
+                 "fillOpacity": 0.4 if hot else 0.28}
+        folium.GeoJson(
+            {"type": "Feature", "geometry": {"type": "Polygon", "coordinates": [r["ring"]]}},
+            style_function=lambda _, s=style: s,
+            highlight_function=lambda _, c=colour: {"weight": 4, "fillOpacity": 0.55, "color": "#ffffff",
+                                                    "fillColor": c},
+            tooltip=folium.Tooltip(tip, sticky=True, class_name="zone-tip"),
+        ).add_to(zone_layer)
 
-m = base_map(site["centre"], site.get("zoom", 16))
-m.get_root().header.add_child(folium.Element("""
-<style>
-  .zone-pin { display:flex; align-items:center; gap:6px; white-space:nowrap;
-              font: 700 12px/1 Inter, system-ui, sans-serif; color:#0f172a;
-              background:rgba(255,255,255,.94); border-radius:999px; padding:5px 9px 5px 5px;
-              box-shadow:0 2px 8px rgba(0,0,0,.35); transform: translate(-50%, -50%); }
-  .zone-pin b { display:inline-flex; align-items:center; justify-content:center; width:20px; height:20px;
-                border-radius:50%; color:#fff; font-size:11px; }
-  .zone-pin small { font-weight:600; color:#475569; }
-  .pulse-ring { position:absolute; left:50%; top:50%; width:22px; height:22px; margin:-11px 0 0 -11px;
-                border-radius:50%; border:3px solid currentColor; animation: ring 1.6s ease-out infinite; }
-  @keyframes ring { 0% {transform:scale(.6); opacity:.9} 100% {transform:scale(3.2); opacity:0} }
-</style>
-"""))
+        lon, lat = r["centre"]
+        ring = f"<span class='ring' style='color:{colour}'></span>" if hot else ""
+        density_tag = "" if r["count"] is None else f"<span class='d'>{r['per_m2']:.1f}/m²</span>"
+        name_tag = f"<span class='n'>{html.escape(r['name'])}</span>" if show_names else ""
+        folium.Marker([lat, lon], icon=folium.DivIcon(
+            html=f"<div class='pin'>{ring}<span class='b' style='background:{colour}'>{z}</span>"
+                 f"{density_tag}{name_tag}</div>", icon_size=(0, 0))).add_to(zone_layer)
 
-zone_layer = folium.FeatureGroup(name="Zones").add_to(m)
-for z, r in zones.items():
-    colour = RISK_COLORS.get(r["risk"], "#94a3b8")
-    critical = r["risk"] == "Critical"
-    density = "not counted" if r["count"] is None else f"{r['per_m2']:.2f} people/m²"
-    tip = (f"<b>Zone {z}: {html.escape(r['name'])}</b><br>"
-           f"Area {r['area_m2']:,.0f} m²<br>"
-           + ("" if r["count"] is None else f"People {r['count']:,}<br>")
-           + f"Density {density}<br>Risk <b style='color:{colour}'>{r['risk'] or '–'}</b>")
-    folium.Polygon(
-        locations=[[lat, lon] for lon, lat in r["ring"]],
-        color=colour, weight=3 if critical else 2, fill=True, fill_color=colour,
-        fill_opacity=0.42 if critical else 0.3, tooltip=folium.Tooltip(tip, sticky=True),
-    ).add_to(zone_layer)
+    route_layer = folium.FeatureGroup(name="Evacuation routes").add_to(m)
+    for p in plans:
+        if len(p["path"]) < 2:
+            continue
+        points = [[zones[z]["centre"][1], zones[z]["centre"][0]] for z in p["path"]]
+        tip = f"Move ~{p['move']:,} people: {' → '.join(p['path'])}"
+        AntPath(points, color="#ffffff", pulse_color=RISK_COLORS[p["risk"]], weight=6, delay=650,
+                dash_array=[14, 26], opacity=0.95, tooltip=tip).add_to(route_layer)
+        arrows = folium.PolyLine(points, weight=0, opacity=0).add_to(route_layer)
+        PolyLineTextPath(arrows, "      ➤      ", repeat=True, offset=5,
+                         attributes={"fill": "#ffffff", "font-size": "15", "font-weight": "bold"}
+                         ).add_to(route_layer)
 
-    lon, lat = r["centre"]
-    pulse = (f"<span class='pulse-ring' style='color:{colour}'></span>"
-             if r["risk"] in ("Critical", "High Risk") else "")
-    sub = "" if r["count"] is None else f"<small>{r['per_m2']:.1f}/m²</small>"
-    folium.Marker(
-        [lat, lon],
-        icon=folium.DivIcon(
-            html=f"<div style='position:relative'>{pulse}<div class='zone-pin'>"
-                 f"<b style='background:{colour}'>{z}</b>{html.escape(r['name'])} {sub}</div></div>",
-            icon_size=(0, 0)),
-    ).add_to(zone_layer)
+    legend = "".join(
+        f"<div><i style='background:{RISK_COLORS[k]}'></i>{k}"
+        f"{'' if k == 'Safe' else ' ≥ ' + str(preset[{'Moderate': 'moderate', 'High Risk': 'high', 'Critical': 'critical'}[k]]) + '/m²'}"
+        f"{' < ' + str(preset['moderate']) + '/m²' if k == 'Safe' else ''}</div>"
+        for k in RISK_ORDER)
+    m.get_root().html.add_child(folium.Element(
+        f"<div class='map-legend'>{legend}<div><i style='background:{GREY}'></i>Not counted</div></div>"))
+    MiniMap(toggle_display=True, position="bottomright", zoom_level_offset=-5).add_to(m)
+    folium.LayerControl(collapsed=True).add_to(m)
+    st_folium(m, height=640, use_container_width=True, returned_objects=[], key="site_map")
 
-route_layer = folium.FeatureGroup(name="Evacuation routes").add_to(m)
-for p in plans:
-    if len(p["path"]) < 2:
-        continue
-    points = [[zones[z]["centre"][1], zones[z]["centre"][0]] for z in p["path"]]
-    AntPath(points, color="#ffffff", pulse_color=RISK_COLORS[p["risk"]], weight=6,
-            delay=700, dash_array=[14, 26], opacity=0.95,
-            tooltip=f"Move ~{p['move']:,} people: {' → '.join(p['path'])}").add_to(route_layer)
+with panel_col:
+    st.markdown("<div class='panel-title'>Zones</div>", unsafe_allow_html=True)
+    scale = preset["critical"] * 1.25
+    for z, r in sorted(zones.items(), key=lambda kv: -(kv[1]["per_m2"] or -1)):
+        colour = RISK_COLORS.get(r["risk"], GREY)
+        if r["count"] is None:
+            meta = f"<span>{r['area_m2']:,.0f} m²</span><span>not counted</span>"
+            fill = ""
+        else:
+            meta = (f"<span>{compact(r['count'])} people</span>"
+                    f"<span><b style='color:#0f172a'>{r['per_m2']:.2f}</b> /m²</span>")
+            fill = (f"<div class='fill' style='width:{min(r['per_m2'] / scale, 1) * 100:.1f}%;"
+                    f"background:{colour}'></div>")
+        ticks = "".join(f"<div class='tick' style='left:{preset[k] / scale * 100:.1f}%'></div>"
+                        for k in ("moderate", "high", "critical"))
+        st.markdown(
+            f"<div class='zone-card'><div class='top'><div class='badge' style='background:{colour}'>{z}</div>"
+            f"<div class='name'>{html.escape(r['name'])}</div>"
+            f"<div class='risk' style='color:{colour}'>{r['risk'] or ''}</div></div>"
+            f"<div class='meta'>{meta}</div><div class='bar'>{fill}{ticks}</div></div>",
+            unsafe_allow_html=True)
+    st.caption("Bar: density against the Moderate, High and Critical marks.")
 
-MiniMap(toggle_display=True, position="bottomright", zoom_level_offset=-5).add_to(m)
-folium.LayerControl(collapsed=True).add_to(m)
-st_folium(m, height=600, use_container_width=True, returned_objects=[], key="site_map")
-
-if site_choice == "demo":
-    st.caption(f"{DEMO['disclaimer']} "
-               + (DEMO["scenario_note"] if source == "scenario" else "")
-               + " Satellite imagery © Esri; map data © OpenStreetMap contributors.")
+if is_demo:
+    st.caption(f"{site['disclaimer']} "
+               + (site["scenario_note"] if source == "Simulated surge" else "")
+               + " Imagery © Esri, Maxar; map data © OpenStreetMap contributors.")
 else:
-    st.caption("Satellite imagery © Esri; map data © OpenStreetMap contributors.")
+    st.caption("Imagery © Esri, Maxar; map data © OpenStreetMap contributors.")
 
 # ---------------------------------------------------------------------------
-# Evacuation plan and zone table
+# Plan, table, export
 # ---------------------------------------------------------------------------
-left, right = st.columns([3, 2])
-with left:
-    st.markdown("#### Evacuation plan")
+tab_plan, tab_table, tab_use = st.tabs(["Evacuation plan", "Zone table", "Export and apply"])
+with tab_plan:
     if not counted:
         st.caption("Add counts on the Upload page, or pick the simulated surge, to see a plan.")
     elif not plans:
@@ -292,20 +360,18 @@ with left:
     for p in plans:
         src = zones[p["high"]]
         if p["target"]:
-            via = " → ".join(p["path"])
             body = (f"Move <b>~{p['move']:,}</b> people from <b>{p['high']}</b> "
                     f"({html.escape(src['name'])}) to <b>{p['target']}</b> "
-                    f"({html.escape(zones[p['target']]['name'])}) "
-                    f"along <span class='route-path'>{via}</span>")
+                    f"({html.escape(zones[p['target']]['name'])}) along "
+                    f"<span class='route-path'>{' → '.join(p['path'])}</span>. "
+                    f"Close entries to {p['high']}; open its exits towards {p['path'][1]}.")
         else:
             body = (f"<b>{p['high']}</b> ({html.escape(src['name'])}) needs ~{p['move']:,} people out, "
-                    f"but no reachable zone has room: hold entries and call reinforcements")
-        css = "" if p["risk"] == "Critical" else " high"
-        st.markdown(f"<div class='route-card{css}'><b style='color:{RISK_COLORS[p['risk']]}'>"
-                    f"{p['risk'].upper()}</b> · {body}</div>", unsafe_allow_html=True)
+                    f"but no connected zone has room. Hold all entries and call reinforcements.")
+        st.markdown(f"<div class='route-card'><span class='pill' style='background:{RISK_COLORS[p['risk']]}'>"
+                    f"{p['risk'].upper()}</span><div>{body}</div></div>", unsafe_allow_html=True)
 
-with right:
-    st.markdown("#### Zones")
+with tab_table:
     st.dataframe(
         [{"Zone": z, "Name": r["name"], "Area (m²)": round(r["area_m2"]),
           "People": r["count"], "Per m²": None if r["per_m2"] is None else round(r["per_m2"], 2),
@@ -313,17 +379,28 @@ with right:
          for z, r in zones.items()],
         hide_index=True, width="stretch")
 
-# ---------------------------------------------------------------------------
-# Send the mapped areas to the rest of the app
-# ---------------------------------------------------------------------------
-st.markdown("#### Use this map in the app")
-st.caption("Sets each zone's area and risk limits on the Settings page from the map, and tells "
-           "the Analysis page which zones connect, so it only plans moves people can walk.")
-if st.button("Apply map areas and routes to the app", width="stretch"):
-    for z, r in zones.items():
-        st.session_state.seg_areas[z] = round(r["area_m2"])
-        st.session_state.thresholds[z] = thresholds_from_area(r["area_m2"], preset)
-    st.session_state.zone_adjacency = view["adjacency"]
-    st.session_state.zone_names = {z: r["name"] for z, r in zones.items()}
-    st.success(f"Applied areas and {preset_name.lower()} limits for zones "
-               f"{', '.join(zones)}, plus the walking routes between them.")
+with tab_use:
+    a, b = st.columns(2)
+    with a:
+        st.markdown("**Download**")
+        st.download_button("Zones as GeoJSON (for QGIS, Google Earth)",
+                           json.dumps(to_geojson(view), indent=1),
+                           file_name="crowd_shield_zones.geojson", mime="application/geo+json",
+                           width="stretch")
+        rows = ["from,to,path,people"] + [
+            f"{p['high']},{p['target'] or ''},{'>'.join(p['path'])},{p['move']}" for p in plans]
+        st.download_button("Evacuation plan (CSV)", "\n".join(rows) + "\n",
+                           file_name="crowd_shield_evacuation_plan.csv", mime="text/csv",
+                           width="stretch")
+    with b:
+        st.markdown("**Use this map in the app**")
+        st.caption("Sets each zone's area and risk limits in Settings from the map, and tells the "
+                   "Analysis page which zones connect, so it only plans walkable moves.")
+        if st.button("Apply map areas and routes", width="stretch"):
+            for z, r in zones.items():
+                st.session_state.seg_areas[z] = round(r["area_m2"])
+                st.session_state.thresholds[z] = thresholds_from_area(r["area_m2"], preset)
+            st.session_state.zone_adjacency = view["adjacency"]
+            st.session_state.zone_names = {z: r["name"] for z, r in zones.items()}
+            st.success(f"Applied areas and {preset_name.lower()} limits for zones "
+                       f"{', '.join(zones)}, plus the routes between them.")

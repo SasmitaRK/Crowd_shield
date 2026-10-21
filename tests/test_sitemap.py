@@ -1,5 +1,6 @@
 from crowdshield.config import FRUIN_PRESETS
-from crowdshield.sitemap import assess, load_site, scenario_counts, site_from_drawings
+from crowdshield.sitemap import (assess, list_sites, load_site, scenario_counts, site_from_drawings,
+                                 timeline, to_geojson)
 
 EVENTS = FRUIN_PRESETS["Crowded events / concerts"]
 
@@ -38,3 +39,42 @@ def test_drawn_shapes_become_a_site():
     assert list(site["zones"]) == ["C"]
     assert site["zones"]["C"]["name"] == "North gate"
     assert site["centre"] == [0.0005, 0.0005]
+
+
+def test_every_bundled_site_is_one_connected_network():
+    sites = list_sites()
+    assert [s["short"] for s in sites][0] == "Sangam, Prayagraj"  # the demo opens first
+    assert any("Madurai" in s["short"] for s in sites)
+    for site in sites:
+        graph = assess(site, {}, EVENTS)["adjacency"]
+        reached, todo = set(), [next(iter(graph))]
+        while todo:
+            zone = todo.pop()
+            if zone not in reached:
+                reached.add(zone)
+                todo.extend(graph[zone])
+        assert reached == set(graph), site["short"]
+
+
+def test_madurai_routes_people_off_the_riverbed_towards_the_city():
+    site = next(s for s in list_sites() if "Madurai" in s["short"])
+    view = assess(site, scenario_counts(site), EVENTS)
+    assert view["zones"]["A"]["risk"] == "Critical"
+    assert view["plans"][0]["path"][:2] == ["A", "C"]  # riverbed out via the south bank
+
+
+def test_the_surge_timeline_scales_counts_and_peaks_at_one():
+    site = load_site()
+    steps = timeline(site)
+    assert max(s["factor"] for s in steps) == 1.0
+    half = scenario_counts(site, 0.5)
+    full = scenario_counts(site)
+    assert all(abs(half[z] - full[z] / 2) <= 1 for z in full)
+
+
+def test_geojson_export_carries_the_numbers():
+    view = assess(load_site(), scenario_counts(load_site()), EVENTS)
+    fc = to_geojson(view)
+    assert fc["type"] == "FeatureCollection" and len(fc["features"]) == 5
+    props = fc["features"][0]["properties"]
+    assert {"zone", "name", "area_m2", "people", "per_m2", "risk", "connected_to"} <= set(props)
