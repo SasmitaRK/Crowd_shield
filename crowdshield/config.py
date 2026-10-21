@@ -54,6 +54,13 @@ MODEL_REGISTRY = {
 }
 DEFAULT_MODEL_KEY = "crowd_yolo"
 
+# Who counted a photo, as shown in the app.
+COUNTER_LABELS = {
+    "points":   "PET point model",
+    "density":  "DM-Count density model",
+    "detector": "YOLO (fallback)",
+}
+
 # Photo source -> model key; None means "use the globally selected model".
 SOURCE_MODEL_MAP = {
     "auto":   None,

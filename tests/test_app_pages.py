@@ -33,7 +33,7 @@ def zone_result(count: int) -> dict:
              "overlay": np.zeros((60, 80, 3), dtype=np.uint8), "model_key": "yolov8l"}
     return {"count": count, "body_count": count, "head_count": 0, "image_count": 1,
             "per_image": [photo], "model_key": "yolov8l", "per_img_sources": ["ground"],
-            "combine": "sum"}
+            "combine": "sum", "counter": "points"}
 
 
 def test_home_page():
@@ -56,6 +56,7 @@ def test_analysis_page_plans_a_relocation():
     app = render(PAGES["Analysis"], crowd_data=crowd)
     text = " ".join(block.value for block in app.markdown)
     assert "Relocate <b>~36</b> people to Segment <b>B</b>" in text
+    assert any("Counted by the PET point model" in c.value for c in app.caption)
 
 
 def test_settings_page():

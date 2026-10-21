@@ -55,4 +55,5 @@ def process_segment(image_bytes_list: list,
         "model_key":        fallback_key,
         "per_img_sources":  per_image_sources or [],
         "combine":          combine,
+        "counter":          results[0].get("counter") if results else None,
     }

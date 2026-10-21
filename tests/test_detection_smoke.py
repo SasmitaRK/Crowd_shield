@@ -28,6 +28,7 @@ def test_drone_model_loads_and_runs():
 def test_app_result_has_an_overlay_of_the_same_size():
     result = analyse_image_bytes(BUS.read_bytes(), "yolov8l")
     assert result["overlay"].shape == cv2.imread(str(BUS)).shape
+    assert result["counter"] == "points"  # PET counts; YOLO is only the last fallback
 
 
 @pytest.mark.skipif(hasattr(cv2, "CascadeClassifier"), reason="OpenCV 4 still has the cascades")
