@@ -179,6 +179,10 @@ shifts.
 - The handheld clips score 8–36%.
 - Above 5%, the app warns and switches motion readings off, while still counting people.
 
+**Speed.** On a plain 4-core cloud CPU with no GPU, PET takes a median 16 s per photo at 1280 px
+(4.3 GB memory with both models loaded), and DM-Count 8 s. At 2048 px, PET takes 38 s. Photos are
+practical on an 8 GB laptop; live video needs a GPU.
+
 ## 6. Privacy and ethics
 
 - **No identity.** The counter outputs anonymous head points. There is no face recognition and
@@ -195,7 +199,7 @@ shifts.
 ## 7. Limitations
 
 - The India test is a pilot: 10 of 105 photos are labelled.
-- Density and pressure need a calibrated, fixed camera.
+- Density and pressure need a calibrated, fixed camera, and live video needs a GPU.
 - The early warning extends a straight-line trend.
 - The movement alarm was validated on 3 scenes.
 - Map zones in the demos are illustrative, not official plans.
