@@ -1,0 +1,42 @@
+{
+ "cpu": "Intel(R) Xeon(R) CPU @ 2.20GHz",
+ "cores": 4,
+ "torch_threads": 2,
+ "python": "3.13.15",
+ "torch": "2.11.0+cpu",
+ "photos": 21,
+ "runs": [
+  {
+   "model": "PET point model",
+   "max_side": 1280,
+   "median_s": 16.44,
+   "p90_s": 17.19,
+   "max_s": 21.1,
+   "peak_rss_mb": 4275
+  },
+  {
+   "model": "DM-Count density model",
+   "max_side": 1280,
+   "median_s": 8.23,
+   "p90_s": 8.53,
+   "max_s": 10.11,
+   "peak_rss_mb": 4275
+  },
+  {
+   "model": "PET point model",
+   "max_side": 2048,
+   "median_s": 37.75,
+   "p90_s": 44.23,
+   "max_s": 51.06,
+   "peak_rss_mb": 8986
+  },
+  {
+   "model": "DM-Count density model",
+   "max_side": 2048,
+   "median_s": 18.0,
+   "p90_s": 20.27,
+   "max_s": 23.46,
+   "peak_rss_mb": 8986
+  }
+ ]
+}

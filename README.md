@@ -1,6 +1,6 @@
 # Crowd Shield
 
-**Try it live: [crowd-shield-india.streamlit.app](https://crowd-shield-india.streamlit.app)** · Trained models: [Hugging Face](https://huggingface.co/Khushi-7/crowd-shield-counting)
+**Try it live: [crowd-shield-india.streamlit.app](https://crowd-shield-india.streamlit.app)** · Trained models: [Hugging Face](https://huggingface.co/Khushi-7/crowd-shield-counting) · Technical report: [PDF](paper/crowd_shield_report.pdf)
 
 Crowd Shield helps the people running an event or a station see crowd danger
 **before** it turns into a crush. It counts people in photos and video, turns
@@ -161,6 +161,20 @@ platform. There's no hand count for these clips, so this is a field check, not a
   video, with one count per second.
 
 Clip list, credits and numbers: [results/india_video/clips.csv](results/india_video/clips.csv).
+
+### Speed without a GPU
+
+On a plain cloud CPU (Intel Xeon, 4 cores, 2 PyTorch threads, no GPU), over the 21 original India
+test photos ([results/cpu_speed.json](results/cpu_speed.json)):
+
+| Model | Photos resized to | Median time per photo | Memory (both models loaded) |
+|---|---|---|---|
+| PET point model (the app's counter) | 1280 px | 16 s | 4.3 GB |
+| DM-Count density model | 1280 px | 8 s | 4.3 GB |
+| PET point model | 2048 px | 38 s | 9.0 GB |
+
+So an ordinary 8 GB laptop can count photos, but not live video: video needs a GPU (about 1.4 s
+per second of video on a free T4). The hosted demo uses 1280 px for this reason.
 
 ## Run it
 
