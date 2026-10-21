@@ -1,0 +1,84 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="430" viewBox="0 0 960 430" font-family="Inter, Segoe UI, Helvetica, Arial, sans-serif">
+  <rect width="960" height="430" rx="18" fill="#ffffff"/>
+  <defs>
+    <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+      <path d="M0 0 L10 5 L0 10 z" fill="#94a3b8"/>
+    </marker>
+    <style>
+      .box { fill: #f8fafc; stroke: #e2e8f0; stroke-width: 1.5; }
+      .key { fill: #f0fdfa; stroke: #99f6e4; stroke-width: 1.5; }
+      .t { font-size: 14px; font-weight: 700; fill: #0f172a; }
+      .s { font-size: 11.5px; fill: #475569; }
+      .h { font-size: 11px; font-weight: 800; letter-spacing: 1.6px; fill: #0d9488; }
+      .ln { stroke: #94a3b8; stroke-width: 1.6; fill: none; marker-end: url(#a); }
+    </style>
+  </defs>
+
+  <text x="40" y="44" class="h">INPUT</text>
+  <text x="250" y="44" class="h">MEASURE</text>
+  <text x="520" y="44" class="h">UNDERSTAND</text>
+  <text x="760" y="44" class="h">ACT</text>
+
+  <!-- inputs -->
+  <rect x="30" y="62" width="180" height="70" rx="12" class="box"/>
+  <text x="46" y="90" class="t">Photos</text>
+  <text x="46" y="110" class="s">CCTV, drone, phone</text>
+  <rect x="30" y="152" width="180" height="70" rx="12" class="box"/>
+  <text x="46" y="180" class="t">Fixed-camera video</text>
+  <text x="46" y="200" class="s">a clip, one count per second</text>
+  <rect x="30" y="242" width="180" height="70" rx="12" class="box"/>
+  <text x="46" y="270" class="t">Site map</text>
+  <text x="46" y="290" class="s">zones drawn on satellite</text>
+
+  <!-- measure -->
+  <rect x="245" y="62" width="230" height="70" rx="12" class="key"/>
+  <text x="261" y="90" class="t">Count every head</text>
+  <text x="261" y="110" class="s">PET points → DM-Count → YOLO</text>
+  <rect x="245" y="152" width="230" height="70" rx="12" class="box"/>
+  <text x="261" y="180" class="t">Movement</text>
+  <text x="261" y="200" class="s">optical flow · moving-camera check</text>
+  <rect x="245" y="242" width="230" height="70" rx="12" class="box"/>
+  <text x="261" y="270" class="t">Ground area</text>
+  <text x="261" y="290" class="s">homography · map polygons (m²)</text>
+
+  <!-- understand -->
+  <rect x="510" y="62" width="215" height="70" rx="12" class="key"/>
+  <text x="526" y="90" class="t">People per m²</text>
+  <text x="526" y="110" class="s">risk level (Fruin, Still)</text>
+  <rect x="510" y="152" width="215" height="70" rx="12" class="box"/>
+  <text x="526" y="180" class="t">Pressure and panic</text>
+  <text x="526" y="200" class="s">Helbing pressure · surge alarm</text>
+  <rect x="510" y="242" width="215" height="70" rx="12" class="box"/>
+  <text x="526" y="270" class="t">Early warning</text>
+  <text x="526" y="290" class="s">minutes until 5 people/m²</text>
+
+  <!-- act -->
+  <rect x="750" y="62" width="180" height="70" rx="12" class="key"/>
+  <text x="766" y="90" class="t">Evacuation plan</text>
+  <text x="766" y="110" class="s">walkable routes with room</text>
+  <rect x="750" y="152" width="180" height="70" rx="12" class="box"/>
+  <text x="766" y="180" class="t">Alerts</text>
+  <text x="766" y="200" class="s">email to each zone's team</text>
+  <rect x="750" y="242" width="180" height="70" rx="12" class="box"/>
+  <text x="766" y="270" class="t">Live map</text>
+  <text x="766" y="290" class="s">zones by risk, animated routes</text>
+
+  <!-- flows -->
+  <path class="ln" d="M210 97 H241"/>
+  <path class="ln" d="M210 187 H241"/>
+  <path class="ln" d="M210 277 H241"/>
+  <path class="ln" d="M210 180 C228 150 228 120 241 108"/>
+  <path class="ln" d="M475 97 H506"/>
+  <path class="ln" d="M475 277 C492 220 492 140 506 110"/>
+  <path class="ln" d="M475 187 H506"/>
+  <path class="ln" d="M617 132 V148"/>
+  <path class="ln" d="M617 132 C640 200 640 220 628 238"/>
+  <path class="ln" d="M725 97 H746"/>
+  <path class="ln" d="M725 187 H746"/>
+  <path class="ln" d="M725 277 H746"/>
+  <path class="ln" d="M725 112 C738 150 738 160 746 172"/>
+
+  <text x="30" y="350" class="s">Every stage is tested: 86.5% / 92.7% counting accuracy on ShanghaiTech A / B · ~90% on 9 of 10 hand-checked Indian photos</text>
+  <text x="30" y="372" class="s">11 of 11 escapes caught on UMN video with no false alarms · no faces, no identities, nothing stored</text>
+  <text x="30" y="404" class="h">CROWD SHIELD</text>
+</svg>
