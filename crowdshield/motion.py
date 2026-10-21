@@ -24,6 +24,31 @@ def optical_flow(prev_gray: np.ndarray, gray: np.ndarray) -> np.ndarray:
                                         poly_sigma=1.2, flags=0)
 
 
+def camera_motion(frames: list, fps: float, step: int = 3, scale: float = 0.25) -> float:
+    """How fast the whole picture slides, as a share of the frame width per second (median).
+
+    Phase correlation finds the single shift that best lines up two frames. With a fixed camera
+    the still background dominates and the shift stays near zero even when people run; with a
+    handheld phone everything slides together. Crowd speed and the panic alarm assume the camera
+    doesn't move, so a high value means those readings measure the camera, not the crowd.
+    """
+    import cv2
+
+    if len(frames) < 2:
+        return 0.0
+    shifts = []
+    for a, b in zip(frames[:-step:step], frames[step::step]):
+        ga = cv2.cvtColor(cv2.resize(a, None, fx=scale, fy=scale), cv2.COLOR_BGR2GRAY).astype(np.float32)
+        gb = cv2.cvtColor(cv2.resize(b, None, fx=scale, fy=scale), cv2.COLOR_BGR2GRAY).astype(np.float32)
+        (dx, dy), _ = cv2.phaseCorrelate(ga, gb)
+        shifts.append(np.hypot(dx, dy) / ga.shape[1] * fps / step)
+    return float(np.median(shifts))
+
+
+# Above this (5% of the frame width per second) the camera itself is moving.
+CAMERA_MOVING = 0.05
+
+
 def flow_stats(flow: np.ndarray, mask: np.ndarray | None = None, grid: int = 8) -> dict:
     """Summarise one flow field.
 

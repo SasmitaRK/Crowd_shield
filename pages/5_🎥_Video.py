@@ -106,6 +106,15 @@ if not frames:
     st.stop()
 h, w = frames[0].shape[:2]
 st.caption(f"{len(frames)} frames · {fps:.0f} fps · {w}×{h} px")
+from crowdshield.motion import CAMERA_MOVING, camera_motion  # noqa: E402
+
+camera = camera_motion(frames, fps)
+handheld = camera > CAMERA_MOVING
+if handheld:
+    st.warning(f"The camera itself is moving (the picture slides about {camera:.0%} of its width per "
+               "second), as with a handheld phone. People counts are still fine, but speed, crowd pressure "
+               "and the panic alarm would measure the camera, not the crowd, so they're switched off for "
+               "this clip. Use a fixed camera for those.")
 
 left, right = st.columns([3, 2])
 with right:
@@ -181,11 +190,12 @@ for col, (name, r) in zip(cols, latest.iterrows()):
         if calib is not None:
             st.metric("People per m²", f"{r['per_m2']:.2f}", help=f"{r['level']}")
             st.caption(f"{r['level']} · {r['people']:.0f} people in {r['area_m2']:.0f} m²")
-            st.metric("Speed", f"{r['speed']:.2f} m/s")
-            st.metric("Crowd pressure", f"{r['pressure']:.3f} /s²",
-                      help="Density × velocity variance (Helbing et al., 2007). Turbulent "
-                           f"motion began above {HELBING_TURBULENCE_PRESSURE}/s² at the 2006 "
-                           "Hajj disaster.")
+            if not handheld:
+                st.metric("Speed", f"{r['speed']:.2f} m/s")
+                st.metric("Crowd pressure", f"{r['pressure']:.3f} /s²",
+                          help="Density × velocity variance (Helbing et al., 2007). Turbulent "
+                               f"motion began above {HELBING_TURBULENCE_PRESSURE}/s² at the 2006 "
+                               "Hajj disaster.")
             eta = r["eta_s"]
             if eta is None or pd.isna(eta):
                 st.success("No rising trend towards 5 people per m².")
@@ -196,9 +206,12 @@ for col, (name, r) in zip(cols, latest.iterrows()):
                            f"{eta / 60:.1f} min.")
         else:
             st.metric("People", f"{r['people']:.0f}")
-            st.metric("Speed", f"{r['speed']:.0f} px/s")
+            if not handheld:
+                st.metric("Speed", f"{r['speed']:.0f} px/s")
 
-if events:
+if handheld:
+    st.info("Panic alarm off: the camera is moving.")
+elif events:
     for e in events:
         st.error(f"⚠ {e['t']:.1f} s — {e['event']}")
 else:
@@ -207,9 +220,10 @@ else:
 measure = "per_m2" if calib is not None else "people"
 st.markdown("#### " + ("People per m² over time" if calib is not None else "People over time"))
 st.line_chart(df.pivot(index="t", columns="zone", values=measure))
-st.markdown("#### Speed over time" + (" (m/s)" if calib is not None else " (px/s)"))
-st.line_chart(df.pivot(index="t", columns="zone", values="speed"))
-if calib is not None:
+if not handheld:
+    st.markdown("#### Speed over time" + (" (m/s)" if calib is not None else " (px/s)"))
+    st.line_chart(df.pivot(index="t", columns="zone", values="speed"))
+if calib is not None and not handheld:
     st.markdown("#### Crowd pressure over time (1/s²)")
     st.line_chart(df.pivot(index="t", columns="zone", values="pressure"))
 
