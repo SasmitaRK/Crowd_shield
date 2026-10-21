@@ -1,0 +1,42 @@
+name: website
+
+on:
+  push:
+    branches: [main]
+    paths: [website/**, sites/**, docs/**, results/**, paper/**, assets/**, .github/workflows/pages.yml]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          lfs: true
+      # The page is plain HTML; this copies in the maps, figures and report it shows.
+      - name: Assemble the site
+        run: |
+          mkdir -p _site/assets _site/data
+          cp website/index.html _site/
+          cp sites/*.json _site/data/
+          cp assets/mark.svg docs/architecture.svg _site/assets/
+          cp results/shanghaitech/accuracy_by_crowd_size.png results/umn/timeline.png _site/assets/
+          mv _site/assets/timeline.png _site/assets/umn_timeline.png
+          cp results/india_video/field_test.jpg _site/assets/
+          cp paper/crowd_shield_report.pdf _site/report.pdf
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+      - id: deployment
+        uses: actions/deploy-pages@v4
