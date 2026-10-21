@@ -140,6 +140,28 @@ scenes, each ending with everyone suddenly running away.
 
 Details: [results/umn](results/umn), [eval/evaluate_motion.py](eval/evaluate_motion.py).
 
+### Indian video, in the field
+
+To see how the video side copes outside the lab, it was run on 15 freely licensed Wikimedia
+Commons clips of Indian crowds: Holi in Howrah (2026), the Bhagoriya fair in Ranapur (2026),
+Gangasagar pilgrims in Kolkata (2013), a solar-eclipse crowd in Kozhikode and a railway
+platform. There's no hand count for these clips, so this is a field check, not an accuracy test.
+
+![Head points on Indian crowd video](results/india_video/field_test.jpg)
+
+- **Counting holds up.** Head points land on heads in packed, colourful, partly covered crowds
+  (sarees and shawls included), from 10 to 330 people per frame.
+- **Every clip was filmed on a handheld phone,** and that matters. With a moving camera the
+  whole picture slides, so "crowd speed" and the panic alarm measure the camera, not the crowd.
+  Crowd Shield now checks for this (phase correlation: how far the whole frame shifts). The
+  fixed UMN camera scores at most 1.4% of the frame width per second even while people run,
+  and these clips score 8 to 36%. Above 5%, the Video page says so and switches speed, pressure
+  and the alarm off, while still counting people.
+- **Speed:** on a free Kaggle T4 GPU, analysing a clip took about 1.4 seconds per second of
+  video, with one count per second.
+
+Clip list, credits and numbers: [results/india_video/clips.csv](results/india_video/clips.csv).
+
 ## Run it
 
 ```bash

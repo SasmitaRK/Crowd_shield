@@ -83,3 +83,32 @@ def test_energy_is_speed_times_moving_share():
     flow[:5, :, 0] = 4.0  # half the view moves at 4 px per frame
     s = flow_stats(flow)
     assert s["energy"] == pytest.approx(s["speed"] * s["moving"]) == pytest.approx(2.0)
+
+
+def _scene(shift=0, size=(240, 320), seed=0):
+    """A smooth textured scene (blurred noise), cropped `shift` pixels to the right."""
+    import cv2
+    rng = np.random.default_rng(seed)
+    base = rng.integers(0, 255, (size[0], size[1] + 300, 3), dtype=np.uint8)
+    base = cv2.normalize(cv2.GaussianBlur(base, (0, 0), 6), None, 0, 255, cv2.NORM_MINMAX)
+    return base[:, shift:shift + size[1]].copy()
+
+
+def test_a_fixed_camera_barely_moves_even_with_people_walking():
+    cv2 = pytest.importorskip("cv2")
+    from crowdshield.motion import CAMERA_MOVING, camera_motion
+    frames = []
+    for i in range(30):
+        f = _scene()
+        cv2.rectangle(f, (10 + 6 * i, 80), (30 + 6 * i, 120), (255, 255, 255), -1)  # a walker
+        frames.append(f)
+    assert camera_motion(frames, fps=25) < CAMERA_MOVING
+
+
+def test_a_panning_camera_is_flagged():
+    pytest.importorskip("cv2")
+    from crowdshield.motion import CAMERA_MOVING, camera_motion
+    frames = [_scene(shift=4 * i) for i in range(30)]  # the whole picture slides 4 px per frame
+    motion = camera_motion(frames, fps=25)
+    assert motion > CAMERA_MOVING
+    assert motion == pytest.approx(4 * 25 / 320, rel=0.2)  # 4 px per frame of a 320 px frame, 25 fps
