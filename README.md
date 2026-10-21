@@ -32,8 +32,12 @@ The **Map** page opens on the bathing area at the Sangam in Prayagraj, where a
 crowd crush at the Maha Kumbh on 29 January 2025 killed at least 30 people. Its
 five zones are illustrative, drawn around OpenStreetMap landmarks rather than
 the official Mela plan, and its "simulated surge" numbers are made up to show
-every risk level. With real counts from the Upload page, or zones you draw
-yourself, it becomes your own site's live view.
+every risk level. A second demo covers Madurai's Chithirai festival: the Vaigai
+riverbed where Lord Kallazhagar enters the river (a crush there killed two people
+in April 2022), both banks, North Masi Street and the Meenakshi Temple. A time
+slider plays each simulated surge forward, and the zones can be downloaded as
+GeoJSON. With real counts from the Upload page, or zones you draw yourself, it
+becomes your own site's live view.
 
 The **Video** page puts this together: upload a clip from a fixed camera, mark
 the floor rectangle and the zones, and get per-zone density, speed, pressure,
