@@ -156,7 +156,10 @@ def render_overlay(img: np.ndarray, person_boxes, extra_heads,
     if heat.max() > 0:
         heat /= heat.max()
     heat_bgr = cv2.applyColorMap((heat * 255).astype(np.uint8), cv2.COLORMAP_JET)
-    overlay = cv2.addWeighted(img, 0.6, heat_bgr, 0.4, 0)
+    # Colour only where people are, fading in with density, so empty parts of the
+    # photo keep their natural colours instead of a blue tint.
+    alpha = (0.55 * np.clip(heat / 0.15, 0, 1))[..., None]
+    overlay = (img * (1 - alpha) + heat_bgr * alpha).astype(np.uint8)
     for boxes, colour in ((person_boxes, (0, 255, 0)), (extra_heads, (0, 255, 255))):
         for x, y, bw, bh in boxes:
             cv2.rectangle(overlay, (x, y), (x + bw, y + bh), colour, 2)
