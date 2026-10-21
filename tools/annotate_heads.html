@@ -38,9 +38,11 @@
   <span class="stat">Suggested <strong id="sugg">0</strong></span>
   <span class="stat" style="color:var(--add)">Added <strong id="added">0</strong></span>
   <span class="stat" style="color:var(--del)">Removed <strong id="removed">0</strong></span>
+  <span class="stat" style="color:#f59e0b">Covered <strong id="covered">0</strong></span>
   <label class="stat"><input id="done" type="checkbox"> Checked</label>
   <span class="stat">Progress <strong id="progress">0/0</strong></span>
   <span class="sep"></span>
+  <button id="ignore">Ignore zone (I): off</button>
   <button id="grid">Grid: on</button>
   <button id="export" class="primary">Save labels</button>
 </header>
@@ -50,6 +52,8 @@
   <div id="help">
     <b>Click a head</b> to add a dot · <b>click a dot</b> to remove it · <b>Ctrl+Z</b> undo<br>
     <b>Shift + drag</b> a box to remove every dot inside it (for wrong dots on gravel, walls, trees)<br>
+    <b>Hold C and click</b> to add a <b style="color:#f59e0b">covered head</b> (saree, dupatta, turban, load); C + click on a dot toggles it<br>
+    <b>I</b> switches to ignore-zone mode: drag a box over people too small or blurry to mark one by one; click inside a zone to delete it<br>
     <b>Scroll</b> to zoom · <b>drag with the right mouse button</b> (or hold Space and drag) to move<br>
     Work through the grid one square at a time, then tick <b>Checked</b>. <b>H</b> hides this box, <b>D</b> hides dots for a moment.<br>
     Your work saves in this browser as you go. When finished, press <b>Save labels</b> and send the file.
@@ -70,6 +74,7 @@ function cur() { return items[idx]; }
 function rec() {
   const it = cur(); if (!it) return null;
   if (!store[it.name]) store[it.name] = { points: it.suggested.map(p => p.slice()), done: false, added: 0, removed: 0, seconds: 0 };
+  if (!store[it.name].ignore) store[it.name].ignore = [];
   return store[it.name];
 }
 
@@ -121,17 +126,27 @@ function draw() {
       ctx.moveTo(0, img.height * k / 4); ctx.lineTo(img.width, img.height * k / 4); ctx.stroke();
     }
   }
+  for (const [a, b, c, d] of rec().ignore) {
+    ctx.fillStyle = "rgba(15,18,22,.55)"; ctx.fillRect(a, b, c - a, d - b);
+    ctx.strokeStyle = "#f59e0b"; ctx.lineWidth = 2 / view.s; ctx.setLineDash([8 / view.s, 6 / view.s]);
+    ctx.strokeRect(a, b, c - a, d - b); ctx.setLineDash([]);
+    ctx.fillStyle = "#f59e0b"; ctx.font = `${14 / view.s}px system-ui`;
+    ctx.fillText("ignored", a + 6 / view.s, b + 18 / view.s);
+  }
   if (box) {
-    ctx.fillStyle = "rgba(239,68,68,.18)"; ctx.strokeStyle = "#ef4444"; ctx.lineWidth = 2 / view.s;
+    const ig = box.ignore;
+    ctx.fillStyle = ig ? "rgba(245,158,11,.15)" : "rgba(239,68,68,.18)";
+    ctx.strokeStyle = ig ? "#f59e0b" : "#ef4444"; ctx.lineWidth = 2 / view.s;
     ctx.fillRect(box.x0, box.y0, box.x1 - box.x0, box.y1 - box.y0);
     ctx.strokeRect(box.x0, box.y0, box.x1 - box.x0, box.y1 - box.y0);
   }
   if (hideDots) return;
   const r = radius() / view.s;
-  for (const [x, y] of rec().points) {
+  for (const [x, y, cov] of rec().points) {  // see-through, so the head underneath stays visible
     ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2);
-    ctx.fillStyle = "rgba(34,197,94,.9)"; ctx.fill();
-    ctx.lineWidth = 1.2 / view.s; ctx.strokeStyle = "#0b0f14"; ctx.stroke();
+    ctx.fillStyle = cov ? "rgba(245,158,11,.28)" : "rgba(56,189,248,.22)"; ctx.fill();
+    ctx.lineWidth = 1.6 / view.s;
+    ctx.strokeStyle = cov ? "rgba(245,158,11,.95)" : "rgba(56,189,248,.95)"; ctx.stroke();
   }
 }
 function update() {
@@ -139,14 +154,17 @@ function update() {
   $("name").textContent = `${cur().name} (${idx + 1}/${items.length})`;
   $("count").textContent = r.points.length; $("sugg").textContent = cur().suggested.length;
   $("added").textContent = r.added; $("removed").textContent = r.removed; $("done").checked = r.done;
+  $("covered").textContent = r.points.filter(p => p[2]).length;
   $("progress").textContent = `${items.filter(it => store[it.name] && store[it.name].done).length}/${items.length}`;
 }
 
-let drag = null, space = false, moved = false, box = null;
+let drag = null, space = false, moved = false, box = null, cKey = false, ignoreMode = false;
 canvas.addEventListener("contextmenu", e => e.preventDefault());
 canvas.addEventListener("mousedown", e => {
   if (e.button === 2 || space) { drag = { x: e.clientX, y: e.clientY, vx: view.x, vy: view.y }; moved = false; }
-  else if (e.button === 0 && e.shiftKey && img) { const p = toImg(e); box = { x0: p[0], y0: p[1], x1: p[0], y1: p[1] }; }
+  else if (e.button === 0 && (e.shiftKey || ignoreMode) && img) {
+    const p = toImg(e); box = { x0: p[0], y0: p[1], x1: p[0], y1: p[1], ignore: ignoreMode && !e.shiftKey };
+  }
 });
 window.addEventListener("mousemove", e => {
   if (box) { const p = toImg(e); box.x1 = p[0]; box.y1 = p[1]; draw(); return; }
@@ -159,7 +177,18 @@ window.addEventListener("mouseup", () => {
   if (!box) return;
   const [xa, xb] = [Math.min(box.x0, box.x1), Math.max(box.x0, box.x1)];
   const [ya, yb] = [Math.min(box.y0, box.y1), Math.max(box.y0, box.y1)];
-  const r = rec(), gone = r.points.filter(([x, y]) => x >= xa && x <= xb && y >= ya && y <= yb);
+  const r = rec();
+  if (box.ignore) {
+    if (xb - xa > 4 && yb - ya > 4) {
+      const z = [xa, ya, xb, yb].map(v => Math.round(v));
+      r.ignore.push(z); history.push(["zone", z]); persist(); update();
+    } else {  // a click, not a drag: delete the zone under it
+      const k = r.ignore.findIndex(([a, b, c, d]) => box.x0 >= a && box.x0 <= c && box.y0 >= b && box.y0 <= d);
+      if (k >= 0) { history.push(["unzone", r.ignore[k]]); r.ignore.splice(k, 1); persist(); update(); }
+    }
+    box = null; moved = true; draw(); return;
+  }
+  const gone = r.points.filter(([x, y]) => x >= xa && x <= xb && y >= ya && y <= yb);
   if (gone.length) {
     r.points = r.points.filter(p => !gone.includes(p)); r.removed += gone.length;
     history.push(["boxdel", gone]); persist(); update();
@@ -173,8 +202,13 @@ canvas.addEventListener("click", e => {
   const hit = radius() * 1.6 / view.s;
   let best = -1, bd = Infinity;
   r.points.forEach(([px, py], k) => { const d = Math.hypot(px - x, py - y); if (d < bd) { bd = d; best = k; } });
-  if (best >= 0 && bd <= hit) { history.push(["del", r.points[best]]); r.points.splice(best, 1); r.removed++; }
-  else { const p = [Math.round(x * 10) / 10, Math.round(y * 10) / 10]; history.push(["add", p]); r.points.push(p); r.added++; }
+  if (best >= 0 && bd <= hit && cKey) { const p = r.points[best]; p[2] = p[2] ? 0 : 1; history.push(["cover", p]); }
+  else if (best >= 0 && bd <= hit) { history.push(["del", r.points[best]]); r.points.splice(best, 1); r.removed++; }
+  else {
+    const p = [Math.round(x * 10) / 10, Math.round(y * 10) / 10];
+    if (cKey) p.push(1);
+    history.push(["add", p]); r.points.push(p); r.added++;
+  }
   persist(); update(); draw();
 });
 canvas.addEventListener("wheel", e => {
@@ -186,10 +220,15 @@ canvas.addEventListener("wheel", e => {
 }, { passive: false });
 window.addEventListener("keydown", e => {
   if (e.code === "Space") { space = true; e.preventDefault(); }
+  if (e.key.toLowerCase() === "c") cKey = true;
+  if (e.key.toLowerCase() === "i" && !e.ctrlKey && !e.repeat) toggleIgnore();
   if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "z") {
     const h = history.pop(), r = rec(); if (!h || !r) return;
     if (h[0] === "add") { r.points.splice(r.points.indexOf(h[1]), 1); r.added--; }
     else if (h[0] === "boxdel") { r.points.push(...h[1]); r.removed -= h[1].length; }
+    else if (h[0] === "cover") { h[1][2] = h[1][2] ? 0 : 1; }
+    else if (h[0] === "zone") { r.ignore.splice(r.ignore.indexOf(h[1]), 1); }
+    else if (h[0] === "unzone") { r.ignore.push(h[1]); }
     else { r.points.push(h[1]); r.removed--; }
     persist(); update(); draw();
   }
@@ -200,11 +239,19 @@ window.addEventListener("keydown", e => {
 });
 window.addEventListener("keyup", e => {
   if (e.code === "Space") space = false;
+  if (e.key.toLowerCase() === "c") cKey = false;
   if (e.key.toLowerCase() === "d") { hideDots = false; draw(); }
 });
 window.addEventListener("resize", () => { if (img) { fit(); draw(); } });
 $("prev").onclick = () => open(idx - 1);
 $("next").onclick = () => open(idx + 1);
+function toggleIgnore() {
+  ignoreMode = !ignoreMode;
+  $("ignore").textContent = `Ignore zone (I): ${ignoreMode ? "on" : "off"}`;
+  $("ignore").style.borderColor = ignoreMode ? "#f59e0b" : "";
+  canvas.style.cursor = ignoreMode ? "cell" : "crosshair";
+}
+$("ignore").onclick = toggleIgnore;
 $("grid").onclick = () => { showGrid = !showGrid; $("grid").textContent = `Grid: ${showGrid ? "on" : "off"}`; draw(); };
 $("done").onchange = e => { const r = rec(); if (r) { r.done = e.target.checked; persist(); update(); } };
 $("export").onclick = () => {
@@ -213,7 +260,8 @@ $("export").onclick = () => {
   for (const it of items) {
     const r = store[it.name]; if (!r) continue;
     out.images[it.name] = { count: r.points.length, suggested: it.suggested.length, added: r.added,
-      removed: r.removed, checked: r.done, seconds: Math.round(r.seconds), points: r.points };
+      removed: r.removed, checked: r.done, seconds: Math.round(r.seconds),
+      covered: r.points.filter(p => p[2]).length, ignore: r.ignore || [], points: r.points };
   }
   const a = document.createElement("a");
   a.href = URL.createObjectURL(new Blob([JSON.stringify(out)], { type: "application/json" }));
