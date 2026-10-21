@@ -25,6 +25,10 @@ PAGES = {
         st.Page("pages/3_📊_Analysis.py", title="Alerts and plans", icon=":material/campaign:",
                 url_path="Analysis"),
     ],
+    "Results": [
+        st.Page("pages/7_📈_Benchmark.py", title="India benchmark", icon=":material/insights:",
+                url_path="Benchmark"),
+    ],
     "Configure": [
         st.Page("pages/1_👥_Agents.py", title="Response team", icon=":material/groups:", url_path="Agents"),
         st.Page("pages/4_⚙️_Settings.py", title="Settings", icon=":material/tune:", url_path="Settings"),

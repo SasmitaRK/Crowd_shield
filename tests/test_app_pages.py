@@ -85,3 +85,9 @@ def test_dashboard_shows_the_headline_results():
 def test_upload_page_says_which_model_counts():
     app = render(PAGES["Upload"])
     assert any("PET point model" in block.value for block in app.markdown)
+
+
+def test_benchmark_page_reports_the_india_pilot():
+    app = render(PAGES["Benchmark"])
+    text = " ".join(block.value for block in app.markdown)
+    assert "Known failure" in text

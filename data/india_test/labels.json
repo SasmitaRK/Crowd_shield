@@ -1,5 +1,5 @@
 {
-"protocol": "Model points loaded as suggestions; one annotator (Khushi Jain) added missed heads, removed wrong points, marked covered heads and drew ignore zones over unresolvable far crowds; a second reviewer audited each photo and added one ignore zone (IN_03, far pontoon bridge).",
+"protocol": "Model points loaded as suggestions; one annotator (Khushi) added missed heads, removed wrong points, marked covered heads and drew ignore zones over unresolvable far crowds; a second reviewer audited each photo and added one ignore zone (IN_03, far pontoon bridge).",
 "images": {
 "IN_01.jpg": {
 "count": 86,
