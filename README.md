@@ -158,6 +158,40 @@ pages/                the Streamlit app: Agents, Upload, Analysis, Video, Map, S
 results/              test results, per photo and per clip
 ```
 
+## Privacy and ethics
+
+Crowd Shield is built to answer "how many people, where, and how fast are they
+moving?", never "who is this?".
+
+- **No faces, no identities.** The point model puts an anonymous dot on each
+  head. There is no face recognition and nothing in the app tries to tell one
+  person from another. Video analysis measures movement per zone (optical
+  flow), not the path of any individual.
+- **Nothing is stored.** Uploaded photos and clips stay in memory for your
+  browser session only. The app keeps no database and writes no photos to
+  disk; a video clip is written to a temporary file only while OpenCV decodes
+  it, then deleted. Closing the tab clears the rest. On the hosted demo, processing
+  happens on Streamlit Community Cloud's servers; use your own copy for
+  sensitive footage.
+- **What can leave the app.** Only the email alerts, and only if you set them
+  up: they send zone staff the counts, the orders and the busiest photo with
+  its dots. Everything else stays on screen.
+- **The old face add-on is off.** The original app could add Haar face
+  detections (finding faces, not recognising them) to catch hidden heads. It
+  is off by default, isn't offered in the app, and the head-point model made
+  it unnecessary.
+- **Data we used.** Public research datasets (ShanghaiTech, UMN) and freely
+  licensed Wikimedia Commons photos, each credited. The Indian test labels are
+  head positions only.
+- **Data minimisation by design.** Keeping only aggregate counts follows the
+  GDPR principle of data minimisation (Article 5(1)(c)). A real deployment
+  would still need a data protection impact assessment (Article 35), visible
+  signage, a retention policy and a trained operator.
+- **A tool for people, not instead of them.** Counts can be wrong, as the
+  railway-gravel case shows. Alerts are prompts for a trained person to look,
+  and Crowd Shield shouldn't be the only safety measure at any event. It
+  shouldn't be used to watch individuals.
+
 ## Limits
 
 - ShanghaiTech is Chinese street and crowd photography. How well the counter

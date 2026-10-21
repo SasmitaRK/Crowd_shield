@@ -1,5 +1,6 @@
 """Video — watch a fixed camera zone by zone: people per m², speed, crowd pressure, early warning."""
 
+import os
 import tempfile
 
 import cv2
@@ -106,12 +107,15 @@ if upload is None:
     st.info("Upload a clip to start. A camera that doesn't move works best.")
     st.stop()
 
+max_seconds = st.slider("Seconds of video to analyse", 5, 120, 30)
+# OpenCV only reads video from a file, so the clip touches disk just long enough to decode it.
 with tempfile.NamedTemporaryFile(suffix="." + upload.name.rsplit(".", 1)[-1], delete=False) as f:
     f.write(upload.getbuffer())
     video_path = f.name
-
-max_seconds = st.slider("Seconds of video to analyse", 5, 120, 30)
-frames, fps = read_frames(video_path, max_seconds)
+try:
+    frames, fps = read_frames(video_path, max_seconds)
+finally:
+    os.remove(video_path)
 if not frames:
     st.error("Couldn't read any frames from this file.")
     st.stop()
