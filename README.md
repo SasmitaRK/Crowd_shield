@@ -1,5 +1,7 @@
 # Crowd Shield
 
+**Try it live: [crowd-shield-india.streamlit.app](https://crowd-shield-india.streamlit.app)** · Trained models: [Hugging Face](https://huggingface.co/Khushi-7/crowd-shield-counting)
+
 Crowd Shield helps the people running an event or a station see crowd danger
 **before** it turns into a crush. It counts people in photos and video, turns
 the count into **people per square metre** for each zone, measures how the
