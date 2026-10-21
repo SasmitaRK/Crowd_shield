@@ -55,7 +55,7 @@ def test_analysis_page_plans_a_relocation():
     crowd = {"A": zone_result(95), "B": zone_result(10), "C": zone_result(45)}
     app = render(PAGES["Analysis"], crowd_data=crowd)
     text = " ".join(block.value for block in app.markdown)
-    assert "Relocate <b>~36</b> people to Segment <b>B</b>" in text
+    assert "Relocate <b>~36</b> people to Zone <b>B</b>" in text
     assert any("Counted by the PET point model" in c.value for c in app.caption)
 
 
@@ -74,3 +74,14 @@ def test_map_page_shows_the_kumbh_demo_with_an_evacuation_plan():
     text = " ".join(block.value for block in app.markdown)
     assert "Sangam Nose bathing area" in text
     assert "CRITICAL" in text and "A → B → D" in text
+
+
+def test_dashboard_shows_the_headline_results():
+    app = render(PAGES["Dashboard"])
+    text = " ".join(block.value for block in app.markdown)
+    assert "92.7%" in text and "86.5%" in text
+
+
+def test_upload_page_says_which_model_counts():
+    app = render(PAGES["Upload"])
+    assert any("PET point model" in block.value for block in app.markdown)
