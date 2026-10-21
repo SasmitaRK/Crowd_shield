@@ -34,7 +34,7 @@
   p { margin: 0; }
   .eyebrow { font-size: .74rem; font-weight: 800; letter-spacing: .16em; text-transform: uppercase; color: var(--brand); }
   .lead { color: var(--text-2); font-size: 1.06rem; max-width: 720px; margin-top: .9rem; }
-  section { padding: 88px 0; }
+  section { padding: 88px 0; scroll-margin-top: 64px; }
   .sec-head { margin-bottom: 40px; }
   .sec-head h2 { margin-top: .5rem; }
 
@@ -128,6 +128,7 @@
                overflow: hidden; background: var(--ink-2); }
   #map { height: 540px; background: #0b1220; }
   .panel { padding: 20px; border-left: 1px solid var(--ink-line); display: flex; flex-direction: column; gap: 14px; overflow: auto; max-height: 540px; }
+  .panel { scrollbar-width: thin; scrollbar-color: #334155 transparent; }
   .tabs { display: flex; gap: 6px; background: #0b1220; padding: 4px; border-radius: 10px; border: 1px solid var(--ink-line); }
   .tabs button { flex: 1; border: 0; background: transparent; color: #94a3b8; font: 600 .84rem Inter, sans-serif; padding: 8px;
                  border-radius: 7px; cursor: pointer; }
@@ -489,6 +490,8 @@ document.getElementById("launch").onclick = () => {
   async function show(key) {
     const site = cache[key] || (cache[key] = await (await fetch(`data/${key}.json`)).json());
     if (layer) layer.remove();
+    // A Leaflet map needs a view before layers can be added to it.
+    map.setView([site.centre[1], site.centre[0]], site.zoom || 16);
     layer = L.featureGroup().addTo(map);
     const list = [];
     for (const [id, z] of Object.entries(site.zones)) {
@@ -496,7 +499,7 @@ document.getElementById("launch").onclick = () => {
       const poly = L.polygon(z.ring.map(([lon, lat]) => [lat, lon]),
         { color: c, weight: 2.5, fillColor: c, fillOpacity: lv === "Critical" ? .45 : .32 }).addTo(layer);
       poly.bindTooltip(`<b>Zone ${id} · ${z.name}</b><br>${d.toFixed(1)} people/m² · ${lv}`, { className: "zt", sticky: true });
-      L.tooltip({ permanent: true, direction: "center", className: "zlabel" }).setContent(id).setLatLng(poly.getCenter()).addTo(layer);
+      L.tooltip({ permanent: true, direction: "center", className: "zlabel" }).setContent(id).setLatLng(poly.getBounds().getCenter()).addTo(layer);
       list.push({ id, z, d, lv, c, bg, fg, poly });
     }
     map.fitBounds(layer.getBounds(), { padding: [30, 30] });
