@@ -49,6 +49,7 @@
   <div id="empty">Click <b>&nbsp;Open folder…&nbsp;</b> and choose the <code>data/india_test</code> folder<br>(it holds <code>images/</code> and <code>predictions/</code>).</div>
   <div id="help">
     <b>Click a head</b> to add a dot · <b>click a dot</b> to remove it · <b>Ctrl+Z</b> undo<br>
+    <b>Shift + drag</b> a box to remove every dot inside it (for wrong dots on gravel, walls, trees)<br>
     <b>Scroll</b> to zoom · <b>drag with the right mouse button</b> (or hold Space and drag) to move<br>
     Work through the grid one square at a time, then tick <b>Checked</b>. <b>H</b> hides this box, <b>D</b> hides dots for a moment.<br>
     Your work saves in this browser as you go. When finished, press <b>Save labels</b> and send the file.
@@ -120,6 +121,11 @@ function draw() {
       ctx.moveTo(0, img.height * k / 4); ctx.lineTo(img.width, img.height * k / 4); ctx.stroke();
     }
   }
+  if (box) {
+    ctx.fillStyle = "rgba(239,68,68,.18)"; ctx.strokeStyle = "#ef4444"; ctx.lineWidth = 2 / view.s;
+    ctx.fillRect(box.x0, box.y0, box.x1 - box.x0, box.y1 - box.y0);
+    ctx.strokeRect(box.x0, box.y0, box.x1 - box.x0, box.y1 - box.y0);
+  }
   if (hideDots) return;
   const r = radius() / view.s;
   for (const [x, y] of rec().points) {
@@ -136,19 +142,32 @@ function update() {
   $("progress").textContent = `${items.filter(it => store[it.name] && store[it.name].done).length}/${items.length}`;
 }
 
-let drag = null, space = false, moved = false;
+let drag = null, space = false, moved = false, box = null;
 canvas.addEventListener("contextmenu", e => e.preventDefault());
 canvas.addEventListener("mousedown", e => {
   if (e.button === 2 || space) { drag = { x: e.clientX, y: e.clientY, vx: view.x, vy: view.y }; moved = false; }
+  else if (e.button === 0 && e.shiftKey && img) { const p = toImg(e); box = { x0: p[0], y0: p[1], x1: p[0], y1: p[1] }; }
 });
 window.addEventListener("mousemove", e => {
+  if (box) { const p = toImg(e); box.x1 = p[0]; box.y1 = p[1]; draw(); return; }
   if (!drag) return;
   view.x = drag.vx + (e.clientX - drag.x) * devicePixelRatio; view.y = drag.vy + (e.clientY - drag.y) * devicePixelRatio;
   moved = true; draw();
 });
-window.addEventListener("mouseup", () => { drag = null; });
+window.addEventListener("mouseup", () => {
+  drag = null;
+  if (!box) return;
+  const [xa, xb] = [Math.min(box.x0, box.x1), Math.max(box.x0, box.x1)];
+  const [ya, yb] = [Math.min(box.y0, box.y1), Math.max(box.y0, box.y1)];
+  const r = rec(), gone = r.points.filter(([x, y]) => x >= xa && x <= xb && y >= ya && y <= yb);
+  if (gone.length) {
+    r.points = r.points.filter(p => !gone.includes(p)); r.removed += gone.length;
+    history.push(["boxdel", gone]); persist(); update();
+  }
+  box = null; moved = true; draw();
+});
 canvas.addEventListener("click", e => {
-  if (!img || space || moved) { moved = false; return; }
+  if (!img || space || moved || e.shiftKey) { moved = false; return; }
   const [x, y] = toImg(e), r = rec();
   if (x < 0 || y < 0 || x > img.width || y > img.height) return;
   const hit = radius() * 1.6 / view.s;
@@ -170,6 +189,7 @@ window.addEventListener("keydown", e => {
   if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "z") {
     const h = history.pop(), r = rec(); if (!h || !r) return;
     if (h[0] === "add") { r.points.splice(r.points.indexOf(h[1]), 1); r.added--; }
+    else if (h[0] === "boxdel") { r.points.push(...h[1]); r.removed -= h[1].length; }
     else { r.points.push(h[1]); r.removed--; }
     persist(); update(); draw();
   }
