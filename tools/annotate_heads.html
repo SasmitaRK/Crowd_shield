@@ -1,0 +1,272 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Head Annotator</title>
+<style>
+  :root { --bg:#111418; --panel:#1b2027; --line:#2c333d; --ink:#e9edf2; --muted:#98a2b3; --accent:#3b82f6; --add:#22c55e; --del:#ef4444; }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--ink); font:14px system-ui, -apple-system, "Segoe UI", sans-serif; height:100vh; display:grid; grid-template-rows:auto 1fr; }
+  header { display:flex; gap:12px; align-items:center; flex-wrap:wrap; padding:10px 14px; background:var(--panel); border-bottom:1px solid var(--line); }
+  header b { font-size:15px; }
+  button, label.btn { background:#262d36; color:var(--ink); border:1px solid var(--line); border-radius:7px; padding:6px 11px; font:inherit; cursor:pointer; }
+  button:hover, label.btn:hover { border-color:var(--accent); }
+  button.primary { background:var(--accent); border-color:var(--accent); color:#fff; }
+  .stat { color:var(--muted); }
+  .stat strong { color:var(--ink); font-variant-numeric:tabular-nums; }
+  main { position:relative; overflow:hidden; }
+  canvas { position:absolute; inset:0; width:100%; height:100%; cursor:crosshair; }
+  #help { position:absolute; left:14px; bottom:14px; max-width:430px; background:rgba(27,32,39,.94); border:1px solid var(--line); border-radius:10px; padding:12px 14px; color:var(--muted); line-height:1.55; }
+  #help b { color:var(--ink); }
+  #empty { position:absolute; inset:0; display:grid; place-items:center; text-align:center; color:var(--muted); padding:20px; }
+  .sep { width:1px; height:22px; background:var(--line); }
+  input[type=file] { display:none; }
+  #done { accent-color: var(--add); width:16px; height:16px; vertical-align:-3px; }
+</style>
+</head>
+<body>
+<header>
+  <b>Head Annotator</b>
+  <label class="btn">Open folder…<input id="folder" type="file" webkitdirectory multiple></label>
+  <span class="sep"></span>
+  <button id="prev">◀ Prev</button>
+  <span class="stat" id="name">—</span>
+  <button id="next">Next ▶</button>
+  <span class="sep"></span>
+  <span class="stat">Heads <strong id="count">0</strong></span>
+  <span class="stat">Suggested <strong id="sugg">0</strong></span>
+  <span class="stat" style="color:var(--add)">Added <strong id="added">0</strong></span>
+  <span class="stat" style="color:var(--del)">Removed <strong id="removed">0</strong></span>
+  <span class="stat" style="color:#f59e0b">Covered <strong id="covered">0</strong></span>
+  <label class="stat"><input id="done" type="checkbox"> Checked</label>
+  <span class="stat">Progress <strong id="progress">0/0</strong></span>
+  <span class="sep"></span>
+  <button id="ignore">Ignore zone (I): off</button>
+  <button id="grid">Grid: on</button>
+  <button id="export" class="primary">Save labels</button>
+</header>
+<main>
+  <canvas id="c"></canvas>
+  <div id="empty">Click <b>&nbsp;Open folder…&nbsp;</b> and choose the <code>data/india_test</code> folder<br>(it holds <code>images/</code> and <code>predictions/</code>).</div>
+  <div id="help">
+    <b>Click a head</b> to add a dot · <b>click a dot</b> to remove it · <b>Ctrl+Z</b> undo<br>
+    <b>Shift + drag</b> a box to remove every dot inside it (for wrong dots on gravel, walls, trees)<br>
+    <b>Hold C and click</b> to add a <b style="color:#f59e0b">covered head</b> (saree, dupatta, turban, load); C + click on a dot toggles it<br>
+    <b>I</b> switches to ignore-zone mode: drag a box over people too small or blurry to mark one by one; click inside a zone to delete it<br>
+    <b>Scroll</b> to zoom · <b>drag with the right mouse button</b> (or hold Space and drag) to move<br>
+    Work through the grid one square at a time, then tick <b>Checked</b>. <b>H</b> hides this box, <b>D</b> hides dots for a moment.<br>
+    Your work saves in this browser as you go. When finished, press <b>Save labels</b> and send the file.
+  </div>
+</main>
+<script>
+const $ = id => document.getElementById(id);
+const canvas = $("c"), ctx = canvas.getContext("2d");
+const KEY = "head-annotator-v1";
+let items = [];          // {name, file, suggested: [[x,y]]}
+let idx = 0, img = null, view = { s: 1, x: 0, y: 0 }, showGrid = true, hideDots = false;
+let store = load();      // name -> {points, done, added, removed, seconds}
+let history = [], started = Date.now();
+
+function load() { try { return JSON.parse(localStorage.getItem(KEY)) || {}; } catch { return {}; } }
+function persist() { try { localStorage.setItem(KEY, JSON.stringify(store)); } catch {} }
+function cur() { return items[idx]; }
+function rec() {
+  const it = cur(); if (!it) return null;
+  if (!store[it.name]) store[it.name] = { points: it.suggested.map(p => p.slice()), done: false, added: 0, removed: 0, seconds: 0 };
+  if (!store[it.name].ignore) store[it.name].ignore = [];
+  return store[it.name];
+}
+
+$("folder").addEventListener("change", async e => {
+  const files = [...e.target.files];
+  const preds = {};
+  for (const f of files.filter(f => /predictions\/.+\.json$/i.test(f.webkitRelativePath))) {
+    const d = JSON.parse(await f.text()); preds[d.image] = d.points || [];
+  }
+  items = files.filter(f => /images\/.+\.(jpe?g|png)$/i.test(f.webkitRelativePath))
+    .sort((a, b) => a.name.localeCompare(b.name, undefined, { numeric: true }))
+    .map(f => ({ name: f.name, file: f, suggested: preds[f.name] || [] }));
+  if (!items.length) { alert("No images/ folder found in that folder."); return; }
+  $("empty").style.display = "none";
+  idx = Math.max(0, items.findIndex(it => !(store[it.name] && store[it.name].done)));
+  open(idx);
+});
+
+function tick() { const r = rec(); if (r) { r.seconds += (Date.now() - started) / 1000; } started = Date.now(); }
+function open(i) {
+  if (!items.length) return;
+  tick(); persist();
+  idx = (i + items.length) % items.length; history = [];
+  const url = URL.createObjectURL(cur().file);
+  img = new Image(); img.onload = () => { fit(); draw(); }; img.src = url;
+  rec(); update();
+}
+function fit() {
+  const r = canvas.getBoundingClientRect();
+  canvas.width = r.width * devicePixelRatio; canvas.height = r.height * devicePixelRatio;
+  view.s = Math.min(canvas.width / img.width, canvas.height / img.height) * 0.98;
+  view.x = (canvas.width - img.width * view.s) / 2; view.y = (canvas.height - img.height * view.s) / 2;
+}
+function toImg(ev) {
+  const r = canvas.getBoundingClientRect();
+  const cx = (ev.clientX - r.left) * devicePixelRatio, cy = (ev.clientY - r.top) * devicePixelRatio;
+  return [(cx - view.x) / view.s, (cy - view.y) / view.s];
+}
+function radius() { return Math.max(2.5, Math.min(7, 5 / Math.sqrt(view.s))) * devicePixelRatio; }
+function draw() {
+  ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.fillStyle = "#111418"; ctx.fillRect(0, 0, canvas.width, canvas.height);
+  if (!img) return;
+  ctx.setTransform(view.s, 0, 0, view.s, view.x, view.y);
+  ctx.drawImage(img, 0, 0);
+  if (showGrid) {
+    ctx.strokeStyle = "rgba(255,255,255,.35)"; ctx.lineWidth = 1 / view.s;
+    for (let k = 1; k < 4; k++) {
+      ctx.beginPath(); ctx.moveTo(img.width * k / 4, 0); ctx.lineTo(img.width * k / 4, img.height);
+      ctx.moveTo(0, img.height * k / 4); ctx.lineTo(img.width, img.height * k / 4); ctx.stroke();
+    }
+  }
+  for (const [a, b, c, d] of rec().ignore) {
+    ctx.fillStyle = "rgba(15,18,22,.55)"; ctx.fillRect(a, b, c - a, d - b);
+    ctx.strokeStyle = "#f59e0b"; ctx.lineWidth = 2 / view.s; ctx.setLineDash([8 / view.s, 6 / view.s]);
+    ctx.strokeRect(a, b, c - a, d - b); ctx.setLineDash([]);
+    ctx.fillStyle = "#f59e0b"; ctx.font = `${14 / view.s}px system-ui`;
+    ctx.fillText("ignored", a + 6 / view.s, b + 18 / view.s);
+  }
+  if (box) {
+    const ig = box.ignore;
+    ctx.fillStyle = ig ? "rgba(245,158,11,.15)" : "rgba(239,68,68,.18)";
+    ctx.strokeStyle = ig ? "#f59e0b" : "#ef4444"; ctx.lineWidth = 2 / view.s;
+    ctx.fillRect(box.x0, box.y0, box.x1 - box.x0, box.y1 - box.y0);
+    ctx.strokeRect(box.x0, box.y0, box.x1 - box.x0, box.y1 - box.y0);
+  }
+  if (hideDots) return;
+  const r = radius() / view.s;
+  for (const [x, y, cov] of rec().points) {  // see-through, so the head underneath stays visible
+    ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2);
+    ctx.fillStyle = cov ? "rgba(245,158,11,.28)" : "rgba(56,189,248,.22)"; ctx.fill();
+    ctx.lineWidth = 1.6 / view.s;
+    ctx.strokeStyle = cov ? "rgba(245,158,11,.95)" : "rgba(56,189,248,.95)"; ctx.stroke();
+  }
+}
+function update() {
+  const r = rec();
+  $("name").textContent = `${cur().name} (${idx + 1}/${items.length})`;
+  $("count").textContent = r.points.length; $("sugg").textContent = cur().suggested.length;
+  $("added").textContent = r.added; $("removed").textContent = r.removed; $("done").checked = r.done;
+  $("covered").textContent = r.points.filter(p => p[2]).length;
+  $("progress").textContent = `${items.filter(it => store[it.name] && store[it.name].done).length}/${items.length}`;
+}
+
+let drag = null, space = false, moved = false, box = null, cKey = false, ignoreMode = false;
+canvas.addEventListener("contextmenu", e => e.preventDefault());
+canvas.addEventListener("mousedown", e => {
+  if (e.button === 2 || space) { drag = { x: e.clientX, y: e.clientY, vx: view.x, vy: view.y }; moved = false; }
+  else if (e.button === 0 && (e.shiftKey || ignoreMode) && img) {
+    const p = toImg(e); box = { x0: p[0], y0: p[1], x1: p[0], y1: p[1], ignore: ignoreMode && !e.shiftKey };
+  }
+});
+window.addEventListener("mousemove", e => {
+  if (box) { const p = toImg(e); box.x1 = p[0]; box.y1 = p[1]; draw(); return; }
+  if (!drag) return;
+  view.x = drag.vx + (e.clientX - drag.x) * devicePixelRatio; view.y = drag.vy + (e.clientY - drag.y) * devicePixelRatio;
+  moved = true; draw();
+});
+window.addEventListener("mouseup", () => {
+  drag = null;
+  if (!box) return;
+  const [xa, xb] = [Math.min(box.x0, box.x1), Math.max(box.x0, box.x1)];
+  const [ya, yb] = [Math.min(box.y0, box.y1), Math.max(box.y0, box.y1)];
+  const r = rec();
+  if (box.ignore) {
+    if (xb - xa > 4 && yb - ya > 4) {
+      const z = [xa, ya, xb, yb].map(v => Math.round(v));
+      r.ignore.push(z); history.push(["zone", z]); persist(); update();
+    } else {  // a click, not a drag: delete the zone under it
+      const k = r.ignore.findIndex(([a, b, c, d]) => box.x0 >= a && box.x0 <= c && box.y0 >= b && box.y0 <= d);
+      if (k >= 0) { history.push(["unzone", r.ignore[k]]); r.ignore.splice(k, 1); persist(); update(); }
+    }
+    box = null; moved = true; draw(); return;
+  }
+  const gone = r.points.filter(([x, y]) => x >= xa && x <= xb && y >= ya && y <= yb);
+  if (gone.length) {
+    r.points = r.points.filter(p => !gone.includes(p)); r.removed += gone.length;
+    history.push(["boxdel", gone]); persist(); update();
+  }
+  box = null; moved = true; draw();
+});
+canvas.addEventListener("click", e => {
+  if (!img || space || moved || e.shiftKey) { moved = false; return; }
+  const [x, y] = toImg(e), r = rec();
+  if (x < 0 || y < 0 || x > img.width || y > img.height) return;
+  const hit = radius() * 1.6 / view.s;
+  let best = -1, bd = Infinity;
+  r.points.forEach(([px, py], k) => { const d = Math.hypot(px - x, py - y); if (d < bd) { bd = d; best = k; } });
+  if (best >= 0 && bd <= hit && cKey) { const p = r.points[best]; p[2] = p[2] ? 0 : 1; history.push(["cover", p]); }
+  else if (best >= 0 && bd <= hit) { history.push(["del", r.points[best]]); r.points.splice(best, 1); r.removed++; }
+  else {
+    const p = [Math.round(x * 10) / 10, Math.round(y * 10) / 10];
+    if (cKey) p.push(1);
+    history.push(["add", p]); r.points.push(p); r.added++;
+  }
+  persist(); update(); draw();
+});
+canvas.addEventListener("wheel", e => {
+  e.preventDefault();
+  const r = canvas.getBoundingClientRect();
+  const cx = (e.clientX - r.left) * devicePixelRatio, cy = (e.clientY - r.top) * devicePixelRatio;
+  const f = Math.exp(-e.deltaY * 0.0015), s = Math.min(40, Math.max(0.05, view.s * f));
+  view.x = cx - (cx - view.x) * s / view.s; view.y = cy - (cy - view.y) * s / view.s; view.s = s; draw();
+}, { passive: false });
+window.addEventListener("keydown", e => {
+  if (e.code === "Space") { space = true; e.preventDefault(); }
+  if (e.key.toLowerCase() === "c") cKey = true;
+  if (e.key.toLowerCase() === "i" && !e.ctrlKey && !e.repeat) toggleIgnore();
+  if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "z") {
+    const h = history.pop(), r = rec(); if (!h || !r) return;
+    if (h[0] === "add") { r.points.splice(r.points.indexOf(h[1]), 1); r.added--; }
+    else if (h[0] === "boxdel") { r.points.push(...h[1]); r.removed -= h[1].length; }
+    else if (h[0] === "cover") { h[1][2] = h[1][2] ? 0 : 1; }
+    else if (h[0] === "zone") { r.ignore.splice(r.ignore.indexOf(h[1]), 1); }
+    else if (h[0] === "unzone") { r.ignore.push(h[1]); }
+    else { r.points.push(h[1]); r.removed--; }
+    persist(); update(); draw();
+  }
+  if (e.key === "ArrowRight") open(idx + 1);
+  if (e.key === "ArrowLeft") open(idx - 1);
+  if (e.key.toLowerCase() === "h") $("help").hidden = !$("help").hidden;
+  if (e.key.toLowerCase() === "d") { hideDots = true; draw(); }
+});
+window.addEventListener("keyup", e => {
+  if (e.code === "Space") space = false;
+  if (e.key.toLowerCase() === "c") cKey = false;
+  if (e.key.toLowerCase() === "d") { hideDots = false; draw(); }
+});
+window.addEventListener("resize", () => { if (img) { fit(); draw(); } });
+$("prev").onclick = () => open(idx - 1);
+$("next").onclick = () => open(idx + 1);
+function toggleIgnore() {
+  ignoreMode = !ignoreMode;
+  $("ignore").textContent = `Ignore zone (I): ${ignoreMode ? "on" : "off"}`;
+  $("ignore").style.borderColor = ignoreMode ? "#f59e0b" : "";
+  canvas.style.cursor = ignoreMode ? "cell" : "crosshair";
+}
+$("ignore").onclick = toggleIgnore;
+$("grid").onclick = () => { showGrid = !showGrid; $("grid").textContent = `Grid: ${showGrid ? "on" : "off"}`; draw(); };
+$("done").onchange = e => { const r = rec(); if (r) { r.done = e.target.checked; persist(); update(); } };
+$("export").onclick = () => {
+  tick(); persist();
+  const out = { tool: "Crowd Shield head annotator", saved: new Date().toISOString(), images: {} };
+  for (const it of items) {
+    const r = store[it.name]; if (!r) continue;
+    out.images[it.name] = { count: r.points.length, suggested: it.suggested.length, added: r.added,
+      removed: r.removed, checked: r.done, seconds: Math.round(r.seconds),
+      covered: r.points.filter(p => p[2]).length, ignore: r.ignore || [], points: r.points };
+  }
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(new Blob([JSON.stringify(out)], { type: "application/json" }));
+  a.download = "india_labels.json"; a.click();
+};
+</script>
+</body>
+</html>

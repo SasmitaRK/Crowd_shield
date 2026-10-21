@@ -100,6 +100,22 @@ Both trained models are published as releases ([PET](https://github.com/khushi-g
 [DM-Count](https://github.com/khushi-git-7/Crowd_shield/releases/tag/dmcount-shab-v1))
 and download automatically, with a checksum check, the first time the app counts.
 
+### Counting Indian crowds
+
+ShanghaiTech is Chinese photography, so Crowd Shield also has its own **India test set**:
+105 freely licensed Wikimedia Commons photos of melas, festivals (including Madurai's
+Chithirai festival), temples, stations, markets, stadiums and ghats, credited in
+[data/india_test](data/india_test). They are never used for training. Every head is being
+marked by hand, with ignore zones over people too far away to mark.
+
+On the first 10 hand-checked photos (3,507 people) the counter is about **90% accurate on 9
+of them**, but **66.7% overall**, because of one failure: on a Mumbai railway photo it counts the
+gravel between the tracks as heads (1,267 against 415). Fine-tuning on 23 photos of empty Indian
+tracks fixed that photo (379 against 415) but made the model miss people in smaller crowds, and it
+was slightly worse on ShanghaiTech, so the app keeps the current model. The **India benchmark**
+page in the app shows per-scene accuracy and every photo with the true and the model's head points.
+This is a pilot until the remaining photos are labelled.
+
 ### Spotting panic
 
 Tested on the University of Minnesota crowd-escape videos: 11 clips in 3
@@ -198,9 +214,8 @@ moving?", never "who is this?".
 
 ## Limits
 
-- ShanghaiTech is Chinese street and crowd photography. How well the counter
-  does on Indian crowds (railway platforms, melas, temple queues) still needs
-  its own test set; that is the next step.
+- The India test is a pilot: 10 of its 105 photos are hand-checked so far, and the counter
+  fails on railway-track gravel seen from above.
 - Density needs a calibrated, fixed camera. A moving phone video gives counts
   and speeds in pixels only.
 - The early warning extends the recent trend in a straight line. It is a
