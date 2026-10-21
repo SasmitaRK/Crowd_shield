@@ -17,6 +17,8 @@ with ordinary cameras.
 
 ## What it does
 
+![How Crowd Shield works](docs/architecture.svg)
+
 | | |
 |---|---|
 | **Count people** | A point model (PET) puts a dot on every head, so it keeps working when bodies overlap and shows exactly where people are. A density-map model (DM-Count) and YOLO are fallbacks. |
