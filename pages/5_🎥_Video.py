@@ -8,30 +8,15 @@ import numpy as np
 import pandas as pd
 import streamlit as st
 
+from ui import page_header
+
 from shared_state import GLOBAL_CSS, init_state
 
 st.set_page_config(page_title="Video • Crowd Shield", page_icon=None, layout="wide")
 st.markdown(GLOBAL_CSS, unsafe_allow_html=True)
 init_state()
-st.markdown(
-    """
-    <div class="navbar">
-      <span class="navbar-brand">Crowd Shield</span>
-      <div class="navbar-links">
-        <a href="/">Dashboard</a>
-        <a href="/Agents">Agents</a>
-        <a href="/Upload">Upload</a>
-        <a href="/Analysis">Analysis</a>
-        <a href="/Video">Video</a>
-        <a href="/Map">Map</a>
-        <a href="/Settings">Settings</a>
-      </div>
-    </div>
-    """,
-    unsafe_allow_html=True,
-)
 
-st.markdown("# Video Monitor")
+page_header("Video monitor", "Watch a fixed camera zone by zone: people per m², walking speed, crowd pressure, sudden-surge alarms and a forecast of when a zone gets dangerous.", "Monitor")
 st.caption("Upload a clip from a fixed camera. Mark a rectangle of known size on the floor "
            "and the zones to watch; Crowd Shield then reports people per m², speed, "
            "crowd pressure and how long each zone has before it reaches 5 people per m².")

@@ -3,6 +3,8 @@
 import math
 import streamlit as st
 
+from ui import page_header
+
 from shared_state import (init_state, GLOBAL_CSS, SEGMENTS,
                           DEFAULT_THRESHOLDS, RISK_COLORS, RISK_ICONS,
                           FRUIN_PRESETS, get_seg_thresholds)
@@ -13,25 +15,8 @@ st.set_page_config(page_title="Settings • Crowd Shield",
                    page_icon=None, layout="wide")
 st.markdown(GLOBAL_CSS, unsafe_allow_html=True)
 init_state()
-st.markdown(
-    """
-    <div class="navbar">
-      <span class="navbar-brand">Crowd Shield</span>
-      <div class="navbar-links">
-        <a href="/">Dashboard</a>
-        <a href="/Agents">Agents</a>
-        <a href="/Upload">Upload</a>
-        <a href="/Analysis">Analysis</a>
-        <a href="/Video">Video</a>
-        <a href="/Map">Map</a>
-        <a href="/Settings">Settings</a>
-      </div>
-    </div>
-    """,
-    unsafe_allow_html=True,
-)
 
-st.markdown("# Settings")
+page_header("Settings", "Risk limits per zone, from the zone's area and a crowd-density standard, plus the fallback detector and email alerts.", "Configure")
 
 # ---------------------------------------------------------------------------
 # 1. Detection model
@@ -67,9 +52,9 @@ st.markdown("---")
 # ---------------------------------------------------------------------------
 # 2. Area-based threshold auto-calculator
 # ---------------------------------------------------------------------------
-st.markdown("### Auto-Calculate Thresholds from Segment Area")
+st.markdown("### Auto-Calculate Thresholds from Zone Area")
 st.caption(
-    "Enter the physical area (m²) for each segment and choose a density "
+    "Enter the physical area (m²) for each zone and choose a density "
     "standard — thresholds are calculated using the Fruin Level of Service "
     "scale and applied in one click.")
 
@@ -87,7 +72,7 @@ with cov_col1:
         "Camera coverage factor",
         min_value=0.50, max_value=1.00, value=0.75, step=0.05,
         help=(
-            "Fraction of the segment visible in your images. "
+            "Fraction of the zone visible in your images. "
             "If cameras cover 75% of the area, set this to 0.75 — "
             "detected counts are divided by this to estimate true density, "
             "making the effective thresholds more conservative."
@@ -104,14 +89,14 @@ with cov_col2:
         f"</div>",
         unsafe_allow_html=True)
 
-st.markdown("**Enter segment areas:**")
+st.markdown("**Enter zone areas:**")
 area_cols   = st.columns(5)
 area_inputs = {}
 for i, seg in enumerate(SEGMENTS):
     with area_cols[i]:
         saved = st.session_state.seg_areas.get(seg, 0)
         area_inputs[seg] = st.number_input(
-            f"Segment {seg} (m²)",
+            f"Zone {seg} (m²)",
             min_value=0, max_value=100_000,
             value=int(saved), step=10,
             key=f"area_{seg}",
@@ -130,7 +115,7 @@ if any(v > 0 for v in area_inputs.values()):
                 st.markdown(
                     f"<div class='glass-card' style='font-size:.78rem;padding:.7rem;"
                     f"text-align:center'>"
-                    f"<b>Seg {seg}</b><br>"
+                    f"<b>Zone {seg}</b><br>"
                     f"<span style='color:#f59e0b;font-weight:600'>{mod}</span>"
                     f"<span style='color:#d1d5db'> / </span>"
                     f"<span style='color:#f97316;font-weight:600'>{hi}</span>"
@@ -141,7 +126,7 @@ if any(v > 0 for v in area_inputs.values()):
             else:
                 st.markdown(
                     f"<div class='glass-card' style='font-size:.78rem;padding:.7rem;"
-                    f"text-align:center;color:#9ca3af'>Seg {seg}<br>no area</div>",
+                    f"text-align:center;color:#9ca3af'>Zone {seg}<br>no area</div>",
                     unsafe_allow_html=True)
 
 if st.button("Auto-calculate and apply thresholds",
@@ -157,7 +142,7 @@ if st.button("Auto-calculate and apply thresholds",
             hi   = max(mod + 1, math.floor(area * preset["high"] * coverage))
             crit = max(hi + 1, math.floor(area * preset["critical"] * coverage))
             new_t[seg] = {"moderate": mod, "high": hi, "critical": crit}
-            applied.append(f"Seg {seg}: {mod} / {hi} / {crit}")
+            applied.append(f"Zone {seg}: {mod} / {hi} / {crit}")
         else:
             skipped.append(seg)
     st.session_state.thresholds    = new_t
@@ -166,7 +151,7 @@ if st.button("Auto-calculate and apply thresholds",
     if applied:
         st.success("Applied:\n\n- " + "\n- ".join(applied))
     if skipped:
-        st.info(f"Segments with no area entered kept their previous thresholds: "
+        st.info(f"Zones with no area entered kept their previous thresholds: "
                 f"{', '.join(skipped)}")
 
 with st.expander("Fruin density standards explained"):
@@ -198,7 +183,7 @@ st.markdown("---")
 # ---------------------------------------------------------------------------
 # 3. Manual per-segment thresholds
 # ---------------------------------------------------------------------------
-st.markdown("### Per-Segment Risk Thresholds")
+st.markdown("### Per-Zone Risk Thresholds")
 st.caption("These values are what auto-calculation writes to. "
            "You can also edit them directly here.")
 
@@ -237,7 +222,7 @@ if st.button("Save manual thresholds", use_container_width=True):
     errors = []
     for seg, t in new_thresholds.items():
         if not (t["moderate"] < t["high"] < t["critical"]):
-            errors.append(f"Segment {seg}: moderate < high < critical required")
+            errors.append(f"Zone {seg}: moderate < high < critical required")
     if errors:
         for e in errors:
             st.error(e)

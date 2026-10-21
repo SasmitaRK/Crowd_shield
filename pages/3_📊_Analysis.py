@@ -13,6 +13,8 @@ import io
 import cv2
 import streamlit as st
 
+from ui import page_header
+
 from shared_state import (init_state, GLOBAL_CSS, SEGMENTS,
                           RISK_COLORS, RISK_ICONS, get_seg_thresholds)
 from detection import risk_level, MODEL_REGISTRY
@@ -26,25 +28,8 @@ st.set_page_config(page_title="Analysis • Crowd Shield",
 st.markdown(GLOBAL_CSS, unsafe_allow_html=True)
 init_state()
 
-st.markdown(
-    """
-    <div class="navbar">
-      <span class="navbar-brand">Crowd Shield</span>
-      <div class="navbar-links">
-        <a href="/">Dashboard</a>
-        <a href="/Agents">Agents</a>
-        <a href="/Upload">Upload</a>
-        <a href="/Analysis">Analysis</a>
-        <a href="/Video">Video</a>
-        <a href="/Map">Map</a>
-        <a href="/Settings">Settings</a>
-      </div>
-    </div>
-    """,
-    unsafe_allow_html=True,
-)
 
-st.markdown("# Analysis & Alerts")
+page_header("Alerts and plans", "Risk per zone from the latest photo analysis, a plan for moving people into zones with room, and email alerts for each zone's team.", "Analyse")
 
 data   = st.session_state.crowd_data
 agents = st.session_state.agents
@@ -86,7 +71,7 @@ c1.metric("Total People",  total)
 c2.metric("Critical",      critical_n)
 c3.metric("High Risk",     high_n)
 c4.metric("Safe",          safe_n)
-c5.metric("Segments Done", len(seg_info))
+c5.metric("Zones done", len(seg_info))
 
 st.markdown("---")
 
@@ -122,7 +107,7 @@ for i, (seg, info) in enumerate(seg_info.items()):
         st.markdown(
             f"<div style='border-top:3px solid {color};padding-top:.6rem;"
             f"margin-bottom:.4rem'>"
-            f"<b style='font-size:.95rem;color:#111827'>Segment {seg}</b>"
+            f"<b style='font-size:.95rem;color:#111827'>Zone {seg}</b>"
             f"</div>",
             unsafe_allow_html=True)
 
@@ -301,7 +286,7 @@ for xi, seg in zip(x_pos, segs_list):
         )
 
 ax1.set_xticks(x_pos)
-ax1.set_xticklabels([f"Seg {s}" for s in segs_list],
+ax1.set_xticklabels([f"Zone {s}" for s in segs_list],
                     color=TEXT_COL, fontsize=11)
 ax1.set_ylabel("People detected", color=TEXT_COL, fontsize=10)
 
@@ -332,7 +317,7 @@ st.markdown('<div class="section-label">Remaining Capacity by Risk Zone</div>',
             unsafe_allow_html=True)
 st.caption(
     "Each bar shows current occupancy vs. the full risk-zone spectrum for "
-    "that segment. All segments share the same X-axis scale so you can "
+    "that zone. All zones share the same X-axis scale so you can "
     "compare headroom directly. +N = people remaining before next threshold."
 )
 
@@ -441,7 +426,7 @@ for seg in segs_list:
             )
 
 ax2.set_yticks(y_pos)
-ax2.set_yticklabels([f"Segment {s}" for s in segs_list],
+ax2.set_yticklabels([f"Zone {s}" for s in segs_list],
                     color=TEXT_COL, fontsize=11)
 ax2.set_xlabel("People count", color=TEXT_COL, fontsize=10)
 # Give enough headroom at top for the badges
@@ -509,7 +494,7 @@ if non_zero:
     ax3.add_patch(hole)
     ax3.text(0, 0.06, str(len(seg_info)), ha="center", va="center",
              color=TEXT_COL, fontsize=16, fontweight="bold")
-    ax3.text(0, -0.16, "segments", ha="center", va="center",
+    ax3.text(0, -0.16, "zones", ha="center", va="center",
              color="#6b7280", fontsize=8)
 
     fig3.tight_layout()
@@ -518,7 +503,7 @@ if non_zero:
         st.pyplot(fig3)
     plt.close(fig3)
 else:
-    st.caption("No segments analysed yet.")
+    st.caption("No zones analysed yet.")
 
 st.markdown("---")
 
@@ -606,11 +591,11 @@ st.markdown('<div class="section-label">Export</div>', unsafe_allow_html=True)
 
 _csv_buf = io.StringIO()
 _writer  = csv.writer(_csv_buf)
-_writer.writerow(["Segment", "Count", "Risk Level", "Counted by",
+_writer.writerow(["Zone", "Count", "Risk Level", "Counted by",
                   "Moderate Threshold", "High Risk Threshold", "Critical Threshold"])
 for _seg, _info in seg_info.items():
     _t = _info["thresholds"]
-    _writer.writerow([f"Segment {_seg}", _info["count"], _info["risk"],
+    _writer.writerow([f"Zone {_seg}", _info["count"], _info["risk"],
                       COUNTER_LABELS.get(_info["counter"], ""),
                       _t["moderate"], _t["high"], _t["critical"]])
 
@@ -625,7 +610,7 @@ with _dl_btn:
     )
 with _dl_left:
     st.caption(
-        f"Report contains {len(seg_info)} segment(s) — "
+        f"Report contains {len(seg_info)} zone(s) — "
         "counts, risk levels and thresholds."
     )
 
@@ -655,12 +640,12 @@ for seg in SEGMENTS:
         pair   = next((p for p in pairings if p["high"] == seg), None)
         target = pair["target"] if pair else None
         move   = pair["move"]   if pair else 0
-        dest   = (f' to Segment <b>{target}</b> '
+        dest   = (f' to Zone <b>{target}</b> '
                   f'(current: {seg_info[target]["count"]})'
                   if target else " — call reinforcements")
         emerg  = "<b>EMERGENCY: </b>" if risk == "Critical" else ""
         msg = (
-            f"<b style='color:#111827'>{risk.upper()} — Segment {seg}</b> "
+            f"<b style='color:#111827'>{risk.upper()} — Zone {seg}</b> "
             f"<span style='color:#6b7280;font-size:.85rem'>"
             f"({info['count']} people · {allowable} to Critical)</span><br>"
             f"{emerg}Relocate <b>~{move}</b> people{dest}.<br>"
@@ -674,14 +659,14 @@ for seg in SEGMENTS:
         if incoming:
             inc = incoming[0]
             msg = (
-                f"<b style='color:#111827'>INCOMING — Segment {seg}</b> "
+                f"<b style='color:#111827'>INCOMING — Zone {seg}</b> "
                 f"<span style='color:#6b7280;font-size:.85rem'>({info['count']} people)</span><br>"
-                f"Prepare for ~{inc['move']} arriving from Segment {inc['high']}.<br>"
+                f"Prepare for ~{inc['move']} arriving from Zone {inc['high']}.<br>"
                 f"<span style='font-size:.83rem;color:#6b7280'>Agent: {agent}</span>"
             )
         else:
             msg = (
-                f"<b style='color:#111827'>MODERATE — Segment {seg}</b> "
+                f"<b style='color:#111827'>MODERATE — Zone {seg}</b> "
                 f"<span style='color:#6b7280;font-size:.85rem'>({info['count']} people)</span>"
                 f" — monitor closely.<br>"
                 f"<span style='font-size:.83rem;color:#6b7280'>Agent: {agent}</span>"
@@ -693,15 +678,15 @@ for seg in SEGMENTS:
         if incoming:
             inc = incoming[0]
             msg = (
-                f"<b style='color:#111827'>SAFE (receiving) — Segment {seg}</b> "
+                f"<b style='color:#111827'>SAFE (receiving) — Zone {seg}</b> "
                 f"<span style='color:#6b7280;font-size:.85rem'>({info['count']} people)</span><br>"
-                f"Receiving ~{inc['move']} from Segment {inc['high']}. "
+                f"Receiving ~{inc['move']} from Zone {inc['high']}. "
                 f"Open entries, guide arrivals.<br>"
                 f"<span style='font-size:.83rem;color:#6b7280'>Agent: {agent}</span>"
             )
         else:
             msg = (
-                f"<b style='color:#111827'>SAFE — Segment {seg}</b> "
+                f"<b style='color:#111827'>SAFE — Zone {seg}</b> "
                 f"<span style='color:#6b7280;font-size:.85rem'>({info['count']} people)</span><br>"
                 f"<span style='font-size:.83rem;color:#6b7280'>Agent: {agent}</span>"
             )
@@ -734,10 +719,10 @@ def _peak_image_bytes(seg: str):
 if not email_configured():
     st.warning("Gmail credentials not configured. Open Settings to add them.")
 elif not pairings:
-    st.success("No high-risk or critical segments — no alerts needed.")
+    st.success("No high-risk or critical zones — no alerts needed.")
 else:
     st.caption("Each email includes operational orders and the peak detection "
-               "image from the flagged segment.")
+               "image from the flagged zone.")
 
     for p in pairings:
         h_email = agents.get(p["high"], "")
@@ -745,7 +730,7 @@ else:
         risk_c  = RISK_COLORS[p["risk"]]
         st.markdown(
             f"<div class='glass-card' style='margin:.4rem 0;font-size:.875rem'>"
-            f"<b style='color:{risk_c}'>Segment {p['high']}</b>"
+            f"<b style='color:{risk_c}'>Zone {p['high']}</b>"
             f" → <code style='background:#f3f4f6;padding:.1rem .35rem;"
             f"border-radius:4px'>{h_email or 'unassigned'}</code>"
             f" — evacuate ~{p['move']}"
@@ -756,7 +741,7 @@ else:
             st.markdown(
                 f"<div class='glass-card' style='margin:.3rem 0 .3rem 1.5rem;"
                 f"font-size:.875rem'>"
-                f"<b style='color:#10b981'>Segment {p['target']}</b>"
+                f"<b style='color:#10b981'>Zone {p['target']}</b>"
                 f" → <code style='background:#f3f4f6;padding:.1rem .35rem;"
                 f"border-radius:4px'>{t_email}</code>"
                 f" — prepare for ~{p['move']} incoming"
@@ -780,7 +765,7 @@ else:
                 (sent if ok else failed).append(
                     f"Agent {p['high']} ({h_email}): {msg}")
             else:
-                failed.append(f"Segment {p['high']}: no agent email assigned")
+                failed.append(f"Zone {p['high']}: no agent email assigned")
 
             if p["target"] and t_email:
                 subj, body = build_receiving_email(
@@ -792,7 +777,7 @@ else:
                 (sent if ok else failed).append(
                     f"Agent {p['target']} ({t_email}): {msg}")
             elif p["target"]:
-                failed.append(f"Segment {p['target']}: no agent email assigned")
+                failed.append(f"Zone {p['target']}: no agent email assigned")
 
         if sent:
             st.success("Sent:\n\n- " + "\n- ".join(sent))

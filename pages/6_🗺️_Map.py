@@ -13,54 +13,15 @@ from crowdshield.risk import thresholds_from_area
 from crowdshield.sitemap import (assess, list_sites, scenario_counts, site_from_drawings,
                                  timeline, to_geojson)
 from shared_state import FRUIN_PRESETS, GLOBAL_CSS, RISK_COLORS, SEGMENTS, init_state
+from ui import compact, page_header
 
 st.set_page_config(page_title="Site Map • Crowd Shield", page_icon=None, layout="wide")
 st.markdown(GLOBAL_CSS, unsafe_allow_html=True)
 init_state()
 
-st.markdown(
-    """
-    <div class="navbar">
-      <span class="navbar-brand">Crowd Shield</span>
-      <div class="navbar-links">
-        <a href="/">Dashboard</a>
-        <a href="/Agents">Agents</a>
-        <a href="/Upload">Upload</a>
-        <a href="/Analysis">Analysis</a>
-        <a href="/Video">Video</a>
-        <a href="/Map">Map</a>
-        <a href="/Settings">Settings</a>
-      </div>
-    </div>
-    """,
-    unsafe_allow_html=True,
-)
 
 st.markdown("""
 <style>
-  .page-head { display:flex; justify-content:space-between; align-items:flex-end; gap:1rem;
-               margin: .2rem 0 1rem; flex-wrap:wrap; }
-  .page-head .eyebrow { font-size:.72rem; font-weight:700; letter-spacing:.14em; text-transform:uppercase;
-                        color:#0d9488; display:flex; align-items:center; gap:.45rem; }
-  .page-head h1 { font-size:1.75rem !important; margin:.15rem 0 .2rem !important; color:#0f172a !important;
-                  letter-spacing:-.4px; font-weight:800 !important; }
-  .page-head p { margin:0; color:#64748b; font-size:.92rem; max-width:760px; }
-  .live-dot { width:8px; height:8px; border-radius:50%; background:#10b981; display:inline-block;
-              animation: livepulse 1.8s infinite; }
-  @keyframes livepulse { 0% {box-shadow:0 0 0 0 rgba(16,185,129,.6);}
-                         70% {box-shadow:0 0 0 8px rgba(16,185,129,0);}
-                         100% {box-shadow:0 0 0 0 rgba(16,185,129,0);} }
-  .chip { display:inline-flex; align-items:center; gap:.35rem; padding:.18rem .55rem; border-radius:999px;
-          font-size:.72rem; font-weight:700; letter-spacing:.02em; }
-  .chip.sim { background:#fef3c7; color:#92400e; border:1px solid #fde68a; }
-  .chip.live { background:#d1fae5; color:#065f46; border:1px solid #a7f3d0; }
-  .kpi { background:#fff; border:1px solid #e2e8f0; border-radius:14px; padding:.85rem 1rem; height:100%;
-         box-shadow:0 1px 2px rgba(15,23,42,.04); }
-  .kpi .label { font-size:.68rem; color:#64748b; text-transform:uppercase; letter-spacing:.1em; font-weight:700; }
-  .kpi .value { font-size:1.55rem; font-weight:800; color:#0f172a; line-height:1.15; margin-top:.2rem;
-                font-variant-numeric: tabular-nums; white-space:nowrap; }
-  .kpi .sub { font-size:.76rem; color:#64748b; margin-top:.1rem; white-space:nowrap; overflow:hidden;
-              text-overflow:ellipsis; }
   .story { border-left:3px solid #f59e0b; background:#fffbeb; color:#78350f; border-radius:0 10px 10px 0;
            padding:.6rem .9rem; font-size:.85rem; margin:.2rem 0 1rem; }
   .zone-card { background:#fff; border:1px solid #e2e8f0; border-radius:12px; padding:.65rem .75rem;
@@ -87,14 +48,6 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 
-def compact(n: float) -> str:
-    """547408 -> 547.4K, the way dashboards show big counts."""
-    for size, suffix in ((1e6, "M"), (1e3, "K")):
-        if abs(n) >= size:
-            return f"{n / size:.1f}{suffix}"
-    return f"{n:,.0f}"
-
-
 RISK_ORDER = ["Safe", "Moderate", "High Risk", "Critical"]
 GREY = "#94a3b8"
 SITES = {s["short"]: s for s in list_sites()}
@@ -102,15 +55,7 @@ SITES = {s["short"]: s for s in list_sites()}
 # ---------------------------------------------------------------------------
 # Controls
 # ---------------------------------------------------------------------------
-st.markdown("""
-<div class="page-head"><div>
-  <div class="eyebrow"><span class="live-dot"></span>Site map</div>
-  <h1>Every zone on real terrain</h1>
-  <p>Zones sit on satellite imagery, so each one's ground area is measured from the map.
-  People per m² sets its risk, and animated routes show where to move people along paths
-  they can walk.</p>
-</div></div>
-""", unsafe_allow_html=True)
+page_header("Site map", "Zones sit on satellite imagery, so each one's ground area is measured from the map. People per m² sets its risk, and animated routes show where to move people along paths they can walk.", "Monitor", live=True)
 
 site_options = list(SITES) + (["My site"] if "custom_site" in st.session_state else []) + ["Draw a new site"]
 with st.container(border=True):
