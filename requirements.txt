@@ -12,3 +12,6 @@ ultralytics>=8.1
 # The custom crowd model (models/crowd_yolo.pt) was saved with dill.
 dill>=0.3
 scipy>=1.10
+# Site map: Leaflet maps inside Streamlit.
+folium>=0.20
+streamlit-folium>=0.27

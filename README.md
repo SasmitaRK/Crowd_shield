@@ -26,6 +26,14 @@ with ordinary cameras.
 | **Early warning** | "At the current trend, Zone B reaches 5 people per m² in about 4 minutes", from a robust (Theil-Sen) trend that one bad count can't swing. |
 | **Panic alarm** | Optical flow spots a crowd suddenly moving much faster than its own normal pace, or much more of the view starting to move. |
 | **Zone plans and alerts** | For photos: risk per zone, a plan for moving people from crowded zones into neighbouring ones with room, and email alerts to each zone's staff. |
+| **Site map** | Zones drawn on satellite imagery. Each zone's ground area comes from its shape on the map (spherical-excess formula, the one Leaflet and Turf use), zones that touch become the walking routes, and the evacuation plan is drawn as animated arrows along them. |
+
+The **Map** page opens on the bathing area at the Sangam in Prayagraj, where a
+crowd crush at the Maha Kumbh on 29 January 2025 killed at least 30 people. Its
+five zones are illustrative, drawn around OpenStreetMap landmarks rather than
+the official Mela plan, and its "simulated surge" numbers are made up to show
+every risk level. With real counts from the Upload page, or zones you draw
+yourself, it becomes your own site's live view.
 
 The **Video** page puts this together: upload a clip from a fixed camera, mark
 the floor rectangle and the zones, and get per-zone density, speed, pressure,
@@ -141,9 +149,12 @@ crowdshield/          the core, with no UI code
   motion.py           optical flow statistics and the panic alarm
   monitor.py          the video monitor: per-zone readings every second
   forecast.py         time until a zone reaches 5 people per m²
-  risk.py             zone risk levels and relocation plans
+  risk.py             zone risk levels, relocation plans and walking routes
+  geo.py              zones on a map: ground area, centres, which zones touch
+  sitemap.py          a mapped site's densities, risk and evacuation routes
+sites/                map sites (the Kumbh demo)
 eval/                 the accuracy tests behind every number above
-pages/                the Streamlit app: Agents, Upload, Analysis, Video, Settings
+pages/                the Streamlit app: Agents, Upload, Analysis, Video, Map, Settings
 results/              test results, per photo and per clip
 ```
 

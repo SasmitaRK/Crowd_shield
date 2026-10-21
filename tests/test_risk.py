@@ -1,7 +1,8 @@
 import pytest
 
 from crowdshield.config import FRUIN_PRESETS
-from crowdshield.risk import combine_counts, plan_relocations, risk_level, thresholds_from_area
+from crowdshield.risk import (combine_counts, plan_relocations, risk_level, route,
+                              thresholds_from_area)
 
 T = {"moderate": 30, "high": 60, "critical": 90}
 
@@ -66,3 +67,11 @@ def test_relocation_without_room_calls_for_reinforcements():
     [plan] = plan_relocations({"A": zone(95), "B": zone(45)})  # B is Moderate
     assert plan["target"] is None
     assert plan["move"] == 36
+
+
+def test_route_takes_the_fewest_steps_and_reports_unreachable_zones():
+    graph = {"A": ["B"], "B": ["A", "C", "D"], "C": ["B", "E"], "D": ["B", "E"], "E": ["C", "D"],
+             "F": []}
+    assert route("A", "E", graph) == ["A", "B", "C", "E"]
+    assert route("A", "A", graph) == ["A"]
+    assert route("A", "F", graph) == []
