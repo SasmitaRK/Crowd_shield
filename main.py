@@ -47,6 +47,7 @@ with st.sidebar:
         f"<div class='rail-status'><i style='background:{'#10b981' if email_ok else '#f59e0b'}'></i>"
         f"Email alerts: {'ready' if email_ok else 'not set up'}</div>"
         "<div style='margin-top:.7rem'>"
+        "<a href='https://khushi-git-7.github.io/Crowd_shield/' target='_blank'>Project home</a> · "
         "<a href='https://github.com/khushi-git-7/Crowd_shield' target='_blank'>Code</a> · "
         "<a href='https://huggingface.co/Khushi-7/crowd-shield-counting' target='_blank'>Models</a>"
         "</div></div>",
