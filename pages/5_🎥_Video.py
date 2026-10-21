@@ -2,6 +2,7 @@
 
 import os
 import tempfile
+from pathlib import Path
 
 import cv2
 import numpy as np
@@ -22,26 +23,69 @@ st.caption("Upload a clip from a fixed camera. Mark a rectangle of known size on
            "crowd pressure and how long each zone has before it reaches 5 people per m².")
 
 MAX_WIDTH = 960  # frames are shrunk to this width; all coordinates below use it
+# The free hosted demo has little memory and no GPU, so it analyses short clips. Set
+# CROWDSHIELD_MAX_VIDEO_S on your own machine to allow longer ones.
+MAX_SECONDS = int(os.environ.get("CROWDSHIELD_MAX_VIDEO_S", 20))
+SAMPLE = {
+    "path": Path(__file__).resolve().parent.parent / "assets" / "samples" / "paris_saint_lazare.mp4",
+    "label": "Sample: Paris Saint-Lazare station",
+    "credit": "Sample clip: 15 s from \"2025-11-06 17-33-16 - Paris - Saint-Lazare\" by Baidax, "
+              "[CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/), via "
+              "[Wikimedia Commons](https://commons.wikimedia.org/wiki/File:2025-11-06_17-33-16_-_Paris_-_Saint-Lazare.webm). "
+              "A fixed camera over the concourse and stairs.",
+    # Zones as fractions of the frame: the stairs on the right, the concourse floor below.
+    "zones": [("Stairs", (0.67, 1.0), (0.25, 1.0)), ("Concourse", (0.0, 0.65), (0.53, 1.0))],
+}
 ZONE_COLOURS = [(0, 200, 255), (255, 120, 0), (180, 0, 255), (0, 220, 120)]
 LEVEL_COLOURS = {"Normal": (80, 200, 80), "Crowded": (0, 200, 255),
                  "Dangerous": (0, 120, 255), "Crush risk": (0, 0, 255), None: (200, 200, 200)}
 
 
-def read_frames(path, max_seconds):
+def iter_frames(path, max_seconds):
+    """Yield frames one at a time, shrunk to MAX_WIDTH, so a clip never sits in memory whole."""
     cap = cv2.VideoCapture(path)
     fps = cap.get(cv2.CAP_PROP_FPS) or 25.0
-    limit = int(fps * max_seconds)
-    frames = []
-    while len(frames) < limit:
-        ok, frame = cap.read()
-        if not ok:
-            break
-        if frame.shape[1] > MAX_WIDTH:
-            s = MAX_WIDTH / frame.shape[1]
-            frame = cv2.resize(frame, None, fx=s, fy=s, interpolation=cv2.INTER_AREA)
-        frames.append(frame)
+    try:
+        for _ in range(int(fps * max_seconds)):
+            ok, frame = cap.read()
+            if not ok:
+                break
+            if frame.shape[1] > MAX_WIDTH:
+                s = MAX_WIDTH / frame.shape[1]
+                frame = cv2.resize(frame, None, fx=s, fy=s, interpolation=cv2.INTER_AREA)
+            yield frame
+    finally:
+        cap.release()
+
+
+def video_fps(path):
+    cap = cv2.VideoCapture(path)
+    fps = cap.get(cv2.CAP_PROP_FPS) or 25.0
     cap.release()
-    return frames, fps
+    return fps
+
+
+def probe(path, max_seconds, fps, step=3, scale=0.25):
+    """First frame, frame count and how much the camera moves, keeping only tiny frames."""
+    from crowdshield.motion import camera_motion
+
+    first, n, small = None, 0, []
+    for i, frame in enumerate(iter_frames(path, max_seconds)):
+        if first is None:
+            first = frame
+        if i % step == 0:
+            small.append(cv2.resize(frame, None, fx=scale, fy=scale, interpolation=cv2.INTER_AREA))
+        n += 1
+    # The small frames are already every `step`th frame at `scale`, so compare neighbours as-is.
+    camera = camera_motion(small, fps / step, step=1, scale=1.0) if small else 0.0
+    return first, n, camera
+
+
+def clip_on_disk(data: bytes, suffix: str) -> str:
+    """OpenCV only reads video from a file. The caller deletes it as soon as decoding is done."""
+    with tempfile.NamedTemporaryFile(suffix=suffix, delete=False) as f:
+        f.write(data)
+        return f.name
 
 
 def make_counter():
@@ -87,28 +131,36 @@ def draw(frame, corners, zones, levels=None):
     return cv2.cvtColor(out, cv2.COLOR_BGR2RGB)
 
 
-upload = st.file_uploader("Video clip", type=["mp4", "avi", "mov", "mkv"])
-if upload is None:
-    st.info("Upload a clip to start. A camera that doesn't move works best.")
-    st.stop()
+source = st.radio("Clip", ["Upload a clip", SAMPLE["label"]], horizontal=True,
+                  label_visibility="collapsed")
+use_sample = source == SAMPLE["label"]
+if use_sample:
+    data, suffix = SAMPLE["path"].read_bytes(), ".mp4"
+    st.caption(SAMPLE["credit"])
+else:
+    upload = st.file_uploader("Video clip (MP4, MOV, AVI or MKV)", type=["mp4", "avi", "mov", "mkv"])
+    if upload is None:
+        st.info("Upload a clip to start, or pick the sample above. A fixed camera such as CCTV "
+                "works best; a handheld phone gives people counts only.")
+        st.stop()
+    data, suffix = upload.getvalue(), "." + upload.name.rsplit(".", 1)[-1].lower()
 
-max_seconds = st.slider("Seconds of video to analyse", 5, 120, 30)
-# OpenCV only reads video from a file, so the clip touches disk just long enough to decode it.
-with tempfile.NamedTemporaryFile(suffix="." + upload.name.rsplit(".", 1)[-1], delete=False) as f:
-    f.write(upload.getbuffer())
-    video_path = f.name
+max_seconds = st.slider("Seconds of video to analyse", 5, MAX_SECONDS, min(15, MAX_SECONDS),
+                        help=f"The hosted demo analyses up to {MAX_SECONDS} s, counting once per "
+                             "second. Run Crowd Shield on your own machine for longer clips.")
+from crowdshield.motion import CAMERA_MOVING  # noqa: E402
+
+video_path = clip_on_disk(data, suffix)
 try:
-    frames, fps = read_frames(video_path, max_seconds)
+    fps = video_fps(video_path)
+    first, n_frames, camera = probe(video_path, max_seconds, fps)
 finally:
     os.remove(video_path)
-if not frames:
-    st.error("Couldn't read any frames from this file.")
+if first is None:
+    st.error("Couldn't read this file. Try an MP4 (H.264), which every phone and CCTV system can export.")
     st.stop()
-h, w = frames[0].shape[:2]
-st.caption(f"{len(frames)} frames · {fps:.0f} fps · {w}×{h} px")
-from crowdshield.motion import CAMERA_MOVING, camera_motion  # noqa: E402
-
-camera = camera_motion(frames, fps)
+h, w = first.shape[:2]
+st.caption(f"{n_frames} frames · {fps:.0f} fps · {w}×{h} px")
 handheld = camera > CAMERA_MOVING
 if handheld:
     st.warning(f"The camera itself is moving (the picture slides about {camera:.0%} of its width per "
@@ -119,7 +171,7 @@ if handheld:
 left, right = st.columns([3, 2])
 with right:
     st.markdown("### 1. Calibrate the floor")
-    calibrate = st.checkbox("I know the size of a rectangle on the floor", value=True,
+    calibrate = st.checkbox("I know the size of a rectangle on the floor", value=not use_sample,
                             help="Floor tiles, a doorway, parking lines, a stage edge. "
                                  "Without this you get counts and speeds in pixels, "
                                  "but no people per m².")
@@ -142,15 +194,21 @@ with right:
     st.markdown("### 2. Zones to watch")
     n_zones = st.number_input("Number of zones", 1, 4, 2)
     zones = []
+    tag = "s" if use_sample else "u"  # separate widget state, so each source keeps its own defaults
     for i in range(int(n_zones)):
-        name = st.text_input(f"Zone {i + 1} name", chr(65 + i), key=f"zn_{i}")
-        x0, x1 = st.slider(f"{name}: left–right (px)", 0, w,
-                           (int(w * i / n_zones), int(w * (i + 1) / n_zones)), key=f"zx_{i}")
-        y0, y1 = st.slider(f"{name}: top–bottom (px)", 0, h, (int(h * .4), h), key=f"zy_{i}")
+        if use_sample and i < len(SAMPLE["zones"]):
+            label, (fx0, fx1), (fy0, fy1) = SAMPLE["zones"][i]
+        else:
+            label, (fx0, fx1), (fy0, fy1) = chr(65 + i), (i / n_zones, (i + 1) / n_zones), (.4, 1)
+        name = st.text_input(f"Zone {i + 1} name", label, key=f"zn_{tag}_{i}")
+        x0, x1 = st.slider(f"{name}: left–right (px)", 0, w, (int(w * fx0), int(w * fx1)),
+                           key=f"zx_{tag}_{i}")
+        y0, y1 = st.slider(f"{name}: top–bottom (px)", 0, h, (int(h * fy0), int(h * fy1)),
+                           key=f"zy_{tag}_{i}")
         zones.append((name, [(x0, y0), (x1, y0), (x1, y1), (x0, y1)]))
 
 with left:
-    st.image(draw(frames[0], corners, zones), caption="First frame: calibration rectangle "
+    st.image(draw(first, corners, zones), caption="First frame: calibration rectangle "
              "in yellow, zones in colour", width="stretch")
 
 if not st.button("Analyse video", type="primary"):
@@ -175,8 +233,22 @@ if counter is None:
     st.stop()
 bar = st.progress(0.0, text="Reading the crowd...")
 monitor = VideoMonitor(counter, fps, [Zone(n, p) for n, p in zones], calib=calib)
-rows, events = monitor.run(frames, progress=lambda i: bar.progress(
-    (i + 1) / len(frames), text=f"Frame {i + 1} of {len(frames)}"))
+last = {}
+
+
+def keep_last(frames):
+    for frame in frames:
+        last["frame"] = frame
+        yield frame
+
+
+video_path = clip_on_disk(data, suffix)
+try:
+    rows, events = monitor.run(keep_last(iter_frames(video_path, max_seconds)),
+                               progress=lambda i: bar.progress(
+                                   min(1.0, (i + 1) / n_frames), text=f"Frame {i + 1} of {n_frames}"))
+finally:
+    os.remove(video_path)
 bar.empty()
 df = pd.DataFrame(rows)
 st.caption(f"Counted with the {counter_name}, once per second.")
@@ -228,7 +300,7 @@ if calib is not None and not handheld:
     st.line_chart(df.pivot(index="t", columns="zone", values="pressure"))
 
 levels = latest["level"].to_dict() if calib is not None else None
-st.image(draw(frames[-1], corners, zones, levels), width="stretch",
+st.image(draw(last.get("frame", first), corners, zones, levels), width="stretch",
          caption="Last frame, zones coloured by density level")
 st.download_button("Download readings (CSV)", df.to_csv(index=False), "crowd_readings.csv",
                    "text/csv")

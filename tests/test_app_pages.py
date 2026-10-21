@@ -91,3 +91,12 @@ def test_benchmark_page_reports_the_india_pilot():
     app = render(PAGES["Benchmark"])
     text = " ".join(block.value for block in app.markdown)
     assert "Known failure" in text
+
+
+def test_video_page_opens_the_sample_clip_as_a_fixed_camera():
+    app = render(PAGES["Video"])
+    app.radio[0].set_value("Sample: Paris Saint-Lazare station").run()
+    assert not app.exception, [e.message for e in app.exception]
+    assert any("450 frames" in block.value for block in app.caption)
+    assert not app.warning  # no moving-camera warning: the station camera is fixed
+    assert [box.value for box in app.text_input] == ["Stairs", "Concourse"]

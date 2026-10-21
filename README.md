@@ -44,6 +44,12 @@ becomes your own site's live view.
 The **Video** page puts this together: upload a clip from a fixed camera, mark
 the floor rectangle and the zones, and get per-zone density, speed, pressure,
 warnings and a CSV of every reading.
+It streams the clip frame by frame instead of loading it whole, so memory stays
+flat however long the clip is. The hosted demo analyses up to 20 seconds (set
+`CROWDSHIELD_MAX_VIDEO_S` to raise it on your own machine), and a 15-second
+sample from a fixed camera at Paris Saint-Lazare station is built in: Baidax,
+[CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/), via
+[Wikimedia Commons](https://commons.wikimedia.org/wiki/File:2025-11-06_17-33-16_-_Paris_-_Saint-Lazare.webm).
 
 ## How well it works
 
