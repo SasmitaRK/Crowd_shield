@@ -7,6 +7,7 @@ import streamlit.components.v1 as components
 from shared_state import (init_state, GLOBAL_CSS, SEGMENTS,
                           MAX_IMAGES_PER_SEGMENT, get_seg_thresholds)
 from detection import process_segment, MODEL_REGISTRY, risk_level
+from crowdshield.config import COUNTER_LABELS
 
 st.set_page_config(page_title="Upload • Crowd Shield",
                    page_icon=None, layout="wide")
@@ -492,7 +493,7 @@ if st.session_state.crowd_data:
                 st.metric(
                     f"Segment {seg}",
                     d["count"],
-                    help=(f"YOLO boxed {d['body_count']} · "
+                    help=(f"Counted by the {COUNTER_LABELS.get(d.get('counter'), 'model')} · "
                           f"{n_c} CCTV, {n_d} Drone"),
                 )
             else:

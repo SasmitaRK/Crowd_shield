@@ -17,6 +17,7 @@ from shared_state import (init_state, GLOBAL_CSS, SEGMENTS,
                           RISK_COLORS, RISK_ICONS, get_seg_thresholds)
 from detection import risk_level, MODEL_REGISTRY
 from crowdshield.risk import plan_relocations
+from crowdshield.config import COUNTER_LABELS
 from emailer import (email_configured, send_email,
                      build_critical_email, build_receiving_email)
 
@@ -65,6 +66,7 @@ for seg in SEGMENTS:
         "body_count":  d["body_count"],
         "head_count":  d["head_count"],
         "image_count": d["image_count"],
+        "counter":     d.get("counter"),
         "risk":        risk_level(d["count"], t),
         "thresholds":  t,
     }
@@ -146,7 +148,7 @@ for i, (seg, info) in enumerate(seg_info.items()):
             f"<span style='font-size:.8rem;color:#6b7280;margin-left:.3rem'>people</span>"
             f"</div>",
             unsafe_allow_html=True)
-        st.caption(f"{info['body_count']} people boxed by YOLO")
+        st.caption(f"Counted by the {COUNTER_LABELS.get(info['counter'], 'model')}")
         st.caption(f"Thresholds: {t['moderate']} / {t['high']} / {t['critical']}")
         st.markdown(f'<span class="risk-badge {css}">{risk}</span>',
                     unsafe_allow_html=True)
@@ -603,12 +605,12 @@ st.markdown('<div class="section-label">Export</div>', unsafe_allow_html=True)
 
 _csv_buf = io.StringIO()
 _writer  = csv.writer(_csv_buf)
-_writer.writerow(["Segment", "Count", "Risk Level", "Bodies", "Heads",
+_writer.writerow(["Segment", "Count", "Risk Level", "Counted by",
                   "Moderate Threshold", "High Risk Threshold", "Critical Threshold"])
 for _seg, _info in seg_info.items():
     _t = _info["thresholds"]
     _writer.writerow([f"Segment {_seg}", _info["count"], _info["risk"],
-                      _info["body_count"], _info["head_count"],
+                      COUNTER_LABELS.get(_info["counter"], ""),
                       _t["moderate"], _t["high"], _t["critical"]])
 
 _dl_left, _dl_btn = st.columns([5, 1])

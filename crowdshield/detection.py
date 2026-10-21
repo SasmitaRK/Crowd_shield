@@ -174,10 +174,12 @@ def count_people(img: np.ndarray, model_key: str = DEFAULT_MODEL_KEY) -> dict:
 
     In order of accuracy on the ShanghaiTech test photos: the point model (PET),
     then the density model (DM-Count), then YOLO boxes, using the first one that
-    can run here (it needs PyTorch and a one-time weights download).
+    can run here (the first two need PyTorch and a one-time weights download).
+    YOLO only runs as the last resort: it finds a small share of the people in
+    a dense crowd, and running it alongside would only slow the app down.
     """
-    det = detect_people(img, model_key)
-    base = {**det, "detector_count": det["count"], "density": None, "points": None}
+    base = {"body_count": 0, "head_count": 0, "person_boxes": [], "extra_heads": [],
+            "density": None, "points": None}
     try:
         from .points import count_points
 
@@ -193,7 +195,9 @@ def count_people(img: np.ndarray, model_key: str = DEFAULT_MODEL_KEY) -> dict:
         return {**base, "count": int(round(dens["count"])), "density": dens["density"],
                 "counter": "density"}
     except Exception:
-        return {**base, "counter": "detector"}
+        pass
+    det = detect_people(img, model_key)
+    return {**base, **det, "counter": "detector"}
 
 
 def analyse_image_bytes(image_bytes: bytes, model_key: str = DEFAULT_MODEL_KEY) -> dict:
@@ -202,14 +206,13 @@ def analyse_image_bytes(image_bytes: bytes, model_key: str = DEFAULT_MODEL_KEY) 
 
     img = cv2.imdecode(np.frombuffer(image_bytes, np.uint8), cv2.IMREAD_COLOR)
     if img is None:
-        return {"count": 0, "body_count": 0, "head_count": 0, "detector_count": 0,
+        return {"count": 0, "body_count": 0, "head_count": 0,
                 "counter": None, "overlay": None, "model_key": model_key}
     res = count_people(img, model_key)
     return {
         "count":          res["count"],
         "body_count":     res["body_count"],
         "head_count":     res["head_count"],
-        "detector_count": res["detector_count"],
         "counter":        res["counter"],
         "overlay":        render_overlay(img, res["person_boxes"], res["extra_heads"],
                                          res["density"], res["points"]),
