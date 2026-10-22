@@ -39,8 +39,8 @@ def test_fit_picks_the_largest_size_that_fits():
 
 def test_other_processes_use_up_the_budget():
     gb = 1024 ** 3
-    free = config.fit_max_side(limit_bytes=3 * gb, in_use_bytes=0, own_bytes=0, ceiling=640)
-    busy = config.fit_max_side(limit_bytes=3 * gb, in_use_bytes=int(1.5 * gb), own_bytes=0, ceiling=640)
+    free = config.fit_max_side(limit_bytes=5 * gb, in_use_bytes=0, own_bytes=0, ceiling=640)
+    busy = config.fit_max_side(limit_bytes=5 * gb, in_use_bytes=2 * gb, own_bytes=0, ceiling=640)
     assert busy < free
 
 
@@ -52,3 +52,9 @@ def test_a_server_too_small_for_the_model_says_so():
 
 def test_no_memory_limit_means_the_ceiling(monkeypatch):
     assert config.fit_max_side(limit_bytes=None, ceiling=1234) == 1234
+
+
+def test_a_3_2_gb_server_stays_well_under_its_limit():
+    """The Streamlit Cloud server has 3.2 GB; the size must not come close to it."""
+    side = config.fit_max_side(limit_bytes=3_200_000_000, in_use_bytes=0, own_bytes=0, ceiling=1024)
+    assert config.estimated_peak_mb(side) <= 0.6 * 3200
