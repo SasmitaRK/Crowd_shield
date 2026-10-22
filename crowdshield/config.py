@@ -12,6 +12,9 @@ FULL_MAX_SIDE = 2048
 # 800 px 2.4 GB, 1024 px 2.8 GB, 1280 px 3.6 GB, 2048 px 8.4 GB. Streamlit Community Cloud gives
 # an app about 2.7 GB, so it counts at 640 px; counts stay within a few percent.
 SMALL_SERVER_MAX_SIDE = 640
+# Counted in tiles on a small server, so photos keep this much detail (the same accuracy on
+# ShanghaiTech as 2048 px: results/size_accuracy.json) instead of shrinking to fit in memory.
+SMALL_SERVER_WORK_SIDE = 1024
 SMALL_SERVER_BYTES = 6 * 1024 ** 3
 
 
@@ -102,6 +105,20 @@ def fit_max_side(limit_bytes: int | None = None, in_use_bytes: int | None = None
         f"This server has about {limit / 1e9:.1f} GB of memory, and counting needs roughly "
         f"{estimated_peak_mb(MIN_SIDE) / 1000:.1f} GB even for a small photo. Run Crowd Shield on "
         "your own computer, or use the sample photos.")
+
+
+def default_work_side() -> int:
+    """The photo size the point model should see: the most detail worth paying for.
+
+    A server too small to run that size in one pass counts it in tiles instead (see points.py), so
+    the size no longer has to shrink with memory. CROWDSHIELD_MAX_SIDE overrides it.
+    """
+    if os.environ.get("CROWDSHIELD_MAX_SIDE"):
+        return int(os.environ["CROWDSHIELD_MAX_SIDE"])
+    limit = memory_limit_bytes()
+    if on_streamlit_cloud() or (limit is not None and limit < SMALL_SERVER_BYTES):
+        return SMALL_SERVER_WORK_SIDE
+    return FULL_MAX_SIDE
 
 
 def default_max_side() -> int:
