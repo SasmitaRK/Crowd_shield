@@ -18,6 +18,7 @@ PAGES = {
     "Monitor": [
         st.Page("pages/6_🗺️_Map.py", title="Site map", icon=":material/map:", url_path="Map"),
         st.Page("pages/5_🎥_Video.py", title="Video monitor", icon=":material/videocam:", url_path="Video"),
+        st.Page("pages/8_📡_Live.py", title="Live feed", icon=":material/sensors:", url_path="Live"),
     ],
     "Analyse": [
         st.Page("pages/2_📤_Upload.py", title="Photo analysis", icon=":material/photo_camera:",

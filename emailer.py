@@ -90,7 +90,7 @@ def _html_wrap(header_color: str, header_icon: str, header_text: str,
           {body_html}
           <hr style="border:none;border-top:1px solid #e0e0e0;margin:20px 0">
           <p style="font-size:0.75em;color:#aaa;margin:0">
-            CrowdWatch Pro automated alert &nbsp;·&nbsp;
+            Crowd Shield automated alert &nbsp;·&nbsp;
             Do not reply to this email.
           </p>
         </div>
@@ -114,7 +114,7 @@ def build_critical_email(seg: str, count: int,
     is_critical = risk_level == "Critical"
     color   = "#c0392b" if is_critical else "#e67e22"
     icon    = "🔴" if is_critical else "🟠"
-    subject = (f"{icon} CrowdWatch Alert: {'CRITICAL' if is_critical else 'HIGH RISK'} "
+    subject = (f"{icon} Crowd Shield alert: {'CRITICAL' if is_critical else 'HIGH RISK'} "
                f"— Segment {seg}")
 
     allowable = max(0, thresholds["critical"] - count)
@@ -185,7 +185,7 @@ def build_receiving_email(seg: str, count: int,
                            move_count: int,
                            thresholds: dict) -> tuple[str, str]:
     """Build notice email for the agent at the receiving (destination) segment."""
-    subject = f"📋 CrowdWatch Notice: Incoming crowd to Segment {seg}"
+    subject = f"📋 Crowd Shield notice: Incoming crowd to Segment {seg}"
     remaining_cap = max(0, thresholds["high"] - count - move_count)
     rows = "".join([
         _info_row("Your segment", f"<b>{seg}</b>"),

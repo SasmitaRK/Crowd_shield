@@ -44,6 +44,31 @@ becomes your own site's live view.
 The **Video** page puts this together: upload a clip from a fixed camera, mark
 the floor rectangle and the zones, and get per-zone density, speed, pressure,
 warnings and a CSV of every reading.
+The **Live feed** page watches a camera stream (RTSP, or an HTTP stream such as HLS or MJPEG) instead of a
+recorded clip. Every 30 to 300 seconds it grabs the newest frame, counts the people in each zone you drew,
+colours the zone by risk, follows the trend and estimates the time until the zone is full (a Theil-Sen
+trend on the counts, the same method as the video early warning). A **Demo feed** plays the Saint-Lazare
+sample as if it were live, so it can be tried without a camera.
+
+It samples one frame at a time, because counting a frame with the point model takes seconds. It is not
+video-rate tracking: speed, crowd pressure and the surge alarm still need the Video page and a fixed camera.
+A hosted copy only runs while the page is open. To watch a camera around the clock, run it on your own
+computer, with no browser:
+
+```
+python -m crowdshield.live_cli --source rtsp://192.168.1.20/stream --zones zones.json --interval 20 --notify
+```
+
+(`zones.json` names each zone as a box of the picture and how many people it holds; the file's help shows the
+format. A camera on your own network needs `CROWDSHIELD_ALLOW_PRIVATE_URLS=1`.) The hosted app refuses
+addresses on private networks and anything other than rtsp/http(s), so it can't be pointed at the server's own
+network.
+
+**Alerts** go to Telegram (free, works on a phone) and/or email. Set `TELEGRAM_BOT_TOKEN` and
+`TELEGRAM_CHAT_ID`, or `GMAIL_USER` and `GMAIL_APP_PASSWORD`, as environment variables or Streamlit secrets.
+Settings explains the 2-minute Telegram set-up and has "send a test" buttons. Nothing is sent unless alerts
+are switched on, and a zone is announced once per level, then quiet for 10 minutes.
+
 It streams the clip frame by frame instead of loading it whole, so memory stays
 flat however long the clip is. The hosted demo analyses up to 20 seconds (set
 `CROWDSHIELD_MAX_VIDEO_S` to raise it on your own machine), and a 15-second

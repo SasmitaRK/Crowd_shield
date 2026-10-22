@@ -11,6 +11,8 @@ import streamlit as st
 
 from ui import kpi_cards, page_header, section
 
+from crowdshield import counting
+
 from shared_state import GLOBAL_CSS, init_state
 
 st.set_page_config(page_title="Video • Crowd Shield", page_icon=None, layout="wide")
@@ -88,36 +90,6 @@ def clip_on_disk(data: bytes, suffix: str) -> str:
     with tempfile.NamedTemporaryFile(suffix=suffix, delete=False) as f:
         f.write(data)
         return f.name
-
-
-def make_counter():
-    """The most accurate counter that can run here: point model, density model, then YOLO."""
-    from crowdshield.monitor import points_to_grid
-
-    try:
-        from crowdshield.points import load_point_model, point_grid
-
-        load_point_model()
-        return point_grid, "point model (PET)"
-    except Exception:
-        pass
-    try:
-        from crowdshield.density import density_grid, load_density_model, DEFAULT_WEIGHTS
-
-        load_density_model(str(DEFAULT_WEIGHTS))
-        return density_grid, "density model (DM-Count)"
-    except Exception:
-        from crowdshield.detection import detect_people, load_detector
-
-        if load_detector("crowd_yolo") is None:
-            return None, "no counting model is installed (needs PyTorch and Ultralytics)"
-
-        def yolo_grid(frame):
-            boxes = detect_people(frame)["person_boxes"]
-            centres = [(y + h / 2, x + w / 2) for x, y, w, h in boxes]
-            return points_to_grid(centres, frame.shape)
-
-        return yolo_grid, "YOLO (density model unavailable)"
 
 
 def draw(frame, corners, zones, levels=None):
@@ -229,7 +201,7 @@ if calibrate:
         st.stop()
 
 with st.spinner("Loading the counting model..."):
-    counter, counter_name = make_counter()
+    counter, counter_name = counting.make_counter()
 if counter is None:
     st.error(f"Can't analyse: {counter_name}.")
     st.stop()
