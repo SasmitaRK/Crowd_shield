@@ -6,6 +6,7 @@ import streamlit as st
 
 from crowdshield import config, notify
 from crowdshield.risk import thresholds_from_area
+from crowdshield.session import BadSession, export_session, import_session
 from emailer import email_configured, send_email
 from shared_state import DEFAULT_THRESHOLDS, FRUIN_PRESETS, GLOBAL_CSS, SEGMENTS, init_state, zone_label
 from ui import page_header, section
@@ -153,6 +154,34 @@ c4.metric("Photo detail", f"{work} px", help="Photos are shrunk to this size (lo
 c5.metric("Counted in", how, help="One pass if it fits in memory, otherwise tiles with a little overlap.")
 st.caption(f"Running from `{config.REPO_ROOT}`"
            f"{' (Streamlit Community Cloud)' if config.on_streamlit_cloud() else ''}.")
+
+# ── Save and load ──────────────────────────────────────────────────────────
+section("Save and load your work", "Nothing is stored on the server, so closing the tab clears your counts, limits, "
+        "contacts and drawn site. Save them to a file on your computer and load them next time. Photos are not "
+        "saved, only the numbers.")
+s1, s2 = st.columns(2)
+with s1:
+    st.download_button("Save my session (JSON file)", export_session(st.session_state),
+                       file_name="crowd_shield_session.json", mime="application/json", width="stretch",
+                       icon=":material/download:")
+with s2:
+    saved = st.file_uploader("Load a saved session", type=["json"], label_visibility="collapsed",
+                             key="session_file")
+    if saved is not None and st.button("Load it", width="stretch", icon=":material/upload:"):
+        try:
+            loaded = import_session(saved.getvalue().decode("utf-8", errors="replace"))
+        except BadSession as exc:
+            st.error(str(exc))
+        else:
+            for key, value in loaded.items():
+                st.session_state[key] = value
+            for seg in SEGMENTS:  # the boxes on this and other pages read these keys first
+                st.session_state.pop(f"agent_input_{seg}", None)
+                st.session_state.pop(f"area_{seg}", None)
+            show_limits(st.session_state.thresholds)
+            st.success("Loaded: " + ", ".join({"crowd_data": "counts", "thresholds": "risk limits",
+                                              "agents": "contacts", "custom_site": "drawn site",
+                                              "zone_names": "zone names"}.get(k, k) for k in loaded) + ".")
 
 # ── Reset ──────────────────────────────────────────────────────────────────
 section("Reset", "Everything here lasts for this browser session only; these clear it sooner.")

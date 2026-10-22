@@ -148,3 +148,24 @@ def test_analysis_page_points_to_settings_when_no_alert_channel_is_set_up(monkey
         monkeypatch.delenv(name, raising=False)
     app = render(PAGES["Analysis"], crowd_data={"A": zone_result(95), "B": zone_result(10)})
     assert any("No alert channel is set up" in w.value for w in app.warning)
+
+
+def test_settings_saves_and_loads_a_session():
+    from crowdshield.session import export_session, import_session
+
+    app = render(PAGES["Settings"], crowd_data={"A": zone_result(55)},
+                 agents={"A": "a@example.com", "B": "", "C": "", "D": "", "E": ""})
+    saved = export_session(app.session_state)
+    assert '"count": 55' in saved and "a@example.com" in saved
+    assert import_session(saved)["crowd_data"]["A"]["count"] == 55
+
+
+def test_photo_results_tell_the_user_to_check_where_the_dots_sit():
+    app = render(PAGES["Upload"], crowd_data={"A": zone_result(40)})
+    assert any("Look at where the dots sit" in c.value for c in app.caption)
+
+
+def test_map_labels_demo_zones_as_illustrative():
+    pytest.importorskip("streamlit_folium")
+    text = " ".join(b.value for b in render(PAGES["Map"]).markdown)
+    assert "Illustrative zones, not the official layout" in text
