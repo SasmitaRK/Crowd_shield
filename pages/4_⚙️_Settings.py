@@ -237,26 +237,53 @@ st.markdown("---")
 # ---------------------------------------------------------------------------
 # 4. Email config
 # ---------------------------------------------------------------------------
-st.markdown("### Gmail Alert Configuration")
-if email_configured():
-    st.success("Gmail configured — alerts with embedded detection images "
-               "can be sent from the Analysis page.")
-else:
-    st.error("Gmail not configured.")
+st.markdown("### Alert channels")
+from crowdshield import notify  # noqa: E402
 
-with st.expander("How to enable email alerts", expanded=not email_configured()):
-    st.markdown("""
+st.caption("Where Crowd Shield sends alerts. Nothing is sent unless you press a button here, send alerts "
+           "from the Alerts page, or the live monitor raises one.")
+tg, mail = st.columns(2)
+with tg:
+    st.markdown("**Telegram** (free, works on a phone)")
+    if notify.telegram_configured():
+        st.success("Telegram is set up.")
+        if st.button("Send a test message", key="tg_test"):
+            ok, message = notify.send_telegram("Crowd Shield test: alerts from this app reach this chat.")
+            (st.success if ok else st.error)(message)
+    else:
+        st.warning("Telegram is not set up.")
+    with st.expander("How to set up Telegram alerts (2 minutes)", expanded=not notify.telegram_configured()):
+        st.markdown("""
+1. In Telegram, open **@BotFather**, send `/newbot`, pick a name, and copy the **token** it gives you.
+2. Open your new bot and press **Start** (a bot can only message people who started it).
+3. Open `https://api.telegram.org/bot<TOKEN>/getUpdates` in a browser (put your token in) and copy the
+   number after `"chat":{"id":`. For a group, add the bot to it first; its id starts with `-`.
+4. Add two secrets: `TELEGRAM_BOT_TOKEN` and `TELEGRAM_CHAT_ID`. On Streamlit Community Cloud this is
+   **App settings → Secrets**: `TELEGRAM_BOT_TOKEN = "123:abc"` and `TELEGRAM_CHAT_ID = "123456789"`.
+        """)
+with mail:
+    st.markdown("**Email** (Gmail)")
+    if email_configured():
+        st.success("Gmail is set up.")
+        import os
+        if st.button("Email a test to myself", key="mail_test"):
+            from emailer import send_email
+            ok, message = send_email(os.environ["GMAIL_USER"], "Crowd Shield test",
+                                     "<p>Alerts from Crowd Shield reach this inbox.</p>")
+            (st.success if ok else st.error)(message)
+    else:
+        st.warning("Gmail is not set up.")
+    with st.expander("How to set up email alerts", expanded=not email_configured()):
+        st.markdown("""
 | Secret name | Value |
 |---|---|
 | `GMAIL_USER` | Gmail address that sends alerts |
 | `GMAIL_APP_PASSWORD` | 16-character app password from Google |
 
-**Steps:**
-1. Enable 2-Step Verification at <https://myaccount.google.com/security>
-2. Generate an app password at <https://myaccount.google.com/apppasswords>
-   — choose Mail / Other (CrowdWatch Pro)
-3. Add both as Replit Secrets (lock icon in sidebar)
-    """)
+1. Turn on 2-Step Verification at <https://myaccount.google.com/security>.
+2. Make an app password at <https://myaccount.google.com/apppasswords> (name it Crowd Shield).
+3. Add both as secrets (on Streamlit Community Cloud: **App settings → Secrets**).
+        """)
 
 st.markdown("---")
 
