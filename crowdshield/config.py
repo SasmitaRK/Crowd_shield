@@ -40,8 +40,9 @@ class NotEnoughMemory(RuntimeError):
 
 
 # Peak memory (MB) of the whole app while PET counts one photo at each size, measured on a
-# Kaggle CPU (results/pet_memory.json, results/app_memory.json). Sizes in between are interpolated.
-PET_PEAK_MB = {320: 900, 384: 1000, 448: 1150, 512: 1300, 576: 1400, 640: 1530,
+# Kaggle CPU (results/pet_memory.json, pet_memory_small.json, app_memory.json). Loading the weights
+# alone takes about 0.9 GB, so no photo size runs in much less than that. Sizes in between are interpolated.
+PET_PEAK_MB = {320: 920, 384: 1140, 448: 1140, 512: 1150, 576: 1520, 640: 1520,
                800: 2400, 1024: 2800, 1280: 3600, 1600: 5500, 2048: 8500}
 MIN_SIDE = 320
 SAFETY = 0.85  # use at most this share of what's free: the numbers above are from one test machine

@@ -1,0 +1,28 @@
+[
+ {
+  "mode": "cloud",
+  "result": {
+   "max_side": 640,
+   "start_mb": 16,
+   "after_page_imports_mb": 159,
+   "count": 89,
+   "counter": "points",
+   "seconds": 23.2,
+   "after_count_mb": 708,
+   "peak_mb": 1530
+  }
+ },
+ {
+  "mode": "big",
+  "result": {
+   "max_side": 2048,
+   "start_mb": 16,
+   "after_page_imports_mb": 157,
+   "count": 93,
+   "counter": "points",
+   "seconds": 64.0,
+   "after_count_mb": 675,
+   "peak_mb": 8492
+  }
+ }
+]
