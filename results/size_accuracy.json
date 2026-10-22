@@ -1,0 +1,98 @@
+{
+ "ShanghaiTech A": {
+  "512": {
+   "photos": 182,
+   "accuracy": 0.8198,
+   "mae": 78.07,
+   "seconds": 87
+  },
+  "704": {
+   "photos": 182,
+   "accuracy": 0.836,
+   "mae": 71.06,
+   "seconds": 26
+  },
+  "1024": {
+   "photos": 182,
+   "accuracy": 0.865,
+   "mae": 58.5,
+   "seconds": 40
+  },
+  "1280": {
+   "photos": 182,
+   "accuracy": 0.865,
+   "mae": 58.5,
+   "seconds": 41
+  },
+  "2048": {
+   "photos": 182,
+   "accuracy": 0.865,
+   "mae": 58.5,
+   "seconds": 41
+  }
+ },
+ "ShanghaiTech B": {
+  "512": {
+   "photos": 316,
+   "accuracy": 0.9021,
+   "mae": 12.12,
+   "seconds": 132
+  },
+  "704": {
+   "photos": 316,
+   "accuracy": 0.9192,
+   "mae": 10.0,
+   "seconds": 64
+  },
+  "1024": {
+   "photos": 316,
+   "accuracy": 0.9272,
+   "mae": 9.01,
+   "seconds": 88
+  },
+  "1280": {
+   "photos": 316,
+   "accuracy": 0.9272,
+   "mae": 9.01,
+   "seconds": 88
+  },
+  "2048": {
+   "photos": 316,
+   "accuracy": 0.9272,
+   "mae": 9.01,
+   "seconds": 88
+  }
+ },
+ "India (10 hand-labelled)": {
+  "512": {
+   "photos": 10,
+   "accuracy": 0.7931,
+   "mae": 72.57,
+   "seconds": 1
+  },
+  "704": {
+   "photos": 10,
+   "accuracy": 0.7933,
+   "mae": 72.5,
+   "seconds": 2
+  },
+  "1024": {
+   "photos": 10,
+   "accuracy": 0.6129,
+   "mae": 135.74,
+   "seconds": 3
+  },
+  "1280": {
+   "photos": 10,
+   "accuracy": 0.5363,
+   "mae": 162.62,
+   "seconds": 5
+  },
+  "2048": {
+   "photos": 10,
+   "accuracy": 0.6471,
+   "mae": 123.75,
+   "seconds": 11
+  }
+ }
+}
