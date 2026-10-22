@@ -50,7 +50,8 @@ with st.sidebar:
         "<div style='margin-top:.7rem'>"
         "<a href='https://khushi-git-7.github.io/Crowd_shield/' target='_blank'>Project home</a> · "
         "<a href='https://github.com/khushi-git-7/Crowd_shield' target='_blank'>Code</a> · "
-        "<a href='https://huggingface.co/Khushi-7/crowd-shield-counting' target='_blank'>Models</a>"
+        "<a href='https://huggingface.co/Khushi-7/crowd-shield-counting' target='_blank'>Models</a> · "
+        "<a href='https://github.com/khushi-git-7/Crowd_shield/issues/new?template=feedback.yml' target='_blank'>Feedback</a>"
         "</div></div>",
         unsafe_allow_html=True)
 

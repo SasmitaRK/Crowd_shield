@@ -95,6 +95,10 @@
             background: radial-gradient(600px 300px at 50% 40%, rgba(20,184,166,.18), transparent 70%), var(--ink-2); }
   .launch p { color: #94a3b8; font-size: .9rem; margin-top: 12px; max-width: 460px; }
   .launch ul { list-style: none; padding: 0; margin: 22px 0 0; display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; }
+  .wake { width: 220px; height: 4px; background: #1e293b; border-radius: 99px; overflow: hidden; margin: 18px auto 0; }
+  .wake i { display: block; width: 40%; height: 100%; background: var(--brand-300); border-radius: 99px; animation: wake 1.4s ease-in-out infinite; }
+  @keyframes wake { 0% { transform: translateX(-100%); } 100% { transform: translateX(260%); } }
+  .stage .launch#waking { z-index: 2; pointer-events: none; }
   .launch li { font-size: .8rem; color: #cbd5e1; border: 1px solid #334155; border-radius: 99px; padding: 5px 12px; }
 
   /* cards */
@@ -456,9 +460,16 @@
 
 // Live demo: load the app only when asked, so the page itself stays fast
 document.getElementById("launch").onclick = () => {
-  document.getElementById("stage").innerHTML =
+  const stage = document.getElementById("stage");
+  stage.innerHTML =
+    '<div class="launch" id="waking"><div><p style="color:#e2e8f0;font-weight:600;margin:0">Starting Crowd Shield...</p>' +
+    '<p>Free hosting puts the app to sleep when nobody is using it. Waking it takes about 30 seconds.</p>' +
+    '<div class="wake"><i></i></div></div></div>' +
     '<iframe src="https://crowd-shield-india.streamlit.app/?embed=true&embed_options=light_theme" title="Crowd Shield live app"' +
     ' allow="clipboard-write; fullscreen"></iframe>';
+  // the sleeping app answers with its own page first; give the real app a moment before the cover goes
+  setTimeout(() => document.getElementById("waking")?.remove(), 45000);   // never leave the cover up for good
+  stage.querySelector("iframe").addEventListener("load", () => setTimeout(() => document.getElementById("waking")?.remove(), 6000));
 };
 
 // Accuracy table (results/shanghaitech/comparison.md)
