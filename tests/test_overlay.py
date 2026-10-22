@@ -1,6 +1,9 @@
 import numpy as np
+import pytest
 
-from crowdshield.detection import render_overlay
+pytest.importorskip("cv2")  # the minimal "core" CI job has no OpenCV; the "app" job runs these
+
+from crowdshield.detection import render_overlay  # noqa: E402
 
 
 def test_head_dots_are_big_and_see_through():
