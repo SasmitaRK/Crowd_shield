@@ -182,7 +182,18 @@ test photos ([results/cpu_speed.json](results/cpu_speed.json)):
 | PET point model | 2048 px | 38 s | 9.0 GB |
 
 So an ordinary 8 GB laptop can count photos, but not live video: video needs a GPU (about 1.4 s
-per second of video on a free T4). The hosted demo uses 1280 px for this reason.
+per second of video on a free T4).
+
+**Memory sets the photo size.** PET's memory grows with pixel count. Measured alone, one model in a
+fresh process ([results/pet_memory.json](results/pet_memory.json)):
+
+| Photos resized to | 640 px | 800 px | 1024 px | 1280 px | 1600 px | 2048 px |
+|---|---|---|---|---|---|---|
+| PET peak memory | 1.5 GB | 2.4 GB | 2.8 GB | 3.6 GB | 5.4 GB | 8.4 GB |
+
+Streamlit Community Cloud gives an app about 2.7 GB, so on it (or any machine with under 6 GB)
+Crowd Shield counts at 640 px; elsewhere it uses 2048 px. On the four test photos the counts at
+640 px stayed close to those at 2048 px. `CROWDSHIELD_MAX_SIDE` overrides the choice.
 
 ## Run it
 
