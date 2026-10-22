@@ -45,6 +45,11 @@ def _outside(points, zones):
             if not any(x0 <= p[0] <= x1 and y0 <= p[1] <= y1 for x0, y0, x1, y1 in zones)]
 
 
+def points_rc(points) -> list[tuple]:
+    """Stored head points are (x, y); the drawing code takes (row, column), i.e. (y, x)."""
+    return [(y, x) for x, y in points]
+
+
 def load(root: Path = INDIA) -> list[dict]:
     """One row per photo with hand-checked labels: true count, model count, error and scene."""
     labels_file = root / "labels.json"
