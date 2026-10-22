@@ -153,6 +153,15 @@ GLOBAL_CSS = """
   .hero-dots circle { animation: cs-float 3.6s ease-in-out infinite; }
   @keyframes cs-float { 0%,100% { opacity: .35; } 50% { opacity: 1; } }
   @media (max-width: 1100px) { .hero-dots { display: none; } }
+  @media (max-width: 640px) {  /* phones: less frame, smaller type, numbers two by two */
+    .main .block-container, [data-testid="stMainBlockContainer"] { padding-left: 1rem; padding-right: 1rem; padding-top: 3rem; }
+    .hero { padding: 1.4rem 1.2rem 1.3rem; border-radius: 14px; }
+    .hero h1 { font-size: 1.65rem !important; }
+    .hero p { font-size: .92rem; }
+    .hero .stats { display: grid; grid-template-columns: 1fr 1fr; gap: .9rem 1.2rem; }
+    .hero .stat b { font-size: 1.25rem; }
+    .ph h1 { font-size: 1.5rem !important; }
+  }
   @media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
 
   /* ── Widgets ──────────────────────────────────────────── */
