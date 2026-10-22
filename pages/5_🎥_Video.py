@@ -9,7 +9,7 @@ import numpy as np
 import pandas as pd
 import streamlit as st
 
-from ui import page_header
+from ui import kpi_cards, page_header, section
 
 from shared_state import GLOBAL_CSS, init_state
 
@@ -37,6 +37,8 @@ SAMPLE = {
     "zones": [("Stairs", (0.67, 1.0), (0.25, 1.0)), ("Concourse", (0.0, 0.65), (0.53, 1.0))],
 }
 ZONE_COLOURS = [(0, 200, 255), (255, 120, 0), (180, 0, 255), (0, 220, 120)]
+ZONE_HEX = ["#{:02x}{:02x}{:02x}".format(r, g, b) for b, g, r in ZONE_COLOURS]  # BGR to hex
+LEVEL_ACCENT = {"Normal": "#10b981", "Crowded": "#f59e0b", "Dangerous": "#f97316", "Crush risk": "#ef4444"}
 LEVEL_COLOURS = {"Normal": (80, 200, 80), "Crowded": (0, 200, 255),
                  "Dangerous": (0, 120, 255), "Crush risk": (0, 0, 255), None: (200, 200, 200)}
 
@@ -253,54 +255,92 @@ bar.empty()
 df = pd.DataFrame(rows)
 st.caption(f"Counted with the {counter_name}, once per second.")
 
-st.markdown("## Results")
+section("Results", "The latest reading for each zone, with its peak and average over the clip.")
 latest = df.groupby("zone").tail(1).set_index("zone")
-cols = st.columns(len(latest))
-for col, (name, r) in zip(cols, latest.iterrows()):
-    with col:
-        st.markdown(f"### Zone {name}")
-        if calib is not None:
-            st.metric("People per m²", f"{r['per_m2']:.2f}", help=f"{r['level']}")
-            st.caption(f"{r['level']} · {r['people']:.0f} people in {r['area_m2']:.0f} m²")
+summary = df.groupby("zone")["people"].agg(["max", "mean"])
+cards, accents = [], []
+for name, r in latest.iterrows():
+    peak, mean = summary.loc[name, "max"], summary.loc[name, "mean"]
+    if calib is not None:
+        cards.append((f"Zone {name}", f"{r['per_m2']:.2f} /m²",
+                      f"{r['level']} · {r['people']:.0f} people in {r['area_m2']:.0f} m²"))
+        accents.append(LEVEL_ACCENT.get(r["level"]))
+    else:
+        cards.append((f"Zone {name}", f"{r['people']:.0f} people", f"peak {peak:.0f} · average {mean:.0f}"))
+        accents.append(None)
+if handheld:
+    cards.append(("Surge alarm", "Off", "the camera is moving"))
+    accents.append(None)
+else:
+    cards.append(("Surge alarm", f"{len(events)} alert{'s' * (len(events) != 1)}" if events else "None",
+                  "sudden movement detected" if events else "no sudden movement"))
+    accents.append("#ef4444" if events else "#10b981")
+kpi_cards(cards, accents)
+for e in events if not handheld else []:
+    st.error(f"⚠ {e['t']:.1f} s: {e['event']}")
+
+if calib is not None:
+    cols = st.columns(len(latest))
+    for col, (name, r) in zip(cols, latest.iterrows()):
+        with col:
             if not handheld:
-                st.metric("Speed", f"{r['speed']:.2f} m/s")
-                st.metric("Crowd pressure", f"{r['pressure']:.3f} /s²",
+                st.metric(f"{name}: speed", f"{r['speed']:.2f} m/s")
+                st.metric(f"{name}: crowd pressure", f"{r['pressure']:.3f} /s²",
                           help="Density × velocity variance (Helbing et al., 2007). Turbulent "
                                f"motion began above {HELBING_TURBULENCE_PRESSURE}/s² at the 2006 "
                                "Hajj disaster.")
             eta = r["eta_s"]
             if eta is None or pd.isna(eta):
-                st.success("No rising trend towards 5 people per m².")
+                st.success(f"{name}: no rising trend towards 5 people per m².")
             elif eta == 0:
-                st.error("Already above 5 people per m².")
+                st.error(f"{name}: already above 5 people per m².")
             else:
-                st.warning(f"At the current trend, reaches 5 people per m² in about "
+                st.warning(f"{name}: at the current trend, reaches 5 people per m² in about "
                            f"{eta / 60:.1f} min.")
-        else:
-            st.metric("People", f"{r['people']:.0f}")
-            if not handheld:
-                st.metric("Speed", f"{r['speed']:.0f} px/s")
 
-if handheld:
-    st.info("Panic alarm off: the camera is moving.")
-elif events:
-    for e in events:
-        st.error(f"⚠ {e['t']:.1f} s — {e['event']}")
+
+def chart(column, title):
+    import altair as alt
+
+    names = [name for name, _ in zones]  # same order, so the same colours as on the frame
+    colours = [ZONE_HEX[i % len(ZONE_HEX)] for i in range(len(names))]
+    return (alt.Chart(df).mark_line(strokeWidth=2, interpolate="monotone")
+            .encode(x=alt.X("t:Q", title="Seconds into the clip"),
+                    y=alt.Y(f"{column}:Q", title=title),
+                    color=alt.Color("zone:N", title="Zone", scale=alt.Scale(domain=names, range=colours)),
+                    tooltip=[alt.Tooltip("zone:N", title="Zone"), alt.Tooltip("t:Q", title="Second"),
+                             alt.Tooltip(f"{column}:Q", title=title, format=".2f")])
+            .properties(height=260))
+
+
+section("Over time")
+if calib is not None:
+    st.altair_chart(chart("per_m2", "People per m²"), width="stretch")
 else:
-    st.info("No sudden movement detected.")
-
-measure = "per_m2" if calib is not None else "people"
-st.markdown("#### " + ("People per m² over time" if calib is not None else "People over time"))
-st.line_chart(df.pivot(index="t", columns="zone", values=measure))
+    st.altair_chart(chart("people", "People"), width="stretch")
 if not handheld:
-    st.markdown("#### Speed over time" + (" (m/s)" if calib is not None else " (px/s)"))
-    st.line_chart(df.pivot(index="t", columns="zone", values="speed"))
+    st.altair_chart(chart("speed", "Speed (m/s)" if calib is not None else "Pixels per second"),
+                    width="stretch")
+    if calib is None:
+        st.caption("Movement is in pixels because the floor size isn't set. Tick \"I know the size of a "
+                   "rectangle on the floor\" for metres per second, people per m² and crowd pressure.")
 if calib is not None and not handheld:
-    st.markdown("#### Crowd pressure over time (1/s²)")
-    st.line_chart(df.pivot(index="t", columns="zone", values="pressure"))
+    st.altair_chart(chart("pressure", "Crowd pressure (1/s²)"), width="stretch")
 
+section("What the model saw", "The last frame of the clip, with a dot on every head the point model found.")
+final = last.get("frame", first)
 levels = latest["level"].to_dict() if calib is not None else None
-st.image(draw(last.get("frame", first), corners, zones, levels), width="stretch",
-         caption="Last frame, zones coloured by density level")
+picture = draw(final, corners, zones, levels)
+heads = None
+if counter_name.startswith("point model"):
+    from crowdshield.points import count_points
+
+    heads = count_points(final)["points"]
+    for y, x in heads:
+        cv2.circle(picture, (int(x), int(y)), 3, (255, 59, 48), -1, cv2.LINE_AA)
+        cv2.circle(picture, (int(x), int(y)), 3, (255, 255, 255), 1, cv2.LINE_AA)
+st.image(picture, width="stretch",
+         caption=(f"{len(heads)} head points in the whole frame. " if heads is not None else "")
+         + ("Zones coloured by density level." if levels else "Zones in their own colours."))
 st.download_button("Download readings (CSV)", df.to_csv(index=False), "crowd_readings.csv",
                    "text/csv")
