@@ -1,8 +1,8 @@
 """Alert channels: Telegram (free, works on a phone) and, if set up, email.
 
 Telegram needs two settings, TELEGRAM_BOT_TOKEN and TELEGRAM_CHAT_ID, as environment variables or
-Streamlit secrets. Nothing here is sent unless something calls it: the live monitor on a new alert, or
-the "Send test message" button in Settings. The token is never put in a message or an error.
+Streamlit secrets. Nothing here is sent unless something calls it: the live monitor on a new alert, the
+"Send alerts" button on the Alerts and plans page, or a test button in Settings. The token is never put in a message or an error.
 """
 
 from __future__ import annotations
@@ -23,6 +23,13 @@ def _setting(name: str) -> str:
 
 def telegram_configured() -> bool:
     return bool(_setting("TELEGRAM_BOT_TOKEN") and _setting("TELEGRAM_CHAT_ID"))
+
+
+def ready_channels() -> list[str]:
+    """The alert channels that are set up, as the app names them: "Telegram" and/or "email"."""
+    from emailer import email_configured
+
+    return [name for name, ready in (("Telegram", telegram_configured()), ("email", email_configured())) if ready]
 
 
 def _post(method: str, fields: dict, files: dict | None = None) -> dict:

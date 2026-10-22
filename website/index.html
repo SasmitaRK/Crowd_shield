@@ -220,7 +220,8 @@
     <div class="eyebrow">Open-source crowd-safety AI · built and tested for Indian crowds</div>
     <h1>See a crowd crush coming, <span>before it happens.</span></h1>
     <p class="lead">Crowd Shield counts every head in CCTV, drone and phone images, turns the count into
-      people per square metre on a satellite map, and raises an alarm when a crowd starts to surge.
+      people per square metre on a satellite map, watches camera feeds for zones filling up or surging, and
+      plans where to move people.
       These are the warning signs crowd-safety research says appear minutes before a crush.</p>
     <div class="cta">
       <a class="btn primary" href="#demo">Try the live demo</a>
@@ -260,7 +261,7 @@
           <div>
             <button class="btn primary" id="launch" type="button" style="border:0;cursor:pointer;font:inherit;font-weight:600">▶ Launch Crowd Shield</button>
             <p>Runs on free hosting. If nobody has used it for a while, it takes about 30 seconds to wake up.</p>
-            <ul><li>Dashboard</li><li>Photo counting</li><li>Video monitor</li><li>Site maps</li><li>India benchmark</li></ul>
+            <ul><li>Site maps</li><li>Photo counting</li><li>Video monitor</li><li>Live feed</li><li>Evacuation plans and alerts</li><li>India benchmark</li></ul>
           </div>
         </div>
       </div>
@@ -320,7 +321,7 @@
       <div class="card step"><div class="n">3</div><h3>Read the danger</h3>
         <p>Density sets the risk level. On video, optical flow tracks speed and crowd pressure, and an alarm fires on a sudden surge.</p></div>
       <div class="card step"><div class="n">4</div><h3>Act</h3>
-        <p>The app plans where to move people, only along routes they can walk and without overfilling the next zone, and alerts each zone's team.</p></div>
+        <p>An optimiser plans where to move people, only along routes they can walk and without overfilling any zone, and alerts each zone's team by Telegram or email.</p></div>
     </div>
     <div class="card arch"><img src="assets/architecture.svg" alt="Crowd Shield architecture: input, measure, understand, act"></div>
   </div>
@@ -403,8 +404,9 @@
         <p>All 15 freely licensed Indian crowd clips I found were filmed handheld, so speed readings measured the camera, not the crowd.
           The app now detects a moving camera and hides motion results instead of guessing.</p></div></div>
       <div class="card lesson"><div class="ic">⏱️</div><div><h3>No GPU, still useful</h3>
-        <p>On a plain 4-core CPU, PET takes about 16 s per photo with 4.3 GB of memory. That's fine for photos on an
-          8 GB laptop. Live video needs a GPU.</p></div></div>
+        <p>On a plain 4-core CPU, PET takes about 16 s per photo. The free server has 3.2 GB, so it counts big
+          photos in overlapping tiles: same accuracy, about a minute each. A live feed is recounted every 30 s or
+          more; video-rate analysis would need a GPU.</p></div></div>
     </div>
     <div class="card" style="margin-top:20px">
       <div class="k">Field test · Indian festival video</div>

@@ -191,8 +191,8 @@ total_area = sum(r["area_m2"] for r in zones.values())
 peak = max(counted, key=lambda r: r["per_m2"]) if counted else None
 at_risk = [z for z, r in zones.items() if r["risk"] in ("High Risk", "Critical")]
 moving = sum(p["move"] for p in plans if p["target"])
-chip = ("<span class='chip sim'>SIMULATED</span>" if source == "Simulated surge"
-        else "<span class='chip live'>FROM YOUR PHOTOS</span>" if counted else "")
+chip = ("<span class='pill warn'>Simulated counts</span>" if source == "Simulated surge"
+        else "<span class='pill brand'>Counts from your photos</span>" if counted else "")
 kpis = [
     ("People in zones", compact(sum(r["count"] for r in counted)) if counted else "–",
      f"{len(counted)} of {len(zones)} zones counted"),
@@ -306,7 +306,7 @@ else:
 tab_plan, tab_table, tab_use = st.tabs(["Evacuation plan", "Zone table", "Export and apply"])
 with tab_plan:
     if not counted:
-        st.caption("Add counts on the Upload page, or pick the simulated surge, to see a plan.")
+        st.caption("Count photos on Photo analysis, or pick the simulated surge, to see a plan.")
     elif not plans:
         st.success("No zone is at High Risk or Critical. No one needs to move.")
     else:
@@ -363,8 +363,8 @@ with tab_use:
                            width="stretch")
     with b:
         st.markdown("**Use this map in the app**")
-        st.caption("Sets each zone's area and risk limits in Settings from the map, and tells the "
-                   "Analysis page which zones connect, so it only plans walkable moves.")
+        st.caption("Sets each zone's area, name and risk limits from the map, and tells Alerts and plans "
+                   "which zones connect, so it only plans walkable moves.")
         if st.button("Apply map areas and routes", width="stretch"):
             for z, r in zones.items():
                 st.session_state.seg_areas[z] = round(r["area_m2"])

@@ -14,18 +14,6 @@ RISK_COLORS = {
     "High Risk": "#f97316",
     "Critical":  "#ef4444",
 }
-RISK_ICONS = {
-    "Safe":      "Safe",
-    "Moderate":  "Moderate",
-    "High Risk": "High Risk",
-    "Critical":  "Critical",
-}
-
-SOURCE_LABELS = {
-    "auto":   "Auto (global model)",
-    "drone":  "Drone / Aerial",
-    "ground": "CCTV / Ground level",
-}
 
 
 def init_state():
@@ -49,10 +37,6 @@ def init_state():
         st.session_state.seg_areas = {s: 0 for s in SEGMENTS}
     if "alert_count" not in st.session_state:
         st.session_state.alert_count = 0
-    if "low_threshold" not in st.session_state:
-        st.session_state.low_threshold = DEFAULT_THRESHOLDS["moderate"]
-    if "high_threshold" not in st.session_state:
-        st.session_state.high_threshold = DEFAULT_THRESHOLDS["critical"]
     if "detection_history" not in st.session_state:
         st.session_state.detection_history = []
 
@@ -63,6 +47,12 @@ def get_seg_thresholds(seg: str) -> dict:
         t[seg] = dict(DEFAULT_THRESHOLDS)
         st.session_state.thresholds = t
     return t[seg]
+
+
+def zone_label(seg: str) -> str:
+    """"Zone A", or "Zone A · Sangam Nose" once a site map has named the zones."""
+    name = st.session_state.get("zone_names", {}).get(seg)
+    return f"Zone {seg} · {name}" if name else f"Zone {seg}"
 
 
 from ui import GLOBAL_CSS  # noqa: E402,F401  (the design system lives in ui.py)

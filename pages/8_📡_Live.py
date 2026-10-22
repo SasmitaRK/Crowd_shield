@@ -111,14 +111,11 @@ c1, c2, c3 = st.columns([2, 2, 3])
 interval = c1.slider("Seconds between counts", MIN_INTERVAL, 300, max(MIN_INTERVAL, 45),
                      help="Counting a frame takes a few seconds to a minute depending on the server, so "
                           f"on this app it can't go below {MIN_INTERVAL} s.")
-channels = [name for name, ready in (("Telegram", notify.telegram_configured()),) if ready]
-from emailer import email_configured  # noqa: E402
-if email_configured():
-    channels.append("email")
-send_alerts = c2.toggle("Send alerts to my phone", value=False, disabled=not channels,
-                        help="Off by default. A zone moving to High Risk or Critical is sent once, then "
-                             "quiet for 10 minutes. Set up Telegram or Gmail in Settings." if not channels else
-                             f"Sends to: {', '.join(channels)}. Each new High Risk or Critical alert goes out once.")
+channels = notify.ready_channels()
+send_alerts = c2.toggle("Send alerts", value=False, disabled=not channels,
+                        help="No alert channel is set up yet: add Telegram or Gmail in Settings." if not channels
+                        else f"Sends to {' and '.join(channels)}. A zone reaching High Risk or Critical is sent "
+                             "once, then that zone stays quiet for 10 minutes.")
 running = c3.toggle("Monitoring", key="live_on", help="Start or stop counting.")
 
 signature = (key, tuple((n, tuple(map(tuple, z["polygon"])), tuple(z["thresholds"].values())) for n, z in zones.items()))

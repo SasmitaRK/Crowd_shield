@@ -6,7 +6,6 @@ torchvision
 streamlit>=1.50
 numpy>=1.24
 matplotlib>=3.8
-seaborn>=0.13
 # Brings opencv-python. Don't add opencv-python-headless too: two OpenCV builds break cv2.
 ultralytics>=8.1
 # The custom crowd model (models/crowd_yolo.pt) was saved with dill.

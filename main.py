@@ -2,7 +2,7 @@
 
 import streamlit as st
 
-from emailer import email_configured
+from crowdshield.notify import ready_channels
 from shared_state import init_state
 
 st.set_page_config(page_title="Crowd Shield", page_icon="assets/mark.svg", layout="wide",
@@ -39,14 +39,14 @@ page = st.navigation(PAGES)
 
 with st.sidebar:
     counted = len(st.session_state.crowd_data)
-    email_ok = email_configured()
+    channels = ready_channels()
     st.markdown(
         "<div class='rail-foot'>"
         f"<div class='rail-status'><i style='background:#2dd4bf'></i>Counting: PET point model</div>"
         f"<div class='rail-status'><i style='background:{'#10b981' if counted else '#475569'}'></i>"
         f"Zones counted: {counted} of 5</div>"
-        f"<div class='rail-status'><i style='background:{'#10b981' if email_ok else '#f59e0b'}'></i>"
-        f"Email alerts: {'ready' if email_ok else 'not set up'}</div>"
+        f"<div class='rail-status'><i style='background:{'#10b981' if channels else '#f59e0b'}'></i>"
+        f"Alerts: {' and '.join(channels) if channels else 'not set up'}</div>"
         "<div style='margin-top:.7rem'>"
         "<a href='https://khushi-git-7.github.io/Crowd_shield/' target='_blank'>Project home</a> · "
         "<a href='https://github.com/khushi-git-7/Crowd_shield' target='_blank'>Code</a> · "

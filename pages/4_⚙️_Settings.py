@@ -1,247 +1,97 @@
-"""Settings — per-segment thresholds, area auto-calculator, model, email."""
+"""Settings: each zone's risk limits, where alerts go, what this server can do, and resets."""
 
-import math
+import os
+
 import streamlit as st
 
-from ui import page_header
+from crowdshield import config, notify
+from crowdshield.risk import thresholds_from_area
+from emailer import email_configured, send_email
+from shared_state import DEFAULT_THRESHOLDS, FRUIN_PRESETS, GLOBAL_CSS, SEGMENTS, init_state, zone_label
+from ui import page_header, section
 
-from shared_state import (init_state, GLOBAL_CSS, SEGMENTS,
-                          DEFAULT_THRESHOLDS, RISK_COLORS, RISK_ICONS,
-                          FRUIN_PRESETS, get_seg_thresholds)
-from emailer import email_configured
-from detection import MODEL_REGISTRY
-
-st.set_page_config(page_title="Settings • Crowd Shield",
-                   page_icon=None, layout="wide")
+st.set_page_config(page_title="Settings • Crowd Shield", page_icon=None, layout="wide")
 st.markdown(GLOBAL_CSS, unsafe_allow_html=True)
 init_state()
 
-page_header("Settings", "Risk limits per zone, from the zone's area and a crowd-density standard, plus the fallback detector and email alerts.", "Configure")
+page_header("Settings", "Each zone's risk limits, where alerts go, and what this server can do.", "Configure")
 
-# ---------------------------------------------------------------------------
-# 1. Detection model
-# ---------------------------------------------------------------------------
-st.markdown("### Detection Model")
-model_keys = list(MODEL_REGISTRY.keys())
-current    = st.session_state.active_model
-if current not in model_keys:
-    current = model_keys[0]
+LEVELS = (("moderate", "Moderate from"), ("high", "High Risk from"), ("critical", "Critical from"))
 
-choice = st.radio(
-    "Default / fallback active model",
-    options=model_keys,
-    format_func=lambda k: MODEL_REGISTRY[k]["label"],
-    index=model_keys.index(current),
-    horizontal=True,
-)
-if choice != st.session_state.active_model:
-    st.session_state.active_model = choice
-    st.success(f"Switched to **{MODEL_REGISTRY[choice]['label']}**. "
-               "Re-run detection on the Upload page.")
 
-st.markdown(
-    f"<div class='glass-card' style='font-size:.85rem;margin-top:.5rem'>"
-    f"<b>Active:</b> {MODEL_REGISTRY[st.session_state.active_model]['label']}<br>"
-    f"<span style='color:#6b7280'>"
-    f"Path: <code>{MODEL_REGISTRY[st.session_state.active_model]['path']}</code>"
-    f"</span></div>",
-    unsafe_allow_html=True)
+def show_limits(limits: dict) -> None:
+    """Put limits into the table's boxes. Runs in callbacks, before the boxes are drawn."""
+    for seg, t in limits.items():
+        for key, _ in LEVELS:
+            st.session_state[f"lim_{key}_{seg}"] = int(t[key])
 
-st.markdown("---")
 
-# ---------------------------------------------------------------------------
-# 2. Area-based threshold auto-calculator
-# ---------------------------------------------------------------------------
-st.markdown("### Auto-Calculate Thresholds from Zone Area")
-st.caption(
-    "Enter the physical area (m²) for each zone and choose a density "
-    "standard — thresholds are calculated using the Fruin Level of Service "
-    "scale and applied in one click.")
+# ── Risk limits ────────────────────────────────────────────────────────────
+section("Risk limits", "A zone's risk comes from how many people are in it. These are the counts at which each "
+        "zone turns Moderate, High Risk and Critical. The quickest way to set them is <b>Apply map areas</b> on "
+        "the Site map; you can also work them out from areas below, or type them in.")
 
-preset_name = st.selectbox(
-    "Crowd density standard",
-    options=list(FRUIN_PRESETS.keys()),
-    index=1,
-    help="Sets the people/m² limits for each risk tier.",
-)
-preset = FRUIN_PRESETS[preset_name]
+with st.expander("Work out limits from each zone's area"):
+    st.caption("Limit = area (m²) × the density standard's people per m² × camera coverage.")
+    a, b = st.columns(2)
+    preset_name = a.selectbox("Density standard", list(FRUIN_PRESETS), index=1,
+                              help="People per m² at which each risk level starts (after Fruin's Level of Service).")
+    coverage = b.slider("Share of each zone the cameras see", 0.50, 1.00, 0.75, 0.05,
+                        help="Photos that show only part of a zone count fewer people than are there, so the "
+                             "limits are lowered by the same share to stay on the safe side.")
+    preset = FRUIN_PRESETS[preset_name]
+    st.caption(f"{preset_name}: Moderate from {preset['moderate']}, High Risk from {preset['high']} and Critical "
+               f"from {preset['critical']} people per m².")
+    areas = {}
+    for col, seg in zip(st.columns(5), SEGMENTS):
+        areas[seg] = col.number_input(f"{zone_label(seg)} (m²)", 0, 1_000_000,
+                                      int(st.session_state.seg_areas.get(seg, 0)), 10, key=f"area_{seg}")
 
-cov_col1, cov_col2 = st.columns([2, 3])
-with cov_col1:
-    coverage = st.slider(
-        "Camera coverage factor",
-        min_value=0.50, max_value=1.00, value=0.75, step=0.05,
-        help=(
-            "Fraction of the zone visible in your images. "
-            "If cameras cover 75% of the area, set this to 0.75 — "
-            "detected counts are divided by this to estimate true density, "
-            "making the effective thresholds more conservative."
-        ),
-    )
-with cov_col2:
-    st.markdown(
-        f"<div class='glass-card' style='font-size:.82rem;padding:.8rem'>"
-        f"<b>How coverage works:</b><br>"
-        f"Threshold = area × density × coverage.<br>"
-        f"At {int(coverage*100)}% coverage your camera under-counts by "
-        f"~{int((1/coverage - 1)*100)}%, so thresholds are scaled down "
-        f"to stay safe."
-        f"</div>",
-        unsafe_allow_html=True)
+    def apply_areas():
+        new = {s: thresholds_from_area(v, preset, coverage) for s, v in areas.items() if v > 0}
+        st.session_state.seg_areas.update(areas)
+        st.session_state.thresholds.update(new)
+        show_limits(new)
+        st.session_state.limits_note = (f"Worked out limits for zone(s) {', '.join(new)}." if new else
+                                        "Enter an area for at least one zone.")
 
-st.markdown("**Enter zone areas:**")
-area_cols   = st.columns(5)
-area_inputs = {}
-for i, seg in enumerate(SEGMENTS):
-    with area_cols[i]:
-        saved = st.session_state.seg_areas.get(seg, 0)
-        area_inputs[seg] = st.number_input(
-            f"Zone {seg} (m²)",
-            min_value=0, max_value=100_000,
-            value=int(saved), step=10,
-            key=f"area_{seg}",
-        )
+    st.button("Work out and apply", on_click=apply_areas, disabled=not any(areas.values()))
 
-if any(v > 0 for v in area_inputs.values()):
-    st.markdown("**Preview of calculated thresholds:**")
-    prev_cols = st.columns(5)
-    for i, seg in enumerate(SEGMENTS):
-        with prev_cols[i]:
-            area = area_inputs[seg]
-            if area > 0:
-                mod  = max(1, math.floor(area * preset["moderate"] * coverage))
-                hi   = max(mod + 1, math.floor(area * preset["high"] * coverage))
-                crit = max(hi + 1, math.floor(area * preset["critical"] * coverage))
-                st.markdown(
-                    f"<div class='glass-card' style='font-size:.78rem;padding:.7rem;"
-                    f"text-align:center'>"
-                    f"<b>Zone {seg}</b><br>"
-                    f"<span style='color:#f59e0b;font-weight:600'>{mod}</span>"
-                    f"<span style='color:#d1d5db'> / </span>"
-                    f"<span style='color:#f97316;font-weight:600'>{hi}</span>"
-                    f"<span style='color:#d1d5db'> / </span>"
-                    f"<span style='color:#ef4444;font-weight:600'>{crit}</span>"
-                    f"</div>",
-                    unsafe_allow_html=True)
-            else:
-                st.markdown(
-                    f"<div class='glass-card' style='font-size:.78rem;padding:.7rem;"
-                    f"text-align:center;color:#9ca3af'>Zone {seg}<br>no area</div>",
-                    unsafe_allow_html=True)
+for seg in SEGMENTS:  # first visit: fill the boxes from the saved limits
+    if f"lim_moderate_{seg}" not in st.session_state:
+        show_limits({seg: st.session_state.thresholds.get(seg, DEFAULT_THRESHOLDS)})
 
-if st.button("Auto-calculate and apply thresholds",
-             use_container_width=True,
-             disabled=not any(v > 0 for v in area_inputs.values())):
-    applied, skipped = [], []
-    new_t = dict(st.session_state.thresholds)
+with st.container(border=True):
+    widths = [3, 2, 2, 2]
+    for col, title in zip(st.columns(widths), ["Zone"] + [label for _, label in LEVELS]):
+        col.markdown(f"<div class='sec' style='margin:.1rem 0'>{title}</div>", unsafe_allow_html=True)
     for seg in SEGMENTS:
-        area = area_inputs[seg]
-        st.session_state.seg_areas[seg] = area
-        if area > 0:
-            mod  = max(1, math.floor(area * preset["moderate"] * coverage))
-            hi   = max(mod + 1, math.floor(area * preset["high"] * coverage))
-            crit = max(hi + 1, math.floor(area * preset["critical"] * coverage))
-            new_t[seg] = {"moderate": mod, "high": hi, "critical": crit}
-            applied.append(f"Zone {seg}: {mod} / {hi} / {crit}")
-        else:
-            skipped.append(seg)
-    st.session_state.thresholds    = new_t
-    st.session_state.low_threshold  = new_t["A"]["moderate"]
-    st.session_state.high_threshold = new_t["A"]["critical"]
-    if applied:
-        st.success("Applied:\n\n- " + "\n- ".join(applied))
-    if skipped:
-        st.info(f"Zones with no area entered kept their previous thresholds: "
-                f"{', '.join(skipped)}")
+        cols = st.columns(widths, vertical_alignment="center")
+        cols[0].markdown(f"**{zone_label(seg)}**")
+        for col, (key, label) in zip(cols[1:], LEVELS):
+            col.number_input(f"{label}, zone {seg}", 1, 1_000_000, step=5, key=f"lim_{key}_{seg}",
+                             label_visibility="collapsed")
 
-with st.expander("Fruin density standards explained"):
-    st.markdown(f"""
-**Currently selected:** *{preset_name}*
 
-| Risk Level | Density (people/m²) | Physical meaning |
-|---|---|---|
-| Safe      | < {preset['moderate']} p/m² | Free movement, comfortable spacing |
-| Moderate  | {preset['moderate']}–{preset['high']} p/m² | Restricted but manageable |
-| High Risk | {preset['high']}–{preset['critical']} p/m² | Body contact, crowd pressure |
-| Critical  | > {preset['critical']} p/m² | Crush risk — emergency response |
-
-**Formula:** `threshold = area_m² × density × camera_coverage`
-
-Example — 200 m² segment, standard preset, 75% coverage:
-```
-Moderate  = 200 × {preset['moderate']} × 0.75 = {math.floor(200 * preset['moderate'] * 0.75)} people
-High Risk = 200 × {preset['high']} × 0.75 = {math.floor(200 * preset['high'] * 0.75)} people
-Critical  = 200 × {preset['critical']} × 0.75 = {math.floor(200 * preset['critical'] * 0.75)} people
-```
-The coverage factor accounts for cameras not seeing the full area —
-detected counts are always *lower* than actual occupancy, so thresholds
-are scaled down to stay on the safe side.
-    """)
-
-st.markdown("---")
-
-# ---------------------------------------------------------------------------
-# 3. Manual per-segment thresholds
-# ---------------------------------------------------------------------------
-st.markdown("### Per-Zone Risk Thresholds")
-st.caption("These values are what auto-calculation writes to. "
-           "You can also edit them directly here.")
-
-hcols = st.columns([1, 2, 2, 2, 3])
-hcols[0].markdown("**Seg**")
-hcols[1].markdown("<span style='color:#f59e0b;font-weight:700'>Moderate</span>",
-                  unsafe_allow_html=True)
-hcols[2].markdown("<span style='color:#f97316;font-weight:700'>High Risk</span>",
-                  unsafe_allow_html=True)
-hcols[3].markdown("<span style='color:#ef4444;font-weight:700'>Critical</span>",
-                  unsafe_allow_html=True)
-hcols[4].markdown("*Rule*")
-
-new_thresholds = {}
-for seg in SEGMENTS:
-    t = get_seg_thresholds(seg)
-    c0, c1, c2, c3, c4 = st.columns([1, 2, 2, 2, 3])
-    c0.markdown(f"**{seg}**")
-    mod  = c1.number_input("Moderate", min_value=1, max_value=9999,
-                           value=t["moderate"], step=5, key=f"t_mod_{seg}",
-                           label_visibility="collapsed")
-    hi   = c2.number_input("High Risk", min_value=1, max_value=9999,
-                           value=t["high"], step=5, key=f"t_hi_{seg}",
-                           label_visibility="collapsed")
-    crit = c3.number_input("Critical", min_value=1, max_value=9999,
-                           value=t["critical"], step=5, key=f"t_crit_{seg}",
-                           label_visibility="collapsed")
-    c4.markdown(
-        f"<span style='font-size:.78rem;color:#6b7280'>"
-        f"Safe &lt;{mod} · Mod {mod}–{hi-1} · High {hi}–{crit-1} · Crit ≥{crit}"
-        f"</span>",
-        unsafe_allow_html=True)
-    new_thresholds[seg] = {"moderate": mod, "high": hi, "critical": crit}
-
-if st.button("Save manual thresholds", use_container_width=True):
-    errors = []
-    for seg, t in new_thresholds.items():
-        if not (t["moderate"] < t["high"] < t["critical"]):
-            errors.append(f"Zone {seg}: moderate < high < critical required")
-    if errors:
-        for e in errors:
-            st.error(e)
+def save_limits():
+    new = {seg: {key: st.session_state[f"lim_{key}_{seg}"] for key, _ in LEVELS} for seg in SEGMENTS}
+    bad = [seg for seg, t in new.items() if not t["moderate"] < t["high"] < t["critical"]]
+    if bad:
+        st.session_state.limits_note = (f"Not saved: in zone(s) {', '.join(bad)} each limit must be higher than "
+                                        "the one before it.")
     else:
-        st.session_state.thresholds    = new_thresholds
-        st.session_state.low_threshold  = new_thresholds["A"]["moderate"]
-        st.session_state.high_threshold = new_thresholds["A"]["critical"]
-        st.success("Manual thresholds saved.")
+        st.session_state.thresholds = new
+        st.session_state.limits_note = "Saved."
 
-st.markdown("---")
 
-# ---------------------------------------------------------------------------
-# 4. Email config
-# ---------------------------------------------------------------------------
-st.markdown("### Alert channels")
-from crowdshield import notify  # noqa: E402
+st.button("Save limits", type="primary", on_click=save_limits)
+note = st.session_state.pop("limits_note", None)
+if note:
+    (st.error if note.startswith("Not saved") else st.success)(note)
 
-st.caption("Where Crowd Shield sends alerts. Nothing is sent unless you press a button here, send alerts "
-           "from the Alerts page, or the live monitor raises one.")
+# ── Alert channels ─────────────────────────────────────────────────────────
+section("Alert channels", "Where Crowd Shield sends alerts. Nothing is sent unless you press Send alerts on Alerts "
+        "and plans, switch alerts on in Live feed, or press a test button here.")
 tg, mail = st.columns(2)
 with tg:
     st.markdown("**Telegram** (free, works on a phone)")
@@ -262,12 +112,10 @@ with tg:
    **App settings → Secrets**: `TELEGRAM_BOT_TOKEN = "123:abc"` and `TELEGRAM_CHAT_ID = "123456789"`.
         """)
 with mail:
-    st.markdown("**Email** (Gmail)")
+    st.markdown("**Email** (Gmail), one contact per zone on Response team")
     if email_configured():
         st.success("Gmail is set up.")
-        import os
         if st.button("Email a test to myself", key="mail_test"):
-            from emailer import send_email
             ok, message = send_email(os.environ["GMAIL_USER"], "Crowd Shield test",
                                      "<p>Alerts from Crowd Shield reach this inbox.</p>")
             (st.success if ok else st.error)(message)
@@ -285,72 +133,50 @@ with mail:
 3. Add both as secrets (on Streamlit Community Cloud: **App settings → Secrets**).
         """)
 
-st.markdown("---")
-
-st.markdown("""
-<style>
-.stButton > button:not([kind="primary"]) {
-  background: #ffffff !important;
-  color: #111827 !important;
-  border: 1px solid #d1d5db !important;
-}
-.stButton > button:not([kind="primary"]):hover {
-  background: #f9fafb !important;
-  border-color: #9ca3af !important;
-}
-.stNumberInput input {
-  color: #111827 !important;
-}
-.stExpander {
-  background: #ffffff !important;
-}
-</style>
-""", unsafe_allow_html=True)
-
-# ---------------------------------------------------------------------------
-# 5. Reset controls
-# ---------------------------------------------------------------------------
-st.markdown("### Reset")
-col1, col2, col3 = st.columns(3)
-with col1:
-    if st.button("Clear images and results", use_container_width=True):
-        st.session_state.uploaded_images = {s: [] for s in SEGMENTS}
-        st.session_state.image_names     = {s: [] for s in SEGMENTS}
-        st.session_state.image_sources   = {s: [] for s in SEGMENTS}
-        st.session_state.crowd_data      = {}
-        st.success("Cleared.")
-with col2:
-    if st.button("Clear agent assignments", use_container_width=True):
-        st.session_state.agents = {s: "" for s in SEGMENTS}
-        st.success("Cleared.")
-with col3:
-    if st.button("Reset thresholds to defaults", use_container_width=True):
-        st.session_state.thresholds = {s: dict(DEFAULT_THRESHOLDS) for s in SEGMENTS}
-        st.success("Reset to defaults (moderate=30, high=60, critical=90).")
-
-# ---------------------------------------------------------------------------
-# Server and memory
-# ---------------------------------------------------------------------------
-st.markdown("---")
-st.markdown("### Server")
-from crowdshield import config as _cfg  # noqa: E402
-
-_limit, _used, _own = _cfg.memory_limit_bytes(), _cfg.memory_in_use_bytes(), _cfg.own_rss_bytes()
-_gb = lambda b: "unknown" if b is None else f"{b / 1e9:.1f} GB"
-_work = _cfg.default_work_side()
+# ── Server ─────────────────────────────────────────────────────────────────
+section("Server", "What this server can hold, and how it will count a photo right now. A server too small to run "
+        "a photo in one pass counts it in tiles, which keeps the detail. If even a tile would not fit, the app "
+        "says so instead of crashing.")
+limit, used, own = config.memory_limit_bytes(), config.memory_in_use_bytes(), config.own_rss_bytes()
+gb = lambda b: "unknown" if b is None else f"{b / 1e9:.1f} GB"  # noqa: E731
+work = config.default_work_side()
 try:
-    _fit = _cfg.fit_max_side(ceiling=_work)
-    _how = "one pass" if _fit >= _work else f"tiles of {_fit} px"
-except _cfg.NotEnoughMemory:
-    _fit, _how = None, "none fits"
-st.caption("What this server can hold, and how it will count a photo right now. A server too small to run "
-           "a photo in one pass counts it in tiles, which keeps the detail. If even a tile would not fit, "
-           "the app says so instead of crashing.")
+    fit = config.fit_max_side(ceiling=work)
+    how = "one pass" if fit >= work else f"tiles of {fit} px"
+except config.NotEnoughMemory:
+    how = "none fits"
 c1, c2, c3, c4, c5 = st.columns(5)
-c1.metric("Memory limit", _gb(_limit))
-c2.metric("In use", _gb(_used), help="Memory used by everything running on this server.")
-c3.metric("This app", _gb(_own))
-c4.metric("Photo detail", f"{_work} px", help="Photos are shrunk to this size (longer side) before counting.")
-c5.metric("Counted in", _how, help="One pass if it fits in memory, otherwise tiles with a little overlap.")
-st.caption(f"Running from `{_cfg.REPO_ROOT}`"
-           f"{' (Streamlit Community Cloud)' if _cfg.on_streamlit_cloud() else ''}.")
+c1.metric("Memory limit", gb(limit))
+c2.metric("In use", gb(used), help="Memory used by everything running on this server.")
+c3.metric("This app", gb(own))
+c4.metric("Photo detail", f"{work} px", help="Photos are shrunk to this size (longer side) before counting.")
+c5.metric("Counted in", how, help="One pass if it fits in memory, otherwise tiles with a little overlap.")
+st.caption(f"Running from `{config.REPO_ROOT}`"
+           f"{' (Streamlit Community Cloud)' if config.on_streamlit_cloud() else ''}.")
+
+# ── Reset ──────────────────────────────────────────────────────────────────
+section("Reset", "Everything here lasts for this browser session only; these clear it sooner.")
+
+
+def clear_photos():
+    for key in ("uploaded_images", "image_names", "image_sources"):
+        st.session_state[key] = {s: [] for s in SEGMENTS}
+    st.session_state.crowd_data = {}
+
+
+def clear_contacts():
+    st.session_state.agents = {s: "" for s in SEGMENTS}
+    for seg in SEGMENTS:
+        st.session_state.pop(f"agent_input_{seg}", None)
+
+
+def reset_limits():
+    st.session_state.thresholds = {s: dict(DEFAULT_THRESHOLDS) for s in SEGMENTS}
+    show_limits(st.session_state.thresholds)
+
+
+r1, r2, r3 = st.columns(3)
+r1.button("Clear photos and counts", width="stretch", on_click=clear_photos)
+r2.button("Clear contacts", width="stretch", on_click=clear_contacts)
+r3.button(f"Reset limits to {DEFAULT_THRESHOLDS['moderate']} / {DEFAULT_THRESHOLDS['high']} / "
+          f"{DEFAULT_THRESHOLDS['critical']}", width="stretch", on_click=reset_limits)
