@@ -45,7 +45,9 @@ class NotEnoughMemory(RuntimeError):
 PET_PEAK_MB = {320: 920, 384: 1140, 448: 1140, 512: 1150, 576: 1520, 640: 1520,
                800: 2400, 1024: 2800, 1280: 3600, 1600: 5500, 2048: 8500}
 MIN_SIDE = 320
-SAFETY = 0.85  # use at most this share of what's free: the numbers above are from one test machine
+# Use at most this share of the memory limit. The Streamlit Cloud server showed a 3.2 GB limit and was
+# still killed at an estimated 2.7 GB (85%), because the numbers above come from a different machine.
+SAFETY = 0.6
 
 
 def estimated_peak_mb(side: int) -> float:
