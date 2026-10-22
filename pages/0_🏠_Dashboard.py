@@ -72,6 +72,7 @@ kpi_cards([
 ], accents=["#0d9488", "#2a78d6", RISK_COLORS["Critical"] if at_risk else "#10b981",
             "#10b981" if assigned == 5 else "#f59e0b", "#10b981" if channels else "#94a3b8"])
 
+st.write("")
 cols = st.columns(5)
 for col, seg in zip(cols, SEGMENTS):
     d = data.get(seg)
