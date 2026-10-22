@@ -117,3 +117,34 @@ def test_map_page_compares_the_simple_rule_with_the_optimised_plan():
     box = next(b for b in app.selectbox if b.label == "Evacuation planner")
     box.set_value("Simple rule").run()
     assert not app.exception, [e.message for e in app.exception]
+
+
+def test_settings_work_out_limits_from_areas_fills_the_table():
+    app = render(PAGES["Settings"])
+    app.number_input(key="area_A").set_value(100).run()
+    next(b for b in app.button if b.label == "Work out and apply").click().run()
+    assert not app.exception, [e.message for e in app.exception]
+    # Standard preset (1 / 2 / 3.5 per m²) on 100 m² seen at 75%: 75 / 150 / 262.
+    assert app.session_state.thresholds["A"] == {"moderate": 75, "high": 150, "critical": 262}
+    assert app.number_input(key="lim_critical_A").value == 262
+
+
+def test_analysis_page_sends_one_telegram_message_for_the_team(monkeypatch):
+    from crowdshield import notify
+
+    sent = []
+    monkeypatch.setenv("TELEGRAM_BOT_TOKEN", "test-token")
+    monkeypatch.setenv("TELEGRAM_CHAT_ID", "1")
+    monkeypatch.setattr(notify, "send_telegram", lambda text, image=None: sent.append(text) or (True, "Sent."))
+    crowd = {"A": zone_result(95), "B": zone_result(10)}
+    app = render(PAGES["Analysis"], crowd_data=crowd)
+    next(b for b in app.button if b.label == "Send alerts").click().run()
+    assert not app.exception, [e.message for e in app.exception]
+    assert len(sent) == 1 and "Zone A: CRITICAL, 95 people. Move ~" in sent[0]
+
+
+def test_analysis_page_points_to_settings_when_no_alert_channel_is_set_up(monkeypatch):
+    for name in ("TELEGRAM_BOT_TOKEN", "TELEGRAM_CHAT_ID", "GMAIL_USER", "GMAIL_APP_PASSWORD"):
+        monkeypatch.delenv(name, raising=False)
+    app = render(PAGES["Analysis"], crowd_data={"A": zone_result(95), "B": zone_result(10)})
+    assert any("No alert channel is set up" in w.value for w in app.warning)

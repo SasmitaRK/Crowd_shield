@@ -12,9 +12,9 @@ st.set_page_config(page_title="Response team • Crowd Shield", page_icon=None, 
 st.markdown(GLOBAL_CSS, unsafe_allow_html=True)
 init_state()
 
-page_header("Response team", "Give each zone a contact. When a zone turns High Risk or Critical, its "
-            "contact and the receiving zone's contact get an email with the counts and the plan.",
-            "Configure")
+page_header("Response team", "Give each zone a contact. When you send alerts, a zone at High Risk or Critical "
+            "gets an email with its orders and photo, and each zone receiving people gets told how many to "
+            "expect. Telegram alerts go to one team chat instead (set up in Settings).", "Configure")
 
 EMAIL_RE = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
 names = st.session_state.get("zone_names", {})
@@ -29,7 +29,7 @@ assigned = sum(1 for v in st.session_state.agents.values() if v)
 kpi_cards([
     ("Zones with a contact", f"{assigned} / 5", "each zone needs one person on call"),
     ("Email alerts", "Ready" if email_configured() else "Off",
-     "Gmail is configured" if email_configured() else "add Gmail details in Settings"),
+     "Gmail is set up" if email_configured() else "set up Gmail in Settings"),
     ("Alerts sent", f"{st.session_state.alert_count}", "this session"),
 ], accents=["#10b981" if assigned == 5 else "#f59e0b",
             "#10b981" if email_configured() else "#94a3b8", "#2a78d6"])
@@ -62,5 +62,5 @@ if st.button("Save contacts", type="primary", width="stretch", icon=":material/s
         st.success(f"Saved: {sum(1 for v in new_vals.values() if v)} of 5 zones have a contact.")
         st.rerun()
 
-st.caption("Place names come from the Site map when you apply a map to the app. Contacts are kept for this "
-           "session only.")
+st.caption("Place names come from the Site map once you apply a map (Site map → Export and apply). Contacts "
+           "last for this browser session only.")

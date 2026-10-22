@@ -1,5 +1,7 @@
-"""Count people in one image with YOLO, optionally adding faces whose bodies are hidden.
+"""Count people in one photo and draw what was found.
 
+`count_people` uses the most accurate counter that can run: the PET point model, then the
+DM-Count density model, then YOLO boxes (optionally with faces whose bodies are hidden).
 No Streamlit here: models load lazily and stay cached per process, so the same
 code serves the app, the evaluation scripts and the tests.
 """
@@ -164,16 +166,27 @@ def render_overlay(img: np.ndarray, person_boxes, extra_heads,
         for x, y, bw, bh in boxes:
             cv2.rectangle(overlay, (x, y), (x + bw, y + bh), colour, 2)
     if points is not None and len(points):
-        # Big, see-through dots: easy to spot on a small screen, yet the people stay visible
-        # underneath. Drawn on a copy and blended in so each dot is translucent.
-        radius = max(5, round(min(h, w) / 110))
-        dots = overlay.copy()
-        for row, col in points:
-            cv2.circle(dots, (int(col), int(row)), radius, (0, 255, 0), -1, cv2.LINE_AA)
-        overlay = cv2.addWeighted(dots, 0.5, overlay, 0.5, 0)
-        for row, col in points:
-            cv2.circle(overlay, (int(col), int(row)), radius, (255, 255, 255), 1, cv2.LINE_AA)
+        overlay = draw_head_dots(overlay, points)
     return overlay
+
+
+def draw_head_dots(img: np.ndarray, points, colour=(0, 255, 0)) -> np.ndarray:
+    """A big, see-through dot on every head (points as row, col), with a thin white ring.
+
+    Easy to spot on a small screen, yet the people stay visible underneath: the dots are drawn
+    on a copy and blended in. Every page that shows head points uses this, so they all match.
+    """
+    import cv2
+
+    h, w = img.shape[:2]
+    radius = max(5, round(min(h, w) / 110))
+    dots = img.copy()
+    for row, col in points:
+        cv2.circle(dots, (int(col), int(row)), radius, colour, -1, cv2.LINE_AA)
+    out = cv2.addWeighted(dots, 0.5, img, 0.5, 0)
+    for row, col in points:
+        cv2.circle(out, (int(col), int(row)), radius, (255, 255, 255), 1, cv2.LINE_AA)
+    return out
 
 
 def count_people(img: np.ndarray, model_key: str = DEFAULT_MODEL_KEY) -> dict:

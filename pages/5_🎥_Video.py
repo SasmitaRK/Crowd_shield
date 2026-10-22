@@ -20,9 +20,8 @@ st.markdown(GLOBAL_CSS, unsafe_allow_html=True)
 init_state()
 
 page_header("Video monitor", "Watch a fixed camera zone by zone: people per m², walking speed, crowd pressure, sudden-surge alarms and a forecast of when a zone gets dangerous.", "Monitor")
-st.caption("Upload a clip from a fixed camera. Mark a rectangle of known size on the floor "
-           "and the zones to watch; Crowd Shield then reports people per m², speed, "
-           "crowd pressure and how long each zone has before it reaches 5 people per m².")
+st.caption("Upload a clip from a fixed camera, or try the sample. Mark the zones to watch and, for people "
+           "per m², a rectangle of known size on the floor. For a camera that is streaming now, use Live feed.")
 
 MAX_WIDTH = 960  # frames are shrunk to this width; all coordinates below use it
 # The free hosted demo has little memory and no GPU, so it analyses short clips. Set
@@ -313,10 +312,10 @@ heads = None
 if counter_name.startswith("point model"):
     from crowdshield.points import count_points
 
+    from crowdshield.detection import draw_head_dots
+
     heads = count_points(final)["points"]
-    for y, x in heads:
-        cv2.circle(picture, (int(x), int(y)), 3, (255, 59, 48), -1, cv2.LINE_AA)
-        cv2.circle(picture, (int(x), int(y)), 3, (255, 255, 255), 1, cv2.LINE_AA)
+    picture = draw_head_dots(picture, heads)
 st.image(picture, width="stretch",
          caption=(f"{len(heads)} head points in the whole frame. " if heads is not None else "")
          + ("Zones coloured by density level." if levels else "Zones in their own colours."))

@@ -27,7 +27,7 @@ with ordinary cameras.
 | **Crowd pressure** | Density × local velocity variance (Helbing, Johansson and Al-Abideen, 2007). In the 2006 Hajj disaster video, turbulent pushing began above 0.02 /s², and the crush came at its peak. |
 | **Early warning** | "At the current trend, Zone B reaches 5 people per m² in about 4 minutes", from a robust (Theil-Sen) trend that one bad count can't swing. |
 | **Panic alarm** | Optical flow spots a crowd suddenly moving much faster than its own normal pace, or much more of the view starting to move. |
-| **Zone plans and alerts** | For photos: risk per zone, a plan for moving people from crowded zones into neighbouring ones with room, and email alerts to each zone's staff. |
+| **Zone plans and alerts** | For photos: risk per zone, an optimised plan for moving people from crowded zones into zones with room along walkable routes, and alerts by Telegram (one team chat) or email (each zone's contact). |
 | **Site map** | Zones drawn on satellite imagery. Each zone's ground area comes from its shape on the map (spherical-excess formula, the one Leaflet and Turf use), zones that touch become the walking routes, and the evacuation plan is drawn as animated arrows along them. |
 
 The **Map** page opens on the bathing area at the Sangam in Prayagraj, where a
@@ -38,12 +38,19 @@ every risk level. A second demo covers Madurai's Chithirai festival: the Vaigai
 riverbed where Lord Kallazhagar enters the river (a crush there killed two people
 in April 2022), both banks, North Masi Street and the Meenakshi Temple. A time
 slider plays each simulated surge forward, and the zones can be downloaded as
-GeoJSON. With real counts from the Upload page, or zones you draw yourself, it
+GeoJSON. With real counts from the Photo analysis page, or zones you draw yourself, it
 becomes your own site's live view.
 
 The **Video** page puts this together: upload a clip from a fixed camera, mark
 the floor rectangle and the zones, and get per-zone density, speed, pressure,
 warnings and a CSV of every reading.
+It streams the clip frame by frame instead of loading it whole, so memory stays
+flat however long the clip is. The hosted demo analyses up to 20 seconds (set
+`CROWDSHIELD_MAX_VIDEO_S` to raise it on your own machine), and a 15-second
+sample from a fixed camera at Paris Saint-Lazare station is built in: Baidax,
+[CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/), via
+[Wikimedia Commons](https://commons.wikimedia.org/wiki/File:2025-11-06_17-33-16_-_Paris_-_Saint-Lazare.webm).
+
 The **Live feed** page watches a camera stream (RTSP, or an HTTP stream such as HLS or MJPEG) instead of a
 recorded clip. Every 30 to 300 seconds it grabs the newest frame, counts the people in each zone you drew,
 colours the zone by risk, follows the trend and estimates the time until the zone is full (a Theil-Sen
@@ -68,13 +75,6 @@ network.
 `TELEGRAM_CHAT_ID`, or `GMAIL_USER` and `GMAIL_APP_PASSWORD`, as environment variables or Streamlit secrets.
 Settings explains the 2-minute Telegram set-up and has "send a test" buttons. Nothing is sent unless alerts
 are switched on, and a zone is announced once per level, then quiet for 10 minutes.
-
-It streams the clip frame by frame instead of loading it whole, so memory stays
-flat however long the clip is. The hosted demo analyses up to 20 seconds (set
-`CROWDSHIELD_MAX_VIDEO_S` to raise it on your own machine), and a 15-second
-sample from a fixed camera at Paris Saint-Lazare station is built in: Baidax,
-[CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/), via
-[Wikimedia Commons](https://commons.wikimedia.org/wiki/File:2025-11-06_17-33-16_-_Paris_-_Saint-Lazare.webm).
 
 ### Evacuation planning
 

@@ -1,12 +1,13 @@
 """Dashboard: what Crowd Shield does, how well it works, and the state of today's zones."""
 
+import html
 import random
 
 import streamlit as st
 
 from detection import risk_level
-from emailer import email_configured
-from shared_state import GLOBAL_CSS, RISK_COLORS, SEGMENTS, get_seg_thresholds, init_state
+from crowdshield.notify import ready_channels
+from shared_state import GLOBAL_CSS, RISK_COLORS, SEGMENTS, get_seg_thresholds, init_state, zone_label
 from ui import compact, kpi_cards, nav_link, risk_pill, section
 
 st.set_page_config(page_title="Crowd Shield", page_icon=None, layout="wide")
@@ -31,24 +32,26 @@ st.markdown(f"""
   <div class="eyebrow"><span class="live-dot"></span>Crowd safety for Indian public spaces</div>
   <h1>See crowd danger before it becomes a crush.</h1>
   <p>Crowd Shield counts every head in CCTV, drone and phone photos, turns counts into people per
-  square metre on a real map, spots sudden surges in video, and tells each zone's team where to
-  move people.</p>
+  square metre on a real map, watches camera feeds for zones filling up or surging, and tells each
+  zone's team where to move people.</p>
   <div class="stats">
     <div class="stat"><b>92.7%</b><span>counting accuracy, street crowds</span></div>
     <div class="stat"><b>86.5%</b><span>on packed crowds (ShanghaiTech A)</span></div>
-    <div class="stat"><b>~90%</b><span>on hand-labelled Indian photos (pilot)</span></div>
+    <div class="stat"><b>9 / 10</b><span>Indian test photos counted about 90% right</span></div>
     <div class="stat"><b>11 / 11</b><span>escape events caught in video</span></div>
   </div>
 </div>
 """, unsafe_allow_html=True)
 
-b1, b2, b3, _ = st.columns([1.2, 1.2, 1.2, 3])
+b1, b2, b3, b4, _ = st.columns([1.2, 1.2, 1.2, 1.2, 1.6])
 with b1:
     nav_link("pages/6_🗺️_Map.py", "Open the site map", ":material/map:", "/Map")
 with b2:
     nav_link("pages/2_📤_Upload.py", "Count a photo", ":material/photo_camera:", "/Upload")
 with b3:
     nav_link("pages/5_🎥_Video.py", "Analyse a video", ":material/videocam:", "/Video")
+with b4:
+    nav_link("pages/8_📡_Live.py", "Watch a live feed", ":material/sensors:", "/Live")
 
 # ── Today's operations ─────────────────────────────────────────────────────
 agents = st.session_state.agents
@@ -56,18 +59,18 @@ data = st.session_state.crowd_data
 assigned = sum(1 for v in agents.values() if v)
 risks = {seg: risk_level(d["count"], get_seg_thresholds(seg)) for seg, d in data.items()}
 at_risk = [s for s, r in risks.items() if r in ("High Risk", "Critical")]
-email_ok = email_configured()
+channels = ready_channels()
 
-section("Today's operations", "Live from this session. Counts appear after you analyse photos.")
+section("Today's operations", "From this session: counts appear after you count photos on Photo analysis.")
 kpi_cards([
     ("Zones counted", f"{len(data)} / 5", "from photo analysis"),
     ("People counted", compact(sum(d["count"] for d in data.values())) if data else "–",
      "across all zones"),
     ("Zones at risk", f"{len(at_risk)}", ", ".join(at_risk) or "none right now"),
     ("Response team", f"{assigned} / 5", "zones with a contact"),
-    ("Email alerts", "Ready" if email_ok else "Off", "Gmail configured" if email_ok else "set up in Settings"),
+    ("Alerts", "Ready" if channels else "Off", " and ".join(channels) if channels else "set up in Settings"),
 ], accents=["#0d9488", "#2a78d6", RISK_COLORS["Critical"] if at_risk else "#10b981",
-            "#10b981" if assigned == 5 else "#f59e0b", "#10b981" if email_ok else "#94a3b8"])
+            "#10b981" if assigned == 5 else "#f59e0b", "#10b981" if channels else "#94a3b8"])
 
 cols = st.columns(5)
 for col, seg in zip(cols, SEGMENTS):
@@ -79,7 +82,8 @@ for col, seg in zip(cols, SEGMENTS):
     col.markdown(
         f"<div class='card' style='border-top:3px solid {colour};padding:.9rem 1rem'>"
         f"<div style='display:flex;justify-content:space-between;align-items:center'>"
-        f"<span style='font-weight:800;font-size:.8rem;color:#334155;letter-spacing:.06em'>ZONE {seg}</span>"
+        f"<span style='font-weight:800;font-size:.8rem;color:#334155;letter-spacing:.06em;white-space:nowrap;"
+        f"overflow:hidden;text-overflow:ellipsis'>{html.escape(zone_label(seg).upper())}</span>"
         f"{risk_pill(risk)}</div>"
         f"<div style='font-size:1.7rem;font-weight:800;margin:.45rem 0 .1rem;"
         f"font-variant-numeric:tabular-nums'>{count}</div>"
@@ -111,11 +115,12 @@ features = [
      "bodies overlap. Tested on ShanghaiTech and on Indian photos.", "pages/2_📤_Upload.py", "Count a photo"),
     ("map", "Density on a real map", "Zones drawn on satellite imagery give true ground area, so counts "
      "become people per m², the number crowd-safety science uses.", "pages/6_🗺️_Map.py", "Open the map"),
-    ("wave", "Spots surges in video", "Optical flow flags a crowd suddenly moving faster or more of it "
-     "starting to move, and forecasts when a zone reaches 5 people per m².", "pages/5_🎥_Video.py",
-     "Analyse a video"),
-    ("route", "Plans the response", "Crowded zones get a plan to move people into connected zones with "
-     "room, and each zone's team gets an email.", "pages/3_📊_Analysis.py", "See alerts"),
+    ("wave", "Watches cameras", "On a video clip, optical flow spots a sudden surge. On a live stream it "
+     "recounts every zone every 30 s or more and warns before a zone is full.", "pages/8_📡_Live.py",
+     "Watch a live feed"),
+    ("route", "Plans the response", "An optimiser finds where to move people from crowded zones, only "
+     "along walkable routes, and alerts each zone's team by email or Telegram.", "pages/3_📊_Analysis.py",
+     "See alerts and plans"),
 ]
 cols = st.columns(4)
 for col, (ic, title, body, target, label) in zip(cols, features):
@@ -123,6 +128,8 @@ for col, (ic, title, body, target, label) in zip(cols, features):
         st.markdown(f"<div class='feature-card'><div class='feature-icon'>{icon(ic)}</div>"
                     f"<h3>{title}</h3><p>{body}</p></div>", unsafe_allow_html=True)
         nav_link(target, label, ":material/arrow_forward:", "/" + target.split("_")[-1][:-3])
+        if ic == "wave":
+            nav_link("pages/5_🎥_Video.py", "Analyse a video", ":material/arrow_forward:", "/Video")
 
 # ── Recent runs ────────────────────────────────────────────────────────────
 section("Recent photo analyses")
@@ -142,4 +149,5 @@ for entry in history[:8]:
         unsafe_allow_html=True)
 
 st.caption("Accuracy figures come from held-out test photos (ShanghaiTech) and a 10-photo hand-labelled "
-           "Indian pilot set; the video figure is from the UMN crowd-escape clips. Details are in the README.")
+           "Indian pilot set, where one railway photo is a known failure (see India benchmark). The video "
+           "figure is from the UMN crowd-escape clips. Details are in the README.")

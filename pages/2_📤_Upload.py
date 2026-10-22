@@ -1,68 +1,39 @@
-"""Upload page — two-channel input (CCTV + Drone) with automatic model routing."""
+"""Photo analysis: add up to four photos per zone, count every head, and see each zone's risk."""
 
 import time
 from datetime import datetime
+
 import streamlit as st
 
-from ui import page_header
-
-from shared_state import (init_state, GLOBAL_CSS, SEGMENTS,
-                          MAX_IMAGES_PER_SEGMENT, get_seg_thresholds)
-from detection import process_segment, MODEL_REGISTRY, risk_level
+from crowdshield import benchmark
 from crowdshield.config import COUNTER_LABELS, NotEnoughMemory
+from detection import process_segment, risk_level
+from shared_state import (GLOBAL_CSS, MAX_IMAGES_PER_SEGMENT, SEGMENTS, get_seg_thresholds, init_state,
+                          zone_label)
+from ui import nav_link, page_header, risk_pill, section
 
-st.set_page_config(page_title="Upload • Crowd Shield",
-                   page_icon=None, layout="wide")
+st.set_page_config(page_title="Photo analysis • Crowd Shield", page_icon=None, layout="wide")
 st.markdown(GLOBAL_CSS, unsafe_allow_html=True)
 init_state()
 
-page_header("Photo analysis", "Add CCTV, drone or phone photos for each zone. The PET point model puts a dot on every head and the zone's risk follows from its count.", "Analyse")
+page_header("Photo analysis", "Add CCTV, drone or phone photos for each zone. The PET point model puts a dot on "
+            "every head, and each zone's risk follows from its count.", "Analyse")
 
 st.markdown(
     "<div class='card' style='display:flex;gap:2rem;flex-wrap:wrap;margin-bottom:1.2rem;padding:.9rem 1.2rem'>"
     "<div><div class='sec' style='margin:0 0 .25rem'>Counts with</div>"
     "<div style='font-size:.88rem'><b>PET point model</b>, fine-tuned on ShanghaiTech: a dot per head, "
     "corrected for undercounting</div></div>"
-    "<div><div class='sec' style='margin:0 0 .25rem'>Falls back to</div>"
-    "<div style='font-size:.88rem'>DM-Count density model, then YOLO (the CCTV / drone tag picks which)</div></div>"
+    "<div><div class='sec' style='margin:0 0 .25rem'>If it can't run</div>"
+    "<div style='font-size:.88rem'>DM-Count density model, then YOLO</div></div>"
     "<div><div class='sec' style='margin:0 0 .25rem'>Privacy</div>"
     "<div style='font-size:.88rem'>Photos stay in this session only. No faces, no identities.</div></div>"
     "</div>",
     unsafe_allow_html=True,
 )
 
-st.markdown(
-    """
-    <style>
-    .stFileUploader {
-      background: #ffffff !important;
-      border-radius: 12px !important;
-    }
-    .stButton > button:not([kind="primary"]) {
-      background: #ffffff !important;
-      color: #111827 !important;
-      border: 1px solid #d1d5db !important;
-    }
-    .stButton > button:not([kind="primary"]):hover {
-      background: #f9fafb !important;
-      border-color: #9ca3af !important;
-    }
-    .stMarkdown, .stCaption, .stText, .stFileUploader, .stMetric {
-      color: #111827 !important;
-    }
-    </style>
-    """,
-    unsafe_allow_html=True,
-)
 
-MAX_HALF = MAX_IMAGES_PER_SEGMENT // 2
-
-# ---------------------------------------------------------------------------
-# Per-segment upload columns
-# ---------------------------------------------------------------------------
-from crowdshield import benchmark  # noqa: E402
-
-
+# ── Samples: instant, nothing runs on the server ────────────────────────────
 def sample_photos():
     """Hand-checked Indian photos with the model's stored head points: instant, nothing to run."""
     rows = [r for r in benchmark.load() if (benchmark.INDIA / "images" / r["image"]).exists()]
@@ -86,123 +57,50 @@ if samples:
             from crowdshield.detection import render_overlay
 
             img = cv2.imread(str(benchmark.INDIA / "images" / shown["image"]))
-            overlay = cv2.cvtColor(render_overlay(img, [], [], None, benchmark.points_rc(shown["model_points"])), cv2.COLOR_BGR2RGB)
+            overlay = render_overlay(img, [], [], None, benchmark.points_rc(shown["model_points"]))
             left, right = st.columns([3, 1])
-            left.image(overlay, width="stretch")
+            left.image(cv2.cvtColor(overlay, cv2.COLOR_BGR2RGB), width="stretch")
             right.metric("Model count", f"{shown['model']:.0f}")
             right.metric("Counted by hand", f"{shown['true']}")
             right.caption(f"{shown['scene']}. Photo by {shown['author']}, {shown['license']}, via "
                           f"[Wikimedia Commons]({shown['source']}).")
 
+# ── Your photos, zone by zone ──────────────────────────────────────────────
+section("Your photos", f"Up to {MAX_IMAGES_PER_SEGMENT} photos per zone (JPG or PNG). Zones without photos "
+        "are skipped.")
 seg_cols = st.columns(5)
-for i, seg in enumerate(SEGMENTS):
-    with seg_cols[i]:
-        existing_sources = st.session_state.image_sources.get(seg, [])
-        n_cctv  = sum(1 for s in existing_sources if s == "ground")
-        n_drone = sum(1 for s in existing_sources if s == "drone")
+for col, seg in zip(seg_cols, SEGMENTS):
+    with col:
+        st.markdown(f"<div style='font-weight:800;font-size:.85rem;color:#334155;margin-bottom:.3rem;"
+                    f"white-space:nowrap;overflow:hidden;text-overflow:ellipsis'>{zone_label(seg)}</div>",
+                    unsafe_allow_html=True)
+        files = st.file_uploader(f"Photos of {zone_label(seg)}", type=["jpg", "jpeg", "png"],
+                                 accept_multiple_files=True, key=f"photos_{seg}", label_visibility="collapsed")
+        st.radio(f"Photos in Zone {seg} show", options=["sum", "max"],
+                 format_func=lambda m: "Different parts: add counts" if m == "sum" else "Same area: keep highest",
+                 key=f"combine_{seg}",
+                 help="Adding up two photos of the same spot counts those people twice.")
+        if files:
+            if len(files) > MAX_IMAGES_PER_SEGMENT:
+                st.caption(f"Only the first {MAX_IMAGES_PER_SEGMENT} photos are used.")
+            files = files[:MAX_IMAGES_PER_SEGMENT]
+            st.session_state.uploaded_images[seg] = [f.getvalue() for f in files]
+            st.session_state.image_names[seg] = [f.name for f in files]
+            st.session_state.image_sources[seg] = ["auto"] * len(files)
 
-        st.markdown(
-            f"""
-            <div style="font-size:.7rem;font-weight:700;text-transform:uppercase;
-                        letter-spacing:.8px;color:#9ca3af;margin-bottom:.6rem;
-                        padding-bottom:.4rem;border-bottom:2px solid #e5e7eb">
-              Zone {seg}
-            </div>
-            """,
-            unsafe_allow_html=True,
-        )
-
-        st.markdown(
-            "<div style='font-size:.8rem;font-weight:600;color:#374151;"
-            "margin-bottom:.25rem'>CCTV / Ground</div>",
-            unsafe_allow_html=True,
-        )
-        cctv_files = st.file_uploader(
-            f"CCTV — Zone {seg}",
-            type=["jpg", "jpeg", "png"],
-            accept_multiple_files=True,
-            key=f"cctv_{seg}",
-            label_visibility="collapsed",
-        )
-
-        st.markdown(
-            "<div style='font-size:.8rem;font-weight:600;color:#374151;"
-            "margin-top:.6rem;margin-bottom:.25rem'>Drone / Aerial</div>",
-            unsafe_allow_html=True,
-        )
-        drone_files = st.file_uploader(
-            f"Drone — Zone {seg}",
-            type=["jpg", "jpeg", "png"],
-            accept_multiple_files=True,
-            key=f"drone_{seg}",
-            label_visibility="collapsed",
-        )
-
-        st.radio(
-            f"Photos in Zone {seg} show",
-            options=["sum", "max"],
-            format_func=lambda m: ("Different parts: add counts" if m == "sum"
-                                   else "Same area: keep highest"),
-            key=f"combine_{seg}",
-            help="Adding up two photos of the same spot counts those people twice.",
-        )
-
-        if cctv_files or drone_files:
-            cctv_clipped  = cctv_files[:MAX_HALF]  if cctv_files  else []
-            drone_clipped = drone_files[:MAX_HALF]  if drone_files else []
-
-            all_bytes   = [f.getvalue() for f in cctv_clipped + drone_clipped]
-            all_names   = [f.name       for f in cctv_clipped + drone_clipped]
-            all_sources = (["ground"] * len(cctv_clipped)
-                           + ["drone"]  * len(drone_clipped))
-
-            st.session_state.uploaded_images[seg] = all_bytes
-            st.session_state.image_names[seg]     = all_names
-            st.session_state.image_sources[seg]   = all_sources
-
-        stored = st.session_state.uploaded_images.get(seg, [])
-        srcs   = st.session_state.image_sources.get(seg, [])
-        n_c    = sum(1 for s in srcs if s == "ground")
-        n_d    = sum(1 for s in srcs if s == "drone")
-        if stored:
-            st.markdown(
-                f"<div style='margin-top:.5rem;font-size:.78rem;color:#6b7280'>"
-                f"{n_c} CCTV &nbsp;·&nbsp; {n_d} Drone"
-                f"</div>",
-                unsafe_allow_html=True,
-            )
-        else:
-            st.markdown(
-                "<div style='margin-top:.5rem;font-size:.78rem;color:#6b7280'>"
-                "No images yet</div>",
-                unsafe_allow_html=True,
-            )
-
-# ---------------------------------------------------------------------------
-# Run detection
-# ---------------------------------------------------------------------------
+# ── Count ──────────────────────────────────────────────────────────────────
 st.markdown("---")
 total_imgs = sum(len(v) for v in st.session_state.uploaded_images.values())
 segs_ready = [s for s in SEGMENTS if st.session_state.uploaded_images.get(s)]
 
 c1, c2 = st.columns([3, 1])
 with c1:
-    if segs_ready:
-        st.markdown(
-            f"<div style='font-size:.9rem;color:#374151;padding-top:.5rem'>"
-            f"<b>{len(segs_ready)}</b> zone(s) ready — "
-            f"<b>{total_imgs}</b> total image(s)</div>",
-            unsafe_allow_html=True,
-        )
-    else:
-        st.markdown(
-            "<div style='font-size:.9rem;color:#9ca3af;padding-top:.5rem'>"
-            "Upload images above to enable detection.</div>",
-            unsafe_allow_html=True,
-        )
-with c2:
-    run = st.button("Count people", width="stretch", icon=":material/play_arrow:",
-                    disabled=(total_imgs == 0), type="primary")
+    st.markdown(f"<div style='font-size:.9rem;color:#334155;padding-top:.5rem'><b>{total_imgs}</b> photo(s) in "
+                f"<b>{len(segs_ready)}</b> zone(s) ready to count.</div>" if segs_ready else
+                "<div style='font-size:.9rem;color:#64748b;padding-top:.5rem'>Add photos to at least one zone "
+                "to count.</div>", unsafe_allow_html=True)
+run = c2.button("Count people", width="stretch", icon=":material/play_arrow:", disabled=not total_imgs,
+                type="primary")
 
 if run:
     results = {}
@@ -210,11 +108,11 @@ if run:
         bar = st.progress(0.0)
         total_photos = sum(len(st.session_state.uploaded_images[z]) for z in segs_ready)
         done_photos, started = 0, time.time()
-        st.caption("The free server counts a photo in roughly 30 to 60 seconds. A photo you have already "
-                   "counted comes back instantly.")
+        st.caption("The free server takes about a minute per photo. A photo you have already counted comes "
+                   "back instantly.")
         for idx, seg in enumerate(segs_ready):
             img_list = st.session_state.uploaded_images[seg]
-            st.write(f"Zone {seg}: {len(img_list)} photo(s)")
+            st.write(f"{zone_label(seg)}: {len(img_list)} photo(s)")
             try:
                 results[seg] = process_segment(
                     img_list, per_image_sources=st.session_state.image_sources.get(seg, []),
@@ -223,7 +121,7 @@ if run:
                 status.update(label="Not enough memory on this server", state="error", expanded=True)
                 st.error(str(exc))
                 st.stop()
-            st.write(f"Zone {seg}: **{results[seg]['count']:,}** people, counted by the "
+            st.write(f"{zone_label(seg)}: **{results[seg]['count']:,}** people, counted by the "
                      f"{COUNTER_LABELS.get(results[seg].get('counter'), 'model')}")
             bar.progress((idx + 1) / len(segs_ready))
             done_photos += len(img_list)
@@ -231,52 +129,36 @@ if run:
                 left = (time.time() - started) / done_photos * (total_photos - done_photos)
                 st.caption(f"About {left:.0f} s left for the other {total_photos - done_photos} photo(s).")
         status.update(label=f"Counted {len(results)} zone(s)", state="complete", expanded=False)
-    st.session_state.crowd_data     = results
-    st.session_state.last_run_model = "mixed"
+    st.session_state.crowd_data = results
 
-    # Record in detection history
-    seg_results = {
-        seg: {
-            "count": r["count"],
-            "risk":  risk_level(r["count"], get_seg_thresholds(seg)),
-        }
-        for seg, r in results.items()
-    }
-    hist_entry = {
-        "timestamp":  datetime.now().strftime("%b %d, %Y  %H:%M"),
-        "seg_count":  len(results),
-        "total":      sum(r["count"] for r in results.values()),
-        "critical":   sum(1 for v in seg_results.values() if v["risk"] == "Critical"),
-        "high":       sum(1 for v in seg_results.values() if v["risk"] == "High Risk"),
-        "results":    seg_results,
-    }
-    st.session_state.detection_history.insert(0, hist_entry)
-    if len(st.session_state.detection_history) > 10:
-        st.session_state.detection_history = st.session_state.detection_history[:10]
+    seg_results = {seg: {"count": r["count"], "risk": risk_level(r["count"], get_seg_thresholds(seg))}
+                   for seg, r in results.items()}
+    st.session_state.detection_history.insert(0, {
+        "timestamp": datetime.now().strftime("%b %d, %Y  %H:%M"),
+        "seg_count": len(results),
+        "total":     sum(r["count"] for r in results.values()),
+        "results":   seg_results,
+    })
+    del st.session_state.detection_history[10:]
 
-    st.success(
-        f"Done: {len(results)} zone(s) counted. Open **Alerts and plans** for risk levels, "
-        "the relocation plan and email alerts."
-    )
+# ── Results ────────────────────────────────────────────────────────────────
+data = st.session_state.crowd_data
+if data:
+    section("Results", "The photo with the most people in each zone, with a dot on every head.")
+    cols = st.columns(len(data))
+    for col, (seg, d) in zip(cols, data.items()):
+        risk = risk_level(d["count"], get_seg_thresholds(seg))
+        with col:
+            st.markdown(f"<div style='display:flex;justify-content:space-between;align-items:center;gap:.4rem'>"
+                        f"<b style='font-size:.88rem'>{zone_label(seg)}</b>{risk_pill(risk)}</div>",
+                        unsafe_allow_html=True)
+            st.metric(f"People in zone {seg}", f"{d['count']:,}", label_visibility="collapsed",
+                      help=f"Counted by the {COUNTER_LABELS.get(d.get('counter'), 'model')} from "
+                           f"{d['image_count']} photo(s)")
+            lead = max(d.get("per_image") or [{}], key=lambda r: r.get("count", 0))
+            if lead.get("overlay") is not None:
+                import cv2
 
-# ---------------------------------------------------------------------------
-# Quick results preview
-# ---------------------------------------------------------------------------
-if st.session_state.crowd_data:
-    st.markdown('<div class="sec">Results</div>', unsafe_allow_html=True)
-    pcols = st.columns(5)
-    for i, seg in enumerate(SEGMENTS):
-        with pcols[i]:
-            d    = st.session_state.crowd_data.get(seg)
-            srcs = st.session_state.image_sources.get(seg, [])
-            n_c  = sum(1 for s in srcs if s == "ground")
-            n_d  = sum(1 for s in srcs if s == "drone")
-            if d:
-                st.metric(
-                    f"Zone {seg}",
-                    d["count"],
-                    help=(f"Counted by the {COUNTER_LABELS.get(d.get('counter'), 'model')} · "
-                          f"{n_c} CCTV, {n_d} Drone"),
-                )
-            else:
-                st.metric(f"Zone {seg}", "—")
+                st.image(cv2.cvtColor(lead["overlay"], cv2.COLOR_BGR2RGB), width="stretch")
+    nav_link("pages/3_📊_Analysis.py", "Next: risk levels, the evacuation plan and alerts",
+             ":material/arrow_forward:", "/Analysis")
