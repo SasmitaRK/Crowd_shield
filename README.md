@@ -51,6 +51,25 @@ sample from a fixed camera at Paris Saint-Lazare station is built in: Baidax,
 [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/), via
 [Wikimedia Commons](https://commons.wikimedia.org/wiki/File:2025-11-06_17-33-16_-_Paris_-_Saint-Lazare.webm).
 
+### Evacuation planning
+
+When zones are over their limit, the **Optimised** planner (the default on the Site map and the Alerts
+page) works out where to send people by solving a minimum-cost network flow as a linear program
+(SciPy's HiGHS solver, `crowdshield/risk.py`). Every High Risk or Critical zone must shed enough people
+to drop below its limit; every other zone can take people up to just below its own limit and no
+more; people may walk through zones on the way, and walking into a busy zone costs more. It first
+leaves as few people as possible with nowhere to go, then minimises the walking.
+
+The older **Simple rule** (still selectable) sends each crowded zone to its nearest zone with room, one
+after another. On the two demo sites ([results/planner_comparison.md](results/planner_comparison.md)) the
+two plans move the same people when there is plenty of room, but the optimiser walks them about 31% less
+in the Kumbh peak. When the Madurai surge needs more room than the nearest zone has, the simple rule
+quietly left about 56,000 people unplaced, while the optimiser placed everyone. (Because it places more
+people, its Madurai peak plan walks more in total.) The map shows both plans side by side.
+
+Limits: this is a static plan on a zone graph with distances between zone centres. It has no travel
+time, exit widths or crowd dynamics, so treat it as a first plan for the people on the ground to adjust.
+
 ## How well it works
 
 Every number below comes from data the method never saw while it was being
