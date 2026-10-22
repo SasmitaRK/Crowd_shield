@@ -39,6 +39,27 @@ python -m crowdshield.live_cli --source "rtsp://user:password@192.168.1.20/strea
 
 Try it with no camera first: `--source assets/samples/paris_saint_lazare.mp4 --once`.
 
+## Test it with a real camera: use a phone
+
+No CCTV to hand? An Android phone makes a real network camera, which is the honest way to field-test
+the monitor (public webcams online are mostly gone, locked behind tokens, or not allowed to be re-used).
+
+1. Install **IP Webcam** (by Pavel Khlebovich, free) and press **Start server**. It shows an address such
+   as `http://192.168.1.7:8080`.
+2. Put the phone somewhere steady and high, looking down at a busy spot: a college gate, a canteen queue, a
+   market lane. Ask permission where you need it, and keep it short: the monitor never stores the video.
+3. On a laptop on the **same Wi-Fi**:
+
+```
+set CROWDSHIELD_ALLOW_PRIVATE_URLS=1            (Windows; on Mac or Linux: export CROWDSHIELD_ALLOW_PRIVATE_URLS=1)
+python -m crowdshield.live_cli --source http://192.168.1.7:8080/video --zones my_zones.json --interval 30 --log field_test.csv
+```
+
+   Or run the app itself (`streamlit run main.py`), open **Live feed**, choose **Stream URL** and paste
+   `http://192.168.1.7:8080/video`.
+4. Count the people in a few of the same moments by hand and compare them with `field_test.csv`. That
+   comparison is a real field result you can quote.
+
 ## What it is not
 
 It looks at one picture per interval; it is not video-rate tracking. It does not recognise anyone: it
