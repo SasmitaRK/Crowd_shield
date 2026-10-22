@@ -1,0 +1,46 @@
+[
+ {
+  "work": 704,
+  "fit": 704,
+  "peak_mb": 1900,
+  "seconds_per_photo": 7.3,
+  "counts": [
+   87.3,
+   81.3,
+   1208.4
+  ]
+ },
+ {
+  "work": 1024,
+  "fit": 704,
+  "peak_mb": 1537,
+  "seconds_per_photo": 20.6,
+  "counts": [
+   96.3,
+   88.3,
+   1187.9
+  ]
+ },
+ {
+  "work": 1024,
+  "fit": 99999,
+  "peak_mb": 2930,
+  "seconds_per_photo": 12.2,
+  "counts": [
+   93.3,
+   82.3,
+   1153.7
+  ]
+ },
+ {
+  "work": 1024,
+  "fit": 576,
+  "peak_mb": 1182,
+  "seconds_per_photo": 21.4,
+  "counts": [
+   101.3,
+   82.3,
+   1190.4
+  ]
+ }
+]

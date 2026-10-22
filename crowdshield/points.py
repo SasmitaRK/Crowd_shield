@@ -17,14 +17,16 @@ from functools import lru_cache
 
 import numpy as np
 
-from .config import REPO_ROOT, default_max_side, fit_max_side
+from .config import MIN_SIDE, REPO_ROOT, default_max_side, default_work_side, fit_max_side
 from .weights import RELEASES, fetch
 
 WEIGHTS = REPO_ROOT / "models" / "pet_shab.pth"
 WEIGHTS_URL = f"{RELEASES}/pet-shab-v1/pet_shab.pth"
 WEIGHTS_SHA256 = "5a7c6590e61938e42c6b3a2bbde5fbec34ee7eb8b2c9cae0fdba2a45d8437595"
 CORRECTION = (1.375, 0.942)  # true ≈ a * raw ** b, fitted on held-out training photos
-MAX_SIDE = default_max_side()  # 2048, or less on a small server (see config.py)
+MAX_SIDE = default_max_side()  # kept for callers that read it; counting uses WORK_SIDE below
+WORK_SIDE = default_work_side()  # the detail to count at; a small server does it in tiles
+TILE_MARGIN = 48  # context around each tile's core, in pixels, so heads at a seam are still seen whole
 _MEAN = np.array([0.485, 0.456, 0.406], dtype=np.float32)
 _STD = np.array([0.229, 0.224, 0.225], dtype=np.float32)
 
@@ -76,15 +78,52 @@ def points_from_model(model, device: str, img_bgr: np.ndarray) -> np.ndarray:
     return pts * np.array([h, w], dtype=float)
 
 
+def tile_layout(height: int, width: int, tile_side: int, margin: int = TILE_MARGIN) -> list[tuple]:
+    """Split an image into cores (y0, y1, x0, x1) that cover it exactly once, each small enough that
+    the core plus `margin` pixels of context on every side fits in `tile_side`."""
+    core = max(64, tile_side - 2 * margin)
+    rows, cols = max(1, -(-height // core)), max(1, -(-width // core))
+    ys = np.linspace(0, height, rows + 1).round().astype(int)
+    xs = np.linspace(0, width, cols + 1).round().astype(int)
+    return [(ys[r], ys[r + 1], xs[c], xs[c + 1]) for r in range(rows) for c in range(cols)]
+
+
+def points_tiled(model, device: str, img_bgr: np.ndarray, tile_side: int,
+                 margin: int = TILE_MARGIN) -> np.ndarray:
+    """Head points for an image counted one tile at a time, so memory is set by the tile, not the photo.
+
+    Each tile is run with `margin` pixels of context, and a head is kept only by the tile whose core
+    contains it: nobody is counted twice at a seam, and nobody is dropped.
+    """
+    h, w = img_bgr.shape[:2]
+    found = []
+    for y0, y1, x0, x1 in tile_layout(h, w, tile_side, margin):
+        ya, yb, xa, xb = max(0, y0 - margin), min(h, y1 + margin), max(0, x0 - margin), min(w, x1 + margin)
+        pts = points_from_model(model, device, img_bgr[ya:yb, xa:xb]) + np.array([ya, xa], dtype=float)
+        keep = (pts[:, 0] >= y0) & (pts[:, 0] < y1) & (pts[:, 1] >= x0) & (pts[:, 1] < x1)
+        found.append(pts[keep])
+    return np.concatenate(found) if found else np.zeros((0, 2))
+
+
 def count_points(img_bgr: np.ndarray) -> dict:
-    """Count people in a BGR photo: corrected count, raw count and head points."""
+    """Count people in a BGR photo: corrected count, raw count and head points.
+
+    The photo is shrunk to WORK_SIDE. If the server has the memory to run that in one pass it does;
+    otherwise the photo is counted in tiles that fit, which keeps the same detail.
+    """
     import cv2
 
     model, device = load_point_model()
-    scale = min(1.0, fit_max_side(ceiling=MAX_SIDE) / max(img_bgr.shape[:2]))
+    scale = min(1.0, WORK_SIDE / max(img_bgr.shape[:2]))
     small = img_bgr if scale == 1.0 else cv2.resize(img_bgr, None, fx=scale, fy=scale,
                                                     interpolation=cv2.INTER_AREA)
-    pts = points_from_model(model, device, small) / scale
+    longest = max(small.shape[:2])
+    fit = fit_max_side(ceiling=max(MIN_SIDE, longest))
+    if fit >= longest:
+        pts = points_from_model(model, device, small)
+    else:
+        pts = points_tiled(model, device, small, fit)
+    pts = pts / scale
     return {"count": corrected_count(len(pts)), "raw_count": len(pts), "points": pts}
 
 

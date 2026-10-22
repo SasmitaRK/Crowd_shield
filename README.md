@@ -195,6 +195,24 @@ Streamlit Community Cloud gives an app about 2.7 GB, so on it (or any machine wi
 Crowd Shield counts at 640 px; elsewhere it uses 2048 px. On the four test photos the counts at
 640 px stayed close to those at 2048 px. `CROWDSHIELD_MAX_SIDE` overrides the choice.
 
+### Counting on a small server: tiles
+
+The free host has 3.2 GB of memory, too little to run the point model on a 1024 px photo in one pass.
+Shrinking photos to fit (704 px) cost accuracy. Instead, a small server now shrinks photos to 1024 px and
+counts them in tiles of at most 704 px, each with 48 px of overlap, keeping every head only in the tile
+whose core contains it (`points.points_tiled`). Measured on Kaggle ([results/tiled_accuracy.json](results/tiled_accuracy.json),
+[results/tiled_memory.json](results/tiled_memory.json)):
+
+| | ShanghaiTech A | ShanghaiTech B | Peak memory | Time per photo (4-core CPU) |
+|---|---:|---:|---:|---:|
+| One pass at 704 px (before) | 83.6% | 91.9% | 1.9 GB | 7 s |
+| **Tiles, 1024 px (now)** | **86.1%** | **93.3%** | **1.5 GB** | 21 s |
+| One pass at 1024 px (needs a bigger server) | 86.5% | 92.7% | 2.9 GB | 12 s |
+
+So the hosted app now counts about as well as a big server, in less memory, but about three times slower.
+On the 10 hand-labelled Indian photos the smaller 704 px pass scored higher (81.9% vs 68.6% tiled and
+66.6% at 2048 px), because shrinking hides the railway-gravel failure; with 10 photos that is a hint, not a result.
+
 ## Run it
 
 ```bash
