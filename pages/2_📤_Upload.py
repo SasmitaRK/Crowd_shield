@@ -1,5 +1,6 @@
 """Upload page — two-channel input (CCTV + Drone) with automatic model routing."""
 
+import time
 from datetime import datetime
 import streamlit as st
 
@@ -207,6 +208,10 @@ if run:
     results = {}
     with st.status("Counting people...", expanded=True) as status:
         bar = st.progress(0.0)
+        total_photos = sum(len(st.session_state.uploaded_images[z]) for z in segs_ready)
+        done_photos, started = 0, time.time()
+        st.caption("The free server counts a photo in roughly 30 to 60 seconds. A photo you have already "
+                   "counted comes back instantly.")
         for idx, seg in enumerate(segs_ready):
             img_list = st.session_state.uploaded_images[seg]
             st.write(f"Zone {seg}: {len(img_list)} photo(s)")
@@ -221,6 +226,10 @@ if run:
             st.write(f"Zone {seg}: **{results[seg]['count']:,}** people, counted by the "
                      f"{COUNTER_LABELS.get(results[seg].get('counter'), 'model')}")
             bar.progress((idx + 1) / len(segs_ready))
+            done_photos += len(img_list)
+            if done_photos < total_photos:
+                left = (time.time() - started) / done_photos * (total_photos - done_photos)
+                st.caption(f"About {left:.0f} s left for the other {total_photos - done_photos} photo(s).")
         status.update(label=f"Counted {len(results)} zone(s)", state="complete", expanded=False)
     st.session_state.crowd_data     = results
     st.session_state.last_run_model = "mixed"
