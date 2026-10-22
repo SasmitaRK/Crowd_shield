@@ -244,11 +244,17 @@ def keep_last(frames):
         yield frame
 
 
+from crowdshield.config import NotEnoughMemory  # noqa: E402
+
 video_path = clip_on_disk(data, suffix)
 try:
     rows, events = monitor.run(keep_last(iter_frames(video_path, max_seconds)),
                                progress=lambda i: bar.progress(
                                    min(1.0, (i + 1) / n_frames), text=f"Frame {i + 1} of {n_frames}"))
+except NotEnoughMemory as exc:
+    bar.empty()
+    st.error(str(exc))
+    st.stop()
 finally:
     os.remove(video_path)
 bar.empty()

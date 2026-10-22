@@ -35,6 +35,73 @@ def on_streamlit_cloud() -> bool:
     return str(REPO_ROOT).startswith("/mount/src")
 
 
+class NotEnoughMemory(RuntimeError):
+    """The server can't hold the counting model for a photo of any size we'd accept."""
+
+
+# Peak memory (MB) of the whole app while PET counts one photo at each size, measured on a
+# Kaggle CPU (results/pet_memory.json, pet_memory_small.json, app_memory.json). Loading the weights
+# alone takes about 0.9 GB, so no photo size runs in much less than that. Sizes in between are interpolated.
+PET_PEAK_MB = {320: 920, 384: 1140, 448: 1140, 512: 1150, 576: 1520, 640: 1520,
+               800: 2400, 1024: 2800, 1280: 3600, 1600: 5500, 2048: 8500}
+MIN_SIDE = 320
+SAFETY = 0.85  # use at most this share of what's free: the numbers above are from one test machine
+
+
+def estimated_peak_mb(side: int) -> float:
+    sizes = sorted(PET_PEAK_MB)
+    side = max(sizes[0], min(side, sizes[-1]))
+    for lo, hi in zip(sizes, sizes[1:]):
+        if lo <= side <= hi:
+            return PET_PEAK_MB[lo] + (PET_PEAK_MB[hi] - PET_PEAK_MB[lo]) * (side - lo) / (hi - lo)
+    return float(PET_PEAK_MB[sizes[-1]])
+
+
+def memory_in_use_bytes() -> int | None:
+    """Memory the container is using now (anonymous memory, not reclaimable file cache)."""
+    try:
+        for line in Path("/sys/fs/cgroup/memory.stat").read_text().splitlines():
+            if line.startswith("anon "):
+                return int(line.split()[1])
+    except OSError:
+        pass
+    try:
+        return int(Path("/sys/fs/cgroup/memory.current").read_text())
+    except OSError:
+        return None
+
+
+def own_rss_bytes() -> int:
+    try:
+        return int(Path("/proc/self/statm").read_text().split()[1]) * os.sysconf("SC_PAGE_SIZE")
+    except (OSError, ValueError, AttributeError, IndexError):
+        return 0
+
+
+def fit_max_side(limit_bytes: int | None = None, in_use_bytes: int | None = None,
+                 own_bytes: int | None = None, ceiling: int | None = None) -> int:
+    """The largest photo size whose estimated peak fits in the memory left, never above `ceiling`.
+
+    Raises NotEnoughMemory when even the smallest size would not fit, so the app can say so
+    instead of being killed by the server. With no memory limit to read (a laptop), the ceiling is used.
+    """
+    ceiling = ceiling or default_max_side()
+    limit = memory_limit_bytes() if limit_bytes is None else limit_bytes
+    if limit is None or limit >= 64 * 1024 ** 3:
+        return ceiling
+    used = memory_in_use_bytes() if in_use_bytes is None else in_use_bytes
+    own = own_rss_bytes() if own_bytes is None else own_bytes
+    others = max(0, (used or 0) - own)           # memory held by other processes in the container
+    budget_mb = (SAFETY * limit - others) / 1e6
+    for side in range(ceiling, MIN_SIDE - 1, -32):
+        if estimated_peak_mb(side) <= budget_mb:
+            return side
+    raise NotEnoughMemory(
+        f"This server has about {limit / 1e9:.1f} GB of memory, and counting needs roughly "
+        f"{estimated_peak_mb(MIN_SIDE) / 1000:.1f} GB even for a small photo. Run Crowd Shield on "
+        "your own computer, or use the sample photos.")
+
+
 def default_max_side() -> int:
     """CROWDSHIELD_MAX_SIDE if set; otherwise smaller on Streamlit Cloud or a small machine."""
     if os.environ.get("CROWDSHIELD_MAX_SIDE"):

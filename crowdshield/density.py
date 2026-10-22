@@ -14,7 +14,7 @@ from pathlib import Path
 
 import numpy as np
 
-from .config import REPO_ROOT, default_max_side
+from .config import REPO_ROOT, default_max_side, fit_max_side
 from .weights import RELEASES, fetch
 
 # Trained on ShanghaiTech A + B with an honest held-out split; see the release notes.
@@ -98,7 +98,7 @@ def estimate_density(img_bgr: np.ndarray, weights: str | None = None) -> dict:
     import cv2
 
     model, device = load_density_model(str(weights or DEFAULT_WEIGHTS))
-    scale = min(1.0, MAX_SIDE / max(img_bgr.shape[:2]))
+    scale = min(1.0, fit_max_side(ceiling=MAX_SIDE) / max(img_bgr.shape[:2]))
     if scale < 1.0:
         img_bgr = cv2.resize(img_bgr, None, fx=scale, fy=scale, interpolation=cv2.INTER_AREA)
     density = density_from_model(model, device, img_bgr)

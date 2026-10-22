@@ -17,7 +17,7 @@ from functools import lru_cache
 
 import numpy as np
 
-from .config import REPO_ROOT, default_max_side
+from .config import REPO_ROOT, default_max_side, fit_max_side
 from .weights import RELEASES, fetch
 
 WEIGHTS = REPO_ROOT / "models" / "pet_shab.pth"
@@ -81,7 +81,7 @@ def count_points(img_bgr: np.ndarray) -> dict:
     import cv2
 
     model, device = load_point_model()
-    scale = min(1.0, MAX_SIDE / max(img_bgr.shape[:2]))
+    scale = min(1.0, fit_max_side(ceiling=MAX_SIDE) / max(img_bgr.shape[:2]))
     small = img_bgr if scale == 1.0 else cv2.resize(img_bgr, None, fx=scale, fy=scale,
                                                     interpolation=cv2.INTER_AREA)
     pts = points_from_model(model, device, small) / scale
