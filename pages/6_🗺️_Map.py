@@ -191,7 +191,11 @@ total_area = sum(r["area_m2"] for r in zones.values())
 peak = max(counted, key=lambda r: r["per_m2"]) if counted else None
 at_risk = [z for z, r in zones.items() if r["risk"] in ("High Risk", "Critical")]
 moving = sum(p["move"] for p in plans if p["target"])
-chip = ("<span class='pill warn'>Simulated counts</span>" if source == "Simulated surge"
+chip = ("<span class='pill warn'>Simulated counts</span> <span class='pill neutral'>Illustrative zones, "
+        "not the official layout</span>" if source == "Simulated surge" and is_demo
+        else "<span class='pill warn'>Simulated counts</span>" if source == "Simulated surge"
+        else "<span class='pill brand'>Counts from your photos</span> <span class='pill neutral'>Illustrative "
+             "zones, not the official layout</span>" if counted and is_demo
         else "<span class='pill brand'>Counts from your photos</span>" if counted else "")
 kpis = [
     ("People in zones", compact(sum(r["count"] for r in counted)) if counted else "–",

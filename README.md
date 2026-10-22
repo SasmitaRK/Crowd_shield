@@ -63,8 +63,10 @@ A hosted copy only runs while the page is open. To watch a camera around the clo
 computer, with no browser:
 
 ```
-python -m crowdshield.live_cli --source rtsp://192.168.1.20/stream --zones zones.json --interval 20 --notify
+python -m crowdshield.live_cli --source rtsp://192.168.1.20/stream --zones zones.json --interval 30 --log counts.csv --notify
 ```
+
+Step-by-step set-up, an example zones file and the options are in [docs/run-on-your-laptop.md](docs/run-on-your-laptop.md).
 
 (`zones.json` names each zone as a box of the picture and how many people it holds; the file's help shows the
 format. A camera on your own network needs `CROWDSHIELD_ALLOW_PRIVATE_URLS=1`.) The hosted app refuses

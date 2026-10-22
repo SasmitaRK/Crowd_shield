@@ -7,6 +7,7 @@ import streamlit as st
 
 from crowdshield import benchmark
 from crowdshield.config import COUNTER_LABELS, NotEnoughMemory
+from crowdshield.points import on_tile_progress
 from detection import process_segment, risk_level
 from shared_state import (GLOBAL_CSS, MAX_IMAGES_PER_SEGMENT, SEGMENTS, get_seg_thresholds, init_state,
                           zone_label)
@@ -110,13 +111,17 @@ if run:
         done_photos, started = 0, time.time()
         st.caption("The free server takes about a minute per photo. A photo you have already counted comes "
                    "back instantly.")
+        tile_note = st.empty()
         for idx, seg in enumerate(segs_ready):
             img_list = st.session_state.uploaded_images[seg]
             st.write(f"{zone_label(seg)}: {len(img_list)} photo(s)")
             try:
-                results[seg] = process_segment(
-                    img_list, per_image_sources=st.session_state.image_sources.get(seg, []),
-                    combine=st.session_state.get(f"combine_{seg}", "sum"))
+                with on_tile_progress(lambda d, n: tile_note.caption(
+                        f"Counting a large photo in {n} pieces: {d} of {n} done.")):
+                    results[seg] = process_segment(
+                        img_list, per_image_sources=st.session_state.image_sources.get(seg, []),
+                        combine=st.session_state.get(f"combine_{seg}", "sum"))
+                tile_note.empty()
             except NotEnoughMemory as exc:
                 status.update(label="Not enough memory on this server", state="error", expanded=True)
                 st.error(str(exc))
@@ -160,5 +165,8 @@ if data:
                 import cv2
 
                 st.image(cv2.cvtColor(lead["overlay"], cv2.COLOR_BGR2RGB), width="stretch")
+    st.caption("A count is an estimate (about 86 to 93% accurate on test photos). Look at where the dots sit: "
+               "if they land on railway gravel, tiles, rails or patterned cloth instead of heads, the count is "
+               "too high. This is the model's known weak spot (see India benchmark).")
     nav_link("pages/3_📊_Analysis.py", "Next: risk levels, the evacuation plan and alerts",
              ":material/arrow_forward:", "/Analysis")

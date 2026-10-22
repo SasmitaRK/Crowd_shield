@@ -84,3 +84,15 @@ def test_work_side_is_set_by_the_server_but_overridable(monkeypatch):
     assert config.default_work_side() == config.FULL_MAX_SIDE
     monkeypatch.setenv("CROWDSHIELD_MAX_SIDE", "1280")
     assert config.default_work_side() == 1280
+
+
+def test_tile_progress_is_reported_and_cleaned_up(monkeypatch):
+    fake_model(monkeypatch)
+    seen = []
+    img = dotted_image([(100, 100), (600, 800)])
+    with points.on_tile_progress(lambda d, n: seen.append((d, n))):
+        points.points_tiled(None, "cpu", img, 300)
+    n = len(points.tile_layout(700, 900, 300))
+    assert seen == [(i, n) for i in range(1, n + 1)]
+    points.points_tiled(None, "cpu", img, 300)  # the hook is gone afterwards
+    assert len(seen) == n

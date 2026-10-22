@@ -130,3 +130,37 @@ def test_the_command_line_monitor_counts_one_frame(tmp_path, monkeypatch, capsys
     assert live_cli.main(["--source", str(SAMPLE), "--zones", str(zones), "--once"]) == 0
     out = capsys.readouterr().out
     assert "Stairs" in out and "Floor" in out
+
+
+def test_the_command_line_monitor_writes_a_csv_log(tmp_path, monkeypatch, capsys):
+    from crowdshield import live_cli, points
+
+    zones = tmp_path / "zones.json"
+    zones.write_text(json.dumps({"Stairs": {"box": [0.6, 0.2, 1.0, 1.0], "capacity": 20}}))
+    monkeypatch.setattr(points, "point_grid", counter_with(25, 3))
+    log = tmp_path / "counts.csv"
+    for _ in range(2):  # a second run appends, with no second header
+        assert live_cli.main(["--source", str(SAMPLE), "--zones", str(zones), "--once", "--log", str(log)]) == 0
+    rows = log.read_text().splitlines()
+    assert rows[0] == "time,zone,people,risk,minutes_to_full" and len(rows) == 3
+    assert rows[1].split(",")[1] == "Stairs"
+
+
+def test_a_bad_frame_does_not_stop_the_command_line_monitor(tmp_path, monkeypatch, capsys):
+    from crowdshield import live_cli, points
+
+    zones = tmp_path / "zones.json"
+    zones.write_text(json.dumps({"Stairs": {"box": [0.6, 0.2, 1.0, 1.0], "capacity": 20}}))
+    calls = {"n": 0}
+
+    def flaky(frame):
+        calls["n"] += 1
+        if calls["n"] == 2:
+            raise RuntimeError("model hiccup")
+        return counter_with(25, 3)(frame)
+
+    monkeypatch.setattr(points, "point_grid", flaky)
+    monkeypatch.setattr(live_cli.time, "sleep", lambda s: (_ for _ in ()).throw(KeyboardInterrupt()) if calls["n"] >= 2 else None)
+    assert live_cli.main(["--source", str(SAMPLE), "--zones", str(zones), "--interval", "1"]) == 0
+    captured = capsys.readouterr()
+    assert "Stairs" in captured.out and "Could not count this frame" in captured.err and "Stopped." in captured.out

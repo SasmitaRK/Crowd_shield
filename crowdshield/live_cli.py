@@ -16,6 +16,7 @@ network needs CROWDSHIELD_ALLOW_PRIVATE_URLS=1.
 from __future__ import annotations
 
 import argparse
+import csv
 import json
 import sys
 import time
@@ -43,6 +44,7 @@ def main(argv=None) -> int:
     ap.add_argument("--interval", type=float, default=20.0, help="seconds between counts")
     ap.add_argument("--notify", action="store_true", help="send alerts to the channels that are set up")
     ap.add_argument("--once", action="store_true", help="count one frame and stop")
+    ap.add_argument("--log", type=Path, help="append every reading to this CSV file (time, zone, people, risk)")
     args = ap.parse_args(argv)
 
     if "://" in args.source:
@@ -59,24 +61,64 @@ def main(argv=None) -> int:
             print("Could not read the stream; retrying in 10 s.", file=sys.stderr)
             time.sleep(10)
     monitor = LiveMonitor(load_zones(args.zones, frame.shape), point_grid)
+    log = _open_log(args.log)
     start = time.time()
-    while True:
-        result = monitor.update(time.time() - start, frame)
-        stamp = time.strftime("%H:%M:%S")
-        print(stamp, " | ".join(f"{z}: {r['count']:.0f} ({r['risk']})" for z, r in result["zones"].items()), flush=True)
-        for event in result["events"]:
-            text = notify.alert_text(event["zone"], event["zone"], event["risk"], event["count"],
-                                     event["per_m2"], None if event["eta_s"] is None else event["eta_s"] / 60)
-            print("  ALERT:", text.splitlines()[0], flush=True)
-            if args.notify:
-                for line in notify.broadcast(text):
-                    print("  ", line, flush=True)
-        if args.once:
-            return 0
-        time.sleep(max(1.0, args.interval))
-        fresh = grab_frame(args.source)
-        if fresh is not None:   # keep the last picture if the stream hiccups
-            frame = fresh
+    try:
+        while True:
+            began = time.time()
+            try:
+                result = monitor.update(began - start, frame)
+            except Exception as exc:  # one bad frame or a model hiccup must not stop an all-day watch
+                print(time.strftime("%H:%M:%S"), f"Could not count this frame ({type(exc).__name__}); "
+                      "trying the next one.", file=sys.stderr, flush=True)
+                if args.once:
+                    return 1
+                result = None
+            if result:
+                _report(result, args, log)
+            if args.once:
+                return 0
+            # Keep the rhythm: the interval is from one count's start to the next, so a slow count
+            # does not push every later count further out.
+            time.sleep(max(1.0, args.interval - (time.time() - began)))
+            fresh = grab_frame(args.source)
+            if fresh is not None:   # keep the last picture if the stream hiccups
+                frame = fresh
+    except KeyboardInterrupt:
+        print("\nStopped.", flush=True)
+        return 0
+    finally:
+        if log:
+            log[0].close()
+
+
+def _open_log(path):
+    """(file, csv writer) for --log, with a header on a new file; None when not asked for."""
+    if not path:
+        return None
+    fresh = not path.exists() or path.stat().st_size == 0
+    handle = open(path, "a", newline="", encoding="utf-8")
+    writer = csv.writer(handle)
+    if fresh:
+        writer.writerow(["time", "zone", "people", "risk", "minutes_to_full"])
+    return handle, writer
+
+
+def _report(result, args, log) -> None:
+    stamp = time.strftime("%H:%M:%S")
+    print(stamp, " | ".join(f"{z}: {r['count']:.0f} ({r['risk']})" for z, r in result["zones"].items()), flush=True)
+    if log:
+        for zone, r in result["zones"].items():
+            log[1].writerow([time.strftime("%Y-%m-%d %H:%M:%S"), zone, f"{r['count']:.0f}", r["risk"],
+                             "" if r["eta_s"] is None else f"{r['eta_s'] / 60:.1f}"])
+        log[0].flush()
+    for event in result["events"]:
+        text = notify.alert_text(event["zone"], event["zone"], event["risk"], event["count"],
+                                 event["per_m2"], None if event["eta_s"] is None else event["eta_s"] / 60)
+        print("  ALERT:", text.splitlines()[0], flush=True)
+        if args.notify:
+            for line in notify.broadcast(text):
+                print("  ", line, flush=True)
 
 
 if __name__ == "__main__":

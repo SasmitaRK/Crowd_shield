@@ -13,6 +13,7 @@ from __future__ import annotations
 
 import os
 from argparse import Namespace
+from contextlib import contextmanager
 from functools import lru_cache
 
 import numpy as np
@@ -35,6 +36,21 @@ _ARGS = dict(backbone="vgg16_bn", position_embedding="sine", dec_layers=2,
              dim_feedforward=512, hidden_dim=256, dropout=0.0, nheads=8,
              set_cost_class=1.0, set_cost_point=0.05, ce_loss_coef=1.0,
              point_loss_coef=5.0, eos_coef=0.5)
+
+
+_progress = None  # called as fn(done, total) after each tile; set with on_tile_progress()
+
+
+@contextmanager
+def on_tile_progress(fn):
+    """Run counting with `fn(done, total)` called after every tile, so a page can show real progress
+    during the minute a big photo takes on a small server."""
+    global _progress
+    previous, _progress = _progress, fn
+    try:
+        yield
+    finally:
+        _progress = previous
 
 
 def corrected_count(raw: float) -> float:
@@ -70,7 +86,7 @@ def points_from_model(model, device: str, img_bgr: np.ndarray) -> np.ndarray:
 
     rgb = img_bgr[:, :, ::-1].astype(np.float32) / 255.0
     x = torch.from_numpy(((rgb - _MEAN) / _STD).transpose(2, 0, 1).copy())
-    with torch.no_grad():
+    with torch.inference_mode():  # same numbers as no_grad, a little less overhead
         samples = nested_tensor_from_tensor_list([x]).to(device)
         out = model(samples, test=True)
     h, w = samples.tensors.shape[-2:]
@@ -97,11 +113,14 @@ def points_tiled(model, device: str, img_bgr: np.ndarray, tile_side: int,
     """
     h, w = img_bgr.shape[:2]
     found = []
-    for y0, y1, x0, x1 in tile_layout(h, w, tile_side, margin):
+    layout = tile_layout(h, w, tile_side, margin)
+    for done, (y0, y1, x0, x1) in enumerate(layout, start=1):
         ya, yb, xa, xb = max(0, y0 - margin), min(h, y1 + margin), max(0, x0 - margin), min(w, x1 + margin)
         pts = points_from_model(model, device, img_bgr[ya:yb, xa:xb]) + np.array([ya, xa], dtype=float)
         keep = (pts[:, 0] >= y0) & (pts[:, 0] < y1) & (pts[:, 1] >= x0) & (pts[:, 1] < x1)
         found.append(pts[keep])
+        if _progress:
+            _progress(done, len(layout))
     return np.concatenate(found) if found else np.zeros((0, 2))
 
 
