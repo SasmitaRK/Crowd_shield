@@ -109,8 +109,13 @@ def build_critical_email(seg: str, count: int,
                          target_seg: str | None, target_count: int,
                          move_count: int, risk_level: str,
                          thresholds: dict,
-                         has_image: bool = False) -> tuple[str, str]:
-    """Build alert email for a High Risk or Critical segment agent."""
+                         has_image: bool = False,
+                         moves: list | None = None) -> tuple[str, str]:
+    """Build alert email for a High Risk or Critical segment agent.
+
+    `moves` lists every destination when the plan splits the people (dicts with target,
+    target_count, move and path; a target of None means people nobody can take).
+    """
     is_critical = risk_level == "Critical"
     color   = "#c0392b" if is_critical else "#e67e22"
     icon    = "🔴" if is_critical else "🟠"
@@ -123,6 +128,17 @@ def build_critical_email(seg: str, count: int,
         f"(current occupancy: {target_count})"
         if target_seg else "No safe destination — call for reinforcements"
     )
+    if moves:
+        lines = []
+        for m in moves:
+            if m["target"]:
+                lines.append(f"<b>~{m['move']}</b> to <b>Segment {m['target']}</b> "
+                             f"(current occupancy: {m['target_count']}), "
+                             f"via {' → '.join(m['path'])}")
+            else:
+                lines.append(f"<b>~{m['move']}</b> have no safe destination: call for reinforcements")
+        target_html = "<br>".join(lines)
+        move_count = sum(m["move"] for m in moves)
 
     rows = "".join([
         _info_row("Segment", f"<b>{seg}</b>"),

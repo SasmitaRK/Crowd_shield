@@ -9,8 +9,8 @@ import json
 from pathlib import Path
 
 from .config import REPO_ROOT
-from .geo import adjacency, centroid, ring_area_m2
-from .risk import plan_relocations, risk_level, route, thresholds_from_area
+from .geo import adjacency, centroid, haversine_m, ring_area_m2
+from .risk import plan_optimal, plan_relocations, risk_level, route, thresholds_from_area
 
 SITES_DIR = REPO_ROOT / "sites"
 DEMO_SITE = SITES_DIR / "kumbh_sangam.json"
@@ -68,10 +68,11 @@ def list_sites() -> list[dict]:
     return [dict(load_site(p), path=str(p)) for p in paths]
 
 
-def assess(site: dict, counts: dict, preset: dict, touch_m: float | None = None) -> dict:
+def assess(site: dict, counts: dict, preset: dict, touch_m: float | None = None,
+           planner: str = "optimal") -> dict:
     """Everything the map shows, from zone shapes, people counts and a density standard.
 
-    Returns {"zones": {zone: row}, "adjacency": graph, "plans": [...]} where each
+    Returns {"zones": {zone: row}, "adjacency": graph, "plans": [...], "distance_m": {...}} where each
     row has the zone's name, ring, centre, area_m2, count, per_m2, risk and
     thresholds, and each plan from plan_relocations gains a "path" of zones to
     walk through. Zones without a count are kept for drawing, with count None.
@@ -95,10 +96,15 @@ def assess(site: dict, counts: dict, preset: dict, touch_m: float | None = None)
             "risk": None if count is None else risk_level(count, thresholds),
         }
     counted = {z: r for z, r in rows.items() if r["count"] is not None}
-    plans = plan_relocations(counted, adjacency=graph)
-    for p in plans:
-        p["path"] = route(p["high"], p["target"], graph) if p["target"] else []
-    return {"zones": rows, "adjacency": graph, "plans": plans}
+    distance = {(a, b): haversine_m(rows[a]["centre"], rows[b]["centre"])
+                for a in graph for b in graph[a]}
+    if planner == "simple":
+        plans = plan_relocations(counted, adjacency=graph)
+        for p in plans:
+            p["path"] = route(p["high"], p["target"], graph) if p["target"] else []
+    else:
+        plans = plan_optimal(counted, graph, distance)
+    return {"zones": rows, "adjacency": graph, "plans": plans, "distance_m": distance}
 
 
 def site_from_drawings(features: list, names: dict, letters: dict) -> dict:

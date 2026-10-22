@@ -60,7 +60,8 @@ def test_madurai_routes_people_off_the_riverbed_towards_the_city():
     site = next(s for s in list_sites() if "Madurai" in s["short"])
     view = assess(site, scenario_counts(site), EVENTS)
     assert view["zones"]["A"]["risk"] == "Critical"
-    assert view["plans"][0]["path"][:2] == ["A", "C"]  # riverbed out via the south bank
+    big = max(view["plans"], key=lambda p: p["move"])
+    assert big["path"][:2] == ["A", "C"]  # the biggest flow leaves the riverbed by the south bank
 
 
 def test_the_surge_timeline_scales_counts_and_peaks_at_one():

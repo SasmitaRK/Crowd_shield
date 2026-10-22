@@ -18,7 +18,7 @@ from ui import page_header
 from shared_state import (init_state, GLOBAL_CSS, SEGMENTS,
                           RISK_COLORS, RISK_ICONS, get_seg_thresholds)
 from detection import risk_level, MODEL_REGISTRY
-from crowdshield.risk import plan_relocations
+from crowdshield.risk import plan_optimal
 from crowdshield.config import COUNTER_LABELS
 from emailer import (email_configured, send_email,
                      build_critical_email, build_receiving_email)
@@ -623,8 +623,7 @@ st.markdown("---")
 st.markdown('<div class="section-label">Alert Plan & Operational Orders</div>',
             unsafe_allow_html=True)
 
-pairings = plan_relocations(seg_info,
-                            adjacency=st.session_state.get("zone_adjacency"))
+pairings = plan_optimal(seg_info, adjacency=st.session_state.get("zone_adjacency"))
 
 for seg in SEGMENTS:
     if seg not in seg_info:
@@ -637,12 +636,14 @@ for seg in SEGMENTS:
     allowable = max(0, t["critical"] - info["count"])
 
     if risk in ("High Risk", "Critical"):
-        pair   = next((p for p in pairings if p["high"] == seg), None)
-        target = pair["target"] if pair else None
-        move   = pair["move"]   if pair else 0
-        dest   = (f' to Zone <b>{target}</b> '
-                  f'(current: {seg_info[target]["count"]})'
-                  if target else " — call reinforcements")
+        mine   = [p for p in pairings if p["high"] == seg]
+        move   = sum(p["move"] for p in mine)
+        placed = [p for p in mine if p["target"]]
+        stuck  = sum(p["move"] for p in mine if not p["target"])
+        dest   = (" to " + ", ".join(f'Zone <b>{p["target"]}</b> (~{p["move"]}, now {p["target_count"]})'
+                                    for p in placed)) if placed else ""
+        if stuck:
+            dest += f" — ~{stuck} have nowhere safe to go: call reinforcements"
         emerg  = "<b>EMERGENCY: </b>" if risk == "Critical" else ""
         msg = (
             f"<b style='color:#111827'>{risk.upper()} — Zone {seg}</b> "
@@ -657,11 +658,11 @@ for seg in SEGMENTS:
     elif risk == "Moderate":
         incoming = [p for p in pairings if p["target"] == seg]
         if incoming:
-            inc = incoming[0]
+            arriving = ", ".join(f"~{p['move']} from Zone {p['high']}" for p in incoming)
             msg = (
                 f"<b style='color:#111827'>INCOMING — Zone {seg}</b> "
                 f"<span style='color:#6b7280;font-size:.85rem'>({info['count']} people)</span><br>"
-                f"Prepare for ~{inc['move']} arriving from Zone {inc['high']}.<br>"
+                f"Prepare for {arriving}.<br>"
                 f"<span style='font-size:.83rem;color:#6b7280'>Agent: {agent}</span>"
             )
         else:
@@ -676,11 +677,11 @@ for seg in SEGMENTS:
     else:
         incoming = [p for p in pairings if p["target"] == seg]
         if incoming:
-            inc = incoming[0]
+            arriving = ", ".join(f"~{p['move']} from Zone {p['high']}" for p in incoming)
             msg = (
                 f"<b style='color:#111827'>SAFE (receiving) — Zone {seg}</b> "
                 f"<span style='color:#6b7280;font-size:.85rem'>({info['count']} people)</span><br>"
-                f"Receiving ~{inc['move']} from Zone {inc['high']}. "
+                f"Receiving {arriving}. "
                 f"Open entries, guide arrivals.<br>"
                 f"<span style='font-size:.83rem;color:#6b7280'>Agent: {agent}</span>"
             )
@@ -750,21 +751,27 @@ else:
 
     if st.button("Send all alerts", use_container_width=True, type="primary"):
         sent, failed = [], []
+        told = set()  # a crowded zone gets one email, however many destinations its plan has
         for p in pairings:
             h_email   = agents.get(p["high"], "")
             t_email   = agents.get(p["target"], "") if p["target"] else ""
             img_bytes = _peak_image_bytes(p["high"])
 
-            if h_email:
+            if p["high"] in told:
+                pass
+            elif h_email:
+                told.add(p["high"])
+                moves = [q for q in pairings if q["high"] == p["high"]]
                 subj, body = build_critical_email(
                     seg=p["high"], count=p["high_count"],
                     target_seg=p["target"], target_count=p["target_count"],
                     move_count=p["move"], risk_level=p["risk"],
-                    thresholds=p["thresholds"], has_image=bool(img_bytes))
+                    thresholds=p["thresholds"], has_image=bool(img_bytes), moves=moves)
                 ok, msg = send_email(h_email, subj, body, img_bytes)
                 (sent if ok else failed).append(
                     f"Agent {p['high']} ({h_email}): {msg}")
             else:
+                told.add(p["high"])
                 failed.append(f"Zone {p['high']}: no agent email assigned")
 
             if p["target"] and t_email:

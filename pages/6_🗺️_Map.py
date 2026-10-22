@@ -59,7 +59,7 @@ page_header("Site map", "Zones sit on satellite imagery, so each one's ground ar
 
 site_options = list(SITES) + (["My site"] if "custom_site" in st.session_state else []) + ["Draw a new site"]
 with st.container(border=True):
-    c1, c2, c3 = st.columns([5, 3, 3])
+    c1, c2, c3, c4 = st.columns([5, 3, 3, 3])
     with c1:
         site_choice = st.selectbox("Site", site_options,
                                    help="Demo sites are real places with illustrative zones.")
@@ -73,6 +73,12 @@ with st.container(border=True):
         preset_name = st.selectbox("Density standard", list(FRUIN_PRESETS),
                                    index=list(FRUIN_PRESETS).index("Crowded events / concerts"),
                                    help="People per m² at which each risk level starts (Fruin).")
+    with c4:
+        planner_name = st.selectbox(
+            "Evacuation planner", ["Optimised", "Simple rule"],
+            help="Optimised solves the whole network at once (minimum-cost flow): it places as many "
+                 "people as the zones can take, along the shortest walks. The simple rule sends each "
+                 "crowded zone to its nearest zone with room, one after another.")
     step = None
     if is_demo and source == "Simulated surge":
         steps = timeline(SITES[site_choice])
@@ -172,7 +178,8 @@ elif source == "My latest analysis":
     counts = {z: d["count"] for z, d in st.session_state.crowd_data.items() if z in site["zones"]}
 else:
     counts = {}
-view = assess(site, counts, preset)
+planner = "optimal" if planner_name == "Optimised" else "simple"
+view = assess(site, counts, preset, planner=planner)
 zones, plans = view["zones"], view["plans"]
 
 if is_demo:
@@ -302,6 +309,23 @@ with tab_plan:
         st.caption("Add counts on the Upload page, or pick the simulated surge, to see a plan.")
     elif not plans:
         st.success("No zone is at High Risk or Critical. No one needs to move.")
+    else:
+        from crowdshield.risk import plan_summary
+
+        counted_rows = {z: r for z, r in zones.items() if r["count"] is not None}
+        both = {name: plan_summary(assess(site, counts, preset, planner=key)["plans"],
+                                   view["distance_m"], counted_rows)
+                for name, key in (("Simple rule", "simple"), ("Optimised", "optimal"))}
+        st.dataframe(
+            [{"Planner": name, "People moved": f"{r['moved']:,}",
+              "Left with nowhere to go": f"{r['unresolved']:,}",
+              "People x metres walked": f"{r['people_metres']:,.0f}"} for name, r in both.items()],
+            hide_index=True, width="stretch")
+        if both["Simple rule"]["unresolved"] > both["Optimised"]["unresolved"]:
+            st.caption("The simple rule gives up on people when its nearest zone fills up. The optimised "
+                       "plan finds room for them in other zones, even ones reached through a busy zone.")
+        else:
+            st.caption("People x metres is the total walking the plan asks for: lower is easier to carry out.")
     for p in plans:
         src = zones[p["high"]]
         if p["target"]:

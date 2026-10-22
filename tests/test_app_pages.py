@@ -107,3 +107,13 @@ def test_photo_page_offers_instant_sample_photos():
     app.button(key="sample_show").click().run()
     assert not app.exception, [e.message for e in app.exception]
     assert any(m.label == "Counted by hand" for m in app.metric)
+
+
+def test_map_page_compares_the_simple_rule_with_the_optimised_plan():
+    pytest.importorskip("streamlit_folium")
+    app = render(PAGES["Map"])
+    names = [box.label for box in app.selectbox]
+    assert "Evacuation planner" in names
+    box = next(b for b in app.selectbox if b.label == "Evacuation planner")
+    box.set_value("Simple rule").run()
+    assert not app.exception, [e.message for e in app.exception]
