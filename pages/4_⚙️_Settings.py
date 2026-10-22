@@ -46,7 +46,7 @@ with st.expander("Work out limits from each zone's area"):
     areas = {}
     for col, seg in zip(st.columns(5), SEGMENTS):
         areas[seg] = col.number_input(f"{zone_label(seg)} (m²)", 0, 1_000_000,
-                                      int(st.session_state.seg_areas.get(seg, 0)), 10, key=f"area_{seg}")
+                                      int(st.session_state.seg_areas.get(seg, 0)), 1, key=f"area_{seg}")
 
     def apply_areas():
         new = {s: thresholds_from_area(v, preset, coverage) for s, v in areas.items() if v > 0}
@@ -70,7 +70,7 @@ with st.container(border=True):
         cols = st.columns(widths, vertical_alignment="center")
         cols[0].markdown(f"**{zone_label(seg)}**")
         for col, (key, label) in zip(cols[1:], LEVELS):
-            col.number_input(f"{label}, zone {seg}", 1, 1_000_000, step=5, key=f"lim_{key}_{seg}",
+            col.number_input(f"{label}, zone {seg}", 1, 1_000_000, step=1, key=f"lim_{key}_{seg}",
                              label_visibility="collapsed")
 
 
@@ -164,24 +164,32 @@ with s1:
     st.download_button("Save my session (JSON file)", export_session(st.session_state),
                        file_name="crowd_shield_session.json", mime="application/json", width="stretch",
                        icon=":material/download:")
+def load_session():
+    """Runs before the page is drawn, so it may refill the boxes (Streamlit forbids that afterwards)."""
+    saved = st.session_state.get("session_file")
+    try:
+        loaded = import_session(saved.getvalue().decode("utf-8", errors="replace"))
+    except BadSession as exc:
+        st.session_state.session_note = ("error", str(exc))
+        return
+    for key, value in loaded.items():
+        st.session_state[key] = value
+    for seg in SEGMENTS:  # the boxes on this and other pages read these keys first
+        st.session_state.pop(f"agent_input_{seg}", None)
+        st.session_state.pop(f"area_{seg}", None)
+    show_limits(st.session_state.thresholds)
+    names = {"crowd_data": "counts", "thresholds": "risk limits", "agents": "contacts", "custom_site": "drawn site",
+             "zone_names": "zone names", "seg_areas": "areas", "zone_adjacency": "routes"}
+    st.session_state.session_note = ("success", "Loaded: " + ", ".join(names.get(k, k) for k in loaded) + ".")
+
+
 with s2:
     saved = st.file_uploader("Load a saved session", type=["json"], label_visibility="collapsed",
                              key="session_file")
-    if saved is not None and st.button("Load it", width="stretch", icon=":material/upload:"):
-        try:
-            loaded = import_session(saved.getvalue().decode("utf-8", errors="replace"))
-        except BadSession as exc:
-            st.error(str(exc))
-        else:
-            for key, value in loaded.items():
-                st.session_state[key] = value
-            for seg in SEGMENTS:  # the boxes on this and other pages read these keys first
-                st.session_state.pop(f"agent_input_{seg}", None)
-                st.session_state.pop(f"area_{seg}", None)
-            show_limits(st.session_state.thresholds)
-            st.success("Loaded: " + ", ".join({"crowd_data": "counts", "thresholds": "risk limits",
-                                              "agents": "contacts", "custom_site": "drawn site",
-                                              "zone_names": "zone names"}.get(k, k) for k in loaded) + ".")
+    st.button("Load it", width="stretch", icon=":material/upload:", on_click=load_session, disabled=saved is None)
+    kind, text = st.session_state.pop("session_note", (None, None))
+    if kind:
+        (st.success if kind == "success" else st.error)(text)
 
 # ── Reset ──────────────────────────────────────────────────────────────────
 section("Reset", "Everything here lasts for this browser session only; these clear it sooner.")
