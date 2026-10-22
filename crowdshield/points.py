@@ -17,14 +17,14 @@ from functools import lru_cache
 
 import numpy as np
 
-from .config import REPO_ROOT
+from .config import REPO_ROOT, default_max_side
 from .weights import RELEASES, fetch
 
 WEIGHTS = REPO_ROOT / "models" / "pet_shab.pth"
 WEIGHTS_URL = f"{RELEASES}/pet-shab-v1/pet_shab.pth"
 WEIGHTS_SHA256 = "5a7c6590e61938e42c6b3a2bbde5fbec34ee7eb8b2c9cae0fdba2a45d8437595"
 CORRECTION = (1.375, 0.942)  # true ≈ a * raw ** b, fitted on held-out training photos
-MAX_SIDE = int(os.environ.get("CROWDSHIELD_MAX_SIDE", 2048))
+MAX_SIDE = default_max_side()  # 2048, or less on a small server (see config.py)
 _MEAN = np.array([0.485, 0.456, 0.406], dtype=np.float32)
 _STD = np.array([0.229, 0.224, 0.225], dtype=np.float32)
 

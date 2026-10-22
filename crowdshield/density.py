@@ -14,7 +14,7 @@ from pathlib import Path
 
 import numpy as np
 
-from .config import REPO_ROOT
+from .config import REPO_ROOT, default_max_side
 from .weights import RELEASES, fetch
 
 # Trained on ShanghaiTech A + B with an honest held-out split; see the release notes.
@@ -23,7 +23,7 @@ WEIGHTS_URL = f"{RELEASES}/dmcount-shab-v1/dmcount_shab.pth"
 WEIGHTS_SHA256 = "d6f72bffcd1ea986011796b43a63e2738fe8c97d19d230ef99286b603ea207b9"
 # Very large photos are shrunk first: the network's memory grows with pixel count.
 # Small free servers can set CROWDSHIELD_MAX_SIDE lower (e.g. 1280).
-MAX_SIDE = int(os.environ.get("CROWDSHIELD_MAX_SIDE", 2048))
+MAX_SIDE = default_max_side()  # 2048, or less on a small server (see config.py)
 
 # VGG19 convolution layers ("M" = 2x2 max-pool), configuration E without batch norm.
 _VGG19 = [64, 64, "M", 128, 128, "M", 256, 256, 256, 256, "M",
