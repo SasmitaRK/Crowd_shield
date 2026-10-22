@@ -26,9 +26,13 @@ def fake_model(monkeypatch):
 def test_tiles_cover_the_image_exactly_once():
     h, w = 700, 900
     cover = np.zeros((h, w), int)
+    budget = points._padded(300) ** 2
     for y0, y1, x0, x1 in points.tile_layout(h, w, 300):
         cover[y0:y1, x0:x1] += 1
-        assert (y1 - y0) + 2 * points.TILE_MARGIN <= 300 and (x1 - x0) + 2 * points.TILE_MARGIN <= 300
+        # the tile PET actually computes (core + context, padded) never needs more than a padded 300 px square
+        th = min(h, y1 + points.TILE_MARGIN) - max(0, y0 - points.TILE_MARGIN)
+        tw = min(w, x1 + points.TILE_MARGIN) - max(0, x0 - points.TILE_MARGIN)
+        assert points._padded(th) * points._padded(tw) <= budget
     assert (cover == 1).all()
 
 
@@ -96,3 +100,20 @@ def test_tile_progress_is_reported_and_cleaned_up(monkeypatch):
     assert seen == [(i, n) for i in range(1, n + 1)]
     points.points_tiled(None, "cpu", img, 300)  # the hook is gone afterwards
     assert len(seen) == n
+
+
+def test_a_landscape_photo_is_counted_in_strips_not_padded_squares():
+    # 1024 x 768 with 704 px of memory: the square plan needs four tiles that PET pads to 512 x 768 each;
+    # the padded plan needs two full-width strips, less padded area in total.
+    padded = points.tile_layout(768, 1024, 704)
+    assert len(padded) == 2 and all(x0 == 0 and x1 == 1024 for _, _, x0, x1 in padded)
+    points.TILE_PLAN = "square"
+    try:
+        assert len(points.tile_layout(768, 1024, 704)) == 4
+    finally:
+        points.TILE_PLAN = "padded"
+
+
+def test_seams_stay_exact_with_the_square_plan_too(monkeypatch):
+    monkeypatch.setattr(points, "TILE_PLAN", "square")
+    test_heads_on_a_seam_are_counted_once_and_none_are_lost(monkeypatch)
