@@ -100,3 +100,10 @@ def test_video_page_opens_the_sample_clip_as_a_fixed_camera():
     assert any("450 frames" in block.value for block in app.caption)
     assert not app.warning  # no moving-camera warning: the station camera is fixed
     assert [box.value for box in app.text_input] == ["Stairs", "Concourse"]
+
+
+def test_photo_page_offers_instant_sample_photos():
+    app = render(PAGES["Upload"])
+    app.button(key="sample_show").click().run()
+    assert not app.exception, [e.message for e in app.exception]
+    assert any(m.label == "Counted by hand" for m in app.metric)

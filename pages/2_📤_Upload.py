@@ -8,7 +8,7 @@ from ui import page_header
 from shared_state import (init_state, GLOBAL_CSS, SEGMENTS,
                           MAX_IMAGES_PER_SEGMENT, get_seg_thresholds)
 from detection import process_segment, MODEL_REGISTRY, risk_level
-from crowdshield.config import COUNTER_LABELS
+from crowdshield.config import COUNTER_LABELS, NotEnoughMemory
 
 st.set_page_config(page_title="Upload • Crowd Shield",
                    page_icon=None, layout="wide")
@@ -59,6 +59,40 @@ MAX_HALF = MAX_IMAGES_PER_SEGMENT // 2
 # ---------------------------------------------------------------------------
 # Per-segment upload columns
 # ---------------------------------------------------------------------------
+from crowdshield import benchmark  # noqa: E402
+
+
+def sample_photos():
+    """Hand-checked Indian photos with the model's stored head points: instant, nothing to run."""
+    rows = [r for r in benchmark.load() if (benchmark.INDIA / "images" / r["image"]).exists()]
+    return sorted(rows, key=lambda r: abs(r["error"]) / max(r["true"], 1))[:6]  # the model's best six
+
+
+samples = sample_photos()
+if samples:
+    with st.container(border=True):
+        top, pick = st.columns([3, 2])
+        top.markdown("**No photo handy? Try a sample.** These are real Indian crowd photos that were "
+                     "counted by hand, with the model's head points already computed, so this is "
+                     "instant and runs nothing on the server.")
+        chosen = pick.selectbox("Sample photo", samples, format_func=lambda r: r["title"][:60],
+                                label_visibility="collapsed", key="sample_choice")
+        if pick.button("Show the count", key="sample_show", width="stretch"):
+            st.session_state.sample_shown = chosen["image"]
+        shown = next((r for r in samples if r["image"] == st.session_state.get("sample_shown")), None)
+        if shown:
+            import cv2
+            from crowdshield.detection import render_overlay
+
+            img = cv2.imread(str(benchmark.INDIA / "images" / shown["image"]))
+            overlay = cv2.cvtColor(render_overlay(img, [], [], None, shown["model_points"]), cv2.COLOR_BGR2RGB)
+            left, right = st.columns([3, 1])
+            left.image(overlay, width="stretch")
+            right.metric("Model count", f"{shown['model']:.0f}")
+            right.metric("Counted by hand", f"{shown['true']}")
+            right.caption(f"{shown['scene']}. Photo by {shown['author']}, {shown['license']}, via "
+                          f"[Wikimedia Commons]({shown['source']}).")
+
 seg_cols = st.columns(5)
 for i, seg in enumerate(SEGMENTS):
     with seg_cols[i]:
@@ -176,9 +210,14 @@ if run:
         for idx, seg in enumerate(segs_ready):
             img_list = st.session_state.uploaded_images[seg]
             st.write(f"Zone {seg}: {len(img_list)} photo(s)")
-            results[seg] = process_segment(
-                img_list, per_image_sources=st.session_state.image_sources.get(seg, []),
-                combine=st.session_state.get(f"combine_{seg}", "sum"))
+            try:
+                results[seg] = process_segment(
+                    img_list, per_image_sources=st.session_state.image_sources.get(seg, []),
+                    combine=st.session_state.get(f"combine_{seg}", "sum"))
+            except NotEnoughMemory as exc:
+                status.update(label="Not enough memory on this server", state="error", expanded=True)
+                st.error(str(exc))
+                st.stop()
             st.write(f"Zone {seg}: **{results[seg]['count']:,}** people, counted by the "
                      f"{COUNTER_LABELS.get(results[seg].get('counter'), 'model')}")
             bar.progress((idx + 1) / len(segs_ready))

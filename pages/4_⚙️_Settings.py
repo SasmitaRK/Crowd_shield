@@ -300,3 +300,27 @@ with col3:
     if st.button("Reset thresholds to defaults", use_container_width=True):
         st.session_state.thresholds = {s: dict(DEFAULT_THRESHOLDS) for s in SEGMENTS}
         st.success("Reset to defaults (moderate=30, high=60, critical=90).")
+
+# ---------------------------------------------------------------------------
+# Server and memory
+# ---------------------------------------------------------------------------
+st.markdown("---")
+st.markdown("### Server")
+from crowdshield import config as _cfg  # noqa: E402
+
+_limit, _used, _own = _cfg.memory_limit_bytes(), _cfg.memory_in_use_bytes(), _cfg.own_rss_bytes()
+_gb = lambda b: "unknown" if b is None else f"{b / 1e9:.1f} GB"
+try:
+    _side = f"{_cfg.fit_max_side()} px"
+except _cfg.NotEnoughMemory:
+    _side = "none fits"
+st.caption("What this server can hold, and the largest photo size the counter will use right now. "
+           "If a photo would not fit, the app says so instead of crashing.")
+c1, c2, c3, c4 = st.columns(4)
+c1.metric("Memory limit", _gb(_limit))
+c2.metric("In use", _gb(_used), help="Memory used by everything running on this server.")
+c3.metric("This app", _gb(_own))
+c4.metric("Photo size used", _side,
+          help=f"At most {_cfg.default_max_side()} px here; smaller when memory is tight.")
+st.caption(f"Running from `{_cfg.REPO_ROOT}`"
+           f"{' (Streamlit Community Cloud)' if _cfg.on_streamlit_cloud() else ''}.")

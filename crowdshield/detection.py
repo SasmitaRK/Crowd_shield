@@ -10,7 +10,7 @@ from functools import lru_cache
 
 import numpy as np
 
-from .config import DEFAULT_MODEL_KEY, MODEL_REGISTRY, REPO_ROOT
+from .config import DEFAULT_MODEL_KEY, MODEL_REGISTRY, REPO_ROOT, NotEnoughMemory
 
 # Ultralytics keeps at most 300 boxes per image by default, which silently caps
 # counts in dense crowds. Counting needs a far higher ceiling.
@@ -186,6 +186,8 @@ def count_people(img: np.ndarray, model_key: str = DEFAULT_MODEL_KEY) -> dict:
         pts = count_points(img)
         return {**base, "count": int(round(pts["count"])), "points": pts["points"],
                 "counter": "points"}
+    except NotEnoughMemory:
+        raise  # falling back to a model that needs as much memory would only crash the server
     except Exception:
         pass
     try:
@@ -194,6 +196,8 @@ def count_people(img: np.ndarray, model_key: str = DEFAULT_MODEL_KEY) -> dict:
         dens = estimate_density(img)
         return {**base, "count": int(round(dens["count"])), "density": dens["density"],
                 "counter": "density"}
+    except NotEnoughMemory:
+        raise
     except Exception:
         pass
     det = detect_people(img, model_key)
