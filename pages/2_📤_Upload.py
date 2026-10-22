@@ -85,7 +85,7 @@ if samples:
             from crowdshield.detection import render_overlay
 
             img = cv2.imread(str(benchmark.INDIA / "images" / shown["image"]))
-            overlay = cv2.cvtColor(render_overlay(img, [], [], None, shown["model_points"]), cv2.COLOR_BGR2RGB)
+            overlay = cv2.cvtColor(render_overlay(img, [], [], None, benchmark.points_rc(shown["model_points"])), cv2.COLOR_BGR2RGB)
             left, right = st.columns([3, 1])
             left.image(overlay, width="stretch")
             right.metric("Model count", f"{shown['model']:.0f}")

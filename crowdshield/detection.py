@@ -163,9 +163,16 @@ def render_overlay(img: np.ndarray, person_boxes, extra_heads,
     for boxes, colour in ((person_boxes, (0, 255, 0)), (extra_heads, (0, 255, 255))):
         for x, y, bw, bh in boxes:
             cv2.rectangle(overlay, (x, y), (x + bw, y + bh), colour, 2)
-    radius = max(2, round(min(h, w) / 300))
-    for row, col in (points if points is not None else []):
-        cv2.circle(overlay, (int(col), int(row)), radius, (0, 255, 0), -1, cv2.LINE_AA)
+    if points is not None and len(points):
+        # Big, see-through dots: easy to spot on a small screen, yet the people stay visible
+        # underneath. Drawn on a copy and blended in so each dot is translucent.
+        radius = max(5, round(min(h, w) / 110))
+        dots = overlay.copy()
+        for row, col in points:
+            cv2.circle(dots, (int(col), int(row)), radius, (0, 255, 0), -1, cv2.LINE_AA)
+        overlay = cv2.addWeighted(dots, 0.5, overlay, 0.5, 0)
+        for row, col in points:
+            cv2.circle(overlay, (int(col), int(row)), radius, (255, 255, 255), 1, cv2.LINE_AA)
     return overlay
 
 
