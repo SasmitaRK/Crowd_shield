@@ -94,6 +94,9 @@ for col, (seg, info) in zip(cols, seg_info.items()):
                      caption=f"Busiest photo: {lead['count']:,} people" if len(per_img) > 1 else None)
         st.caption(f"Counted by the {COUNTER_LABELS.get(info['counter'], 'model')} from "
                    f"{info['image_count']} photo(s)")
+        if any((r.get("check") or {}).get("disagree") for r in per_img):
+            st.warning("Check this count: a second model found far fewer people. Look at the dots on "
+                       "Photo analysis before acting on it.", icon=":material/visibility:")
 
 # ── Plan ───────────────────────────────────────────────────────────────────
 section("Evacuation plan",

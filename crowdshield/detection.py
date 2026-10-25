@@ -199,17 +199,20 @@ def count_people(img: np.ndarray, model_key: str = DEFAULT_MODEL_KEY) -> dict:
     a dense crowd, and running it alongside would only slow the app down.
     """
     base = {"body_count": 0, "head_count": 0, "person_boxes": [], "extra_heads": [],
-            "density": None, "points": None}
+            "density": None, "points": None, "check": None}
     try:
         from .points import count_points
 
         pts = count_points(img)
-        return {**base, "count": int(round(pts["count"])), "points": pts["points"],
-                "counter": "points"}
     except NotEnoughMemory:
         raise  # falling back to a model that needs as much memory would only crash the server
     except Exception:
-        pass
+        pts = None
+    if pts is not None:
+        from .crosscheck import second_opinion
+
+        return {**base, "count": int(round(pts["count"])), "points": pts["points"],
+                "counter": "points", "check": second_opinion(img, pts["count"])}
     try:
         from .density import estimate_density
 
@@ -231,13 +234,14 @@ def analyse_image_bytes(image_bytes: bytes, model_key: str = DEFAULT_MODEL_KEY) 
     img = cv2.imdecode(np.frombuffer(image_bytes, np.uint8), cv2.IMREAD_COLOR)
     if img is None:
         return {"count": 0, "body_count": 0, "head_count": 0,
-                "counter": None, "overlay": None, "model_key": model_key}
+                "counter": None, "check": None, "overlay": None, "model_key": model_key}
     res = count_people(img, model_key)
     return {
         "count":          res["count"],
         "body_count":     res["body_count"],
         "head_count":     res["head_count"],
         "counter":        res["counter"],
+        "check":          res.get("check"),
         "overlay":        render_overlay(img, res["person_boxes"], res["extra_heads"],
                                          res["density"], res["points"]),
         "model_key":      model_key,

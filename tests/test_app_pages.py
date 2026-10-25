@@ -169,3 +169,12 @@ def test_map_labels_demo_zones_as_illustrative():
     pytest.importorskip("streamlit_folium")
     text = " ".join(b.value for b in render(PAGES["Map"]).markdown)
     assert "Illustrative zones, not the official layout" in text
+
+
+def test_photo_and_alert_pages_warn_when_the_two_models_disagree():
+    zone = zone_result(1282)
+    zone["per_image"][0]["check"] = {"dm_count": 415, "ratio": 3.09, "disagree": True}
+    up = render(PAGES["Upload"], crowd_data={"A": zone})
+    assert any("Check this count" in w.value and "415" in w.value for w in up.warning)
+    alerts = render(PAGES["Analysis"], crowd_data={"A": zone})
+    assert any("Check this count" in w.value for w in alerts.warning)
