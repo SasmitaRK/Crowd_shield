@@ -19,7 +19,7 @@ def code_stamp() -> int:
 
 
 stamp = code_stamp()
-if getattr(sys, "crowdshield_code_stamp", stamp) != stamp:
+if getattr(sys, "crowdshield_code_stamp", None) != stamp:  # also on the first run: modules may predate it
     for name in [n for n in sys.modules if n.split(".")[0] in OWN_MODULES]:
         del sys.modules[name]
 sys.crowdshield_code_stamp = stamp
