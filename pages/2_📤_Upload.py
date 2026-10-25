@@ -1,4 +1,4 @@
-"""Photo analysis: add up to four photos per zone, count every head, and see each zone's risk."""
+"""Count people in a photo: up to four photos per zone, a dot on every head, and each zone's risk."""
 
 import time
 from datetime import datetime
@@ -11,24 +11,23 @@ from crowdshield.points import on_tile_progress
 from detection import process_segment, risk_level
 from shared_state import (GLOBAL_CSS, MAX_IMAGES_PER_SEGMENT, SEGMENTS, get_seg_thresholds, init_state,
                           zone_label)
-from ui import nav_link, page_header, risk_pill, section
+from ui import next_step, page_header, risk_pill, section
 
-st.set_page_config(page_title="Photo analysis • Crowd Shield", page_icon=None, layout="wide")
+st.set_page_config(page_title="Count people in a photo • Crowd Shield", page_icon=None, layout="wide")
 st.markdown(GLOBAL_CSS, unsafe_allow_html=True)
 init_state()
 
-page_header("Photo analysis", "Add CCTV, drone or phone photos for each zone. The PET point model puts a dot on "
-            "every head, and each zone's risk follows from its count.", "Analyse")
+page_header("Count people in a photo", "Add a photo of each part of your site, from CCTV, a drone or a phone. "
+            "Crowd Shield puts a dot on every head and tells you how crowded each part is.", "Check a crowd")
 
 st.markdown(
     "<div class='card' style='display:flex;gap:2rem;flex-wrap:wrap;margin-bottom:1.2rem;padding:.9rem 1.2rem'>"
-    "<div><div class='sec' style='margin:0 0 .25rem'>Counts with</div>"
-    "<div style='font-size:.88rem'><b>PET point model</b>, fine-tuned on ShanghaiTech: a dot per head, "
-    "corrected for undercounting</div></div>"
-    "<div><div class='sec' style='margin:0 0 .25rem'>If it can't run</div>"
-    "<div style='font-size:.88rem'>DM-Count density model, then YOLO</div></div>"
+    "<div><div class='sec' style='margin:0 0 .25rem'>How it counts</div>"
+    "<div style='font-size:.88rem'>An AI model trained on thousands of crowd photos puts a dot on each head</div></div>"
+    "<div><div class='sec' style='margin:0 0 .25rem'>How accurate</div>"
+    "<div style='font-size:.88rem'>About 86 to 93% on test photos; always glance at the dots</div></div>"
     "<div><div class='sec' style='margin:0 0 .25rem'>Privacy</div>"
-    "<div style='font-size:.88rem'>Photos stay in this session only. No faces, no identities.</div></div>"
+    "<div style='font-size:.88rem'>Photos stay in this session only. No faces, no names.</div></div>"
     "</div>",
     unsafe_allow_html=True,
 )
@@ -67,8 +66,9 @@ if samples:
                           f"[Wikimedia Commons]({shown['source']}).")
 
 # ── Your photos, zone by zone ──────────────────────────────────────────────
-section("Your photos", f"Up to {MAX_IMAGES_PER_SEGMENT} photos per zone (JPG or PNG). Zones without photos "
-        "are skipped.")
+section("1. Add photos", f"A zone is one part of your site, such as a gate, a ghat or a platform. Put photos of "
+        f"the same part in the same zone (up to {MAX_IMAGES_PER_SEGMENT}, JPG or PNG). Zones without photos are "
+        "skipped.")
 seg_cols = st.columns(5)
 for col, seg in zip(seg_cols, SEGMENTS):
     with col:
@@ -90,7 +90,7 @@ for col, seg in zip(seg_cols, SEGMENTS):
             st.session_state.image_sources[seg] = ["auto"] * len(files)
 
 # ── Count ──────────────────────────────────────────────────────────────────
-st.markdown("---")
+section("2. Count")
 total_imgs = sum(len(v) for v in st.session_state.uploaded_images.values())
 segs_ready = [s for s in SEGMENTS if st.session_state.uploaded_images.get(s)]
 
@@ -149,7 +149,7 @@ if run:
 # ── Results ────────────────────────────────────────────────────────────────
 data = st.session_state.crowd_data
 if data:
-    section("Results", "The photo with the most people in each zone, with a dot on every head.")
+    section("3. Results", "The photo with the most people in each zone, with a dot on every head.")
     cols = st.columns(len(data))
     for col, (seg, d) in zip(cols, data.items()):
         risk = risk_level(d["count"], get_seg_thresholds(seg))
@@ -174,6 +174,6 @@ if data:
                 st.image(cv2.cvtColor(lead["overlay"], cv2.COLOR_BGR2RGB), width="stretch")
     st.caption("A count is an estimate (about 86 to 93% accurate on test photos). Look at where the dots sit: "
                "if they land on railway gravel, tiles, rails or patterned cloth instead of heads, the count is "
-               "too high. This is the model's known weak spot (see India benchmark).")
-    nav_link("pages/3_📊_Analysis.py", "Next: risk levels, the evacuation plan and alerts",
-             ":material/arrow_forward:", "/Analysis")
+               "too high. This is the model's known weak spot (see How accurate is it?).")
+    next_step("See which zones are too crowded, where to move people, and tell your team.",
+              "pages/3_📊_Analysis.py", "Go to the evacuation plan and alerts", "/Analysis")

@@ -10,29 +10,29 @@ st.set_page_config(page_title="Crowd Shield", page_icon="assets/mark.svg", layou
 st.logo("assets/logo.svg", icon_image="assets/mark.svg", size="large")
 init_state()
 
+# Organised by what a visitor wants to do, in the order they would do it.
 PAGES = {
-    "Overview": [
-        st.Page("pages/0_🏠_Dashboard.py", title="Dashboard", icon=":material/space_dashboard:",
-                default=True),
+    "": [
+        st.Page("pages/0_🏠_Dashboard.py", title="Home", icon=":material/home:", default=True),
     ],
-    "Monitor": [
-        st.Page("pages/6_🗺️_Map.py", title="Site map", icon=":material/map:", url_path="Map"),
-        st.Page("pages/5_🎥_Video.py", title="Video monitor", icon=":material/videocam:", url_path="Video"),
-        st.Page("pages/8_📡_Live.py", title="Live feed", icon=":material/sensors:", url_path="Live"),
-    ],
-    "Analyse": [
-        st.Page("pages/2_📤_Upload.py", title="Photo analysis", icon=":material/photo_camera:",
+    "Check a crowd": [
+        st.Page("pages/2_📤_Upload.py", title="Count people in a photo", icon=":material/photo_camera:",
                 url_path="Upload"),
-        st.Page("pages/3_📊_Analysis.py", title="Alerts and plans", icon=":material/campaign:",
+        st.Page("pages/5_🎥_Video.py", title="Analyse a video", icon=":material/videocam:", url_path="Video"),
+        st.Page("pages/8_📡_Live.py", title="Watch a live camera", icon=":material/sensors:", url_path="Live"),
+    ],
+    "Plan the response": [
+        st.Page("pages/6_🗺️_Map.py", title="Site map", icon=":material/map:", url_path="Map"),
+        st.Page("pages/3_📊_Analysis.py", title="Evacuation plan and alerts", icon=":material/campaign:",
                 url_path="Analysis"),
     ],
-    "Results": [
-        st.Page("pages/7_📈_Benchmark.py", title="India benchmark", icon=":material/insights:",
-                url_path="Benchmark"),
-    ],
-    "Configure": [
-        st.Page("pages/1_👥_Agents.py", title="Response team", icon=":material/groups:", url_path="Agents"),
+    "Set up": [
+        st.Page("pages/1_👥_Agents.py", title="Team and alerts", icon=":material/groups:", url_path="Agents"),
         st.Page("pages/4_⚙️_Settings.py", title="Settings", icon=":material/tune:", url_path="Settings"),
+    ],
+    "Proof": [
+        st.Page("pages/7_📈_Benchmark.py", title="How accurate is it?", icon=":material/verified:",
+                url_path="Benchmark"),
     ],
 }
 page = st.navigation(PAGES)
@@ -42,16 +42,15 @@ with st.sidebar:
     channels = ready_channels()
     st.markdown(
         "<div class='rail-foot'>"
-        f"<div class='rail-status'><i style='background:#2dd4bf'></i>Counting: PET point model</div>"
+        "<div style='font-weight:700;color:#94a3b8;margin-bottom:.2rem'>This session</div>"
         f"<div class='rail-status'><i style='background:{'#10b981' if counted else '#475569'}'></i>"
-        f"Zones counted: {counted} of 5</div>"
+        f"{counted} of 5 zones counted</div>"
         f"<div class='rail-status'><i style='background:{'#10b981' if channels else '#f59e0b'}'></i>"
-        f"Alerts: {' and '.join(channels) if channels else 'not set up'}</div>"
+        f"Alerts: {' and '.join(channels) if channels else 'not set up yet'}</div>"
         "<div style='margin-top:.7rem'>"
-        "<a href='https://khushi-git-7.github.io/Crowd_shield/' target='_blank'>Project home</a> · "
+        "<a href='https://khushi-git-7.github.io/Crowd_shield/' target='_blank'>About the project</a> · "
         "<a href='https://github.com/khushi-git-7/Crowd_shield' target='_blank'>Code</a> · "
-        "<a href='https://huggingface.co/Khushi-7/crowd-shield-counting' target='_blank'>Models</a> · "
-        "<a href='https://github.com/khushi-git-7/Crowd_shield/issues/new?template=feedback.yml' target='_blank'>Feedback</a>"
+        "<a href='https://github.com/khushi-git-7/Crowd_shield/issues/new?template=feedback.yml' target='_blank'>Send feedback</a>"
         "</div></div>",
         unsafe_allow_html=True)
 

@@ -182,9 +182,9 @@ DEFAULT_MODEL_KEY = "crowd_yolo"
 
 # Who counted a photo, as shown in the app.
 COUNTER_LABELS = {
-    "points":   "PET point model",
-    "density":  "DM-Count density model",
-    "detector": "YOLO (fallback)",
+    "points":   "main counting model (PET)",
+    "density":  "backup counting model (DM-Count)",
+    "detector": "basic person detector (YOLO)",
 }
 
 # Photo source -> model key; None means "use the globally selected model".

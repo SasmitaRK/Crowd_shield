@@ -2,7 +2,7 @@
 
 Telegram needs two settings, TELEGRAM_BOT_TOKEN and TELEGRAM_CHAT_ID, as environment variables or
 Streamlit secrets. Nothing here is sent unless something calls it: the live monitor on a new alert, the
-"Send alerts" button on the Alerts and plans page, or a test button in Settings. The token is never put in a message or an error.
+"Send alerts" button on the evacuation plan, or a test button in Team and alerts. The token is never put in a message or an error.
 """
 
 from __future__ import annotations
@@ -99,5 +99,5 @@ def broadcast(text: str, image_bytes: bytes | None = None, email_to: list[str] |
                 ok, message = send_email(address, "Crowd Shield alert", f"<pre>{text}</pre>", image_bytes)
                 results.append(f"Email {address}: {message}")
     if not results:
-        results.append("No alert channel is set up (add Telegram or Gmail in Settings).")
+        results.append("No alert channel is set up (add Telegram or Gmail in Team and alerts).")
     return results

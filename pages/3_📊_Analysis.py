@@ -1,4 +1,4 @@
-"""Alerts and plans: each zone's risk from the latest photo count, where to move people, and alerts."""
+"""Evacuation plan and alerts: each zone's risk from the latest count, where to move people, and alerts."""
 
 import csv
 import html
@@ -15,19 +15,19 @@ from emailer import build_critical_email, build_receiving_email, email_configure
 from shared_state import GLOBAL_CSS, RISK_COLORS, SEGMENTS, get_seg_thresholds, init_state, zone_label
 from ui import compact, kpi_cards, nav_link, page_header, risk_pill, section
 
-st.set_page_config(page_title="Alerts and plans • Crowd Shield", page_icon=None, layout="wide")
+st.set_page_config(page_title="Evacuation plan and alerts • Crowd Shield", page_icon=None, layout="wide")
 st.markdown(GLOBAL_CSS, unsafe_allow_html=True)
 init_state()
 
-page_header("Alerts and plans", "Each zone's risk from the latest photo count, a plan for moving people out of "
-            "crowded zones into zones with room, and alerts for each zone's team.", "Analyse")
+page_header("Evacuation plan and alerts", "How crowded each zone is, where to move people from the crowded ones, "
+            "and one button to tell your team.", "Plan the response")
 
 data = st.session_state.crowd_data
 agents = st.session_state.agents
 
 if not data:
-    st.info("Nothing counted yet. Add photos on Photo analysis and press Count people; the results show up here.")
-    nav_link("pages/2_📤_Upload.py", "Go to Photo analysis", ":material/photo_camera:", "/Upload")
+    st.info("Nothing counted yet. Count the people in a photo of each zone first; the plan appears here.")
+    nav_link("pages/2_📤_Upload.py", "Count people in a photo", ":material/photo_camera:", "/Upload")
     st.stop()
 
 st.markdown("""
@@ -58,7 +58,7 @@ kpi_cards([
     ("Zones at risk", f"{len(at_risk)} / {len(seg_info)}", ", ".join(at_risk) or "none"),
     ("People to move", compact(placed), "into zones with room" if placed else "no moves needed"),
     ("Nowhere to go", compact(stuck), "need more space or staff" if stuck else "everyone placed"),
-    ("Alerts", "Ready" if channels else "Off", " and ".join(channels) if channels else "set up in Settings"),
+    ("Alerts", "Ready" if channels else "Off", " and ".join(channels) if channels else "set up in Team and alerts"),
 ], accents=["#0d9488", RISK_COLORS["Critical"] if at_risk else "#10b981", "#2a78d6",
             RISK_COLORS["Critical"] if stuck else "#10b981", "#10b981" if channels else "#94a3b8"])
 
@@ -96,7 +96,7 @@ for col, (seg, info) in zip(cols, seg_info.items()):
                    f"{info['image_count']} photo(s)")
         if any((r.get("check") or {}).get("disagree") for r in per_img):
             st.warning("Check this count: a second model found far fewer people. Look at the dots on "
-                       "Photo analysis before acting on it.", icon=":material/visibility:")
+                       "Count people in a photo before acting on it.", icon=":material/visibility:")
 
 # ── Plan ───────────────────────────────────────────────────────────────────
 section("Evacuation plan",
@@ -170,9 +170,9 @@ def team_message():
 if not pairings:
     st.success("No zone is at High Risk or Critical, so there is nothing to send.")
 elif not channels:
-    st.warning("No alert channel is set up. Add Telegram (free, on your phone) or Gmail in Settings, then come "
+    st.warning("No alert channel is set up. Add Telegram (free, on your phone) or Gmail in Team and alerts, then come "
                "back here to send.")
-    nav_link("pages/4_⚙️_Settings.py", "Set up alerts in Settings", ":material/tune:", "/Settings")
+    nav_link("pages/1_👥_Agents.py", "Set up alerts in Team and alerts", ":material/groups:", "/Agents")
 else:
     plan_lines = []
     if "Telegram" in channels:
@@ -196,7 +196,7 @@ else:
             for seg in sorted({p["high"] for p in pairings}):
                 address = agents.get(seg, "")
                 if not address:
-                    failed.append(f"{zone_label(seg)}: no contact email (add one on Response team)")
+                    failed.append(f"{zone_label(seg)}: no contact email (add one in Team and alerts)")
                     continue
                 moves = [p for p in pairings if p["high"] == seg]
                 first, image = moves[0], peak_image(seg)
@@ -211,7 +211,7 @@ else:
                     continue
                 address = agents.get(p["target"], "")
                 if not address:
-                    failed.append(f"{zone_label(p['target'])}: no contact email (add one on Response team)")
+                    failed.append(f"{zone_label(p['target'])}: no contact email (add one in Team and alerts)")
                     continue
                 subject, body = build_receiving_email(
                     seg=p["target"], count=p["target_count"], source_seg=p["high"], source_count=p["high_count"],

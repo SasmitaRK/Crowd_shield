@@ -238,6 +238,13 @@ def nav_link(page: str, label: str, icon: str | None = None, url: str = "") -> N
         st.markdown(f"[{label}]({url or '/'})")
 
 
+def next_step(text: str, page: str, label: str, url: str, icon: str = ":material/arrow_forward:") -> None:
+    """The end of a page: one line on what to do next, and the link that does it, so nobody gets stuck."""
+    st.markdown(f"<div class='sec' style='margin-top:2rem'>Next</div><div class='sec-cap'>{html.escape(text)}</div>",
+                unsafe_allow_html=True)
+    nav_link(page, label, icon, url)
+
+
 def compact(n: float) -> str:
     """547408 -> 547.4K: big counts the way dashboards show them."""
     for size, suffix in ((1e6, "M"), (1e3, "K")):

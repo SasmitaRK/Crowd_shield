@@ -1,4 +1,4 @@
-"""India benchmark: how well the counter does on hand-labelled Indian crowd photos."""
+"""How accurate is it? The counter on standard test photos and on hand-counted Indian crowd photos."""
 
 import html
 
@@ -9,17 +9,17 @@ import streamlit as st
 
 from crowdshield.benchmark import INDIA, accuracy, by_scene, load
 from shared_state import GLOBAL_CSS, init_state
-from ui import kpi_cards, page_header, section
+from ui import kpi_cards, next_step, page_header, section
 
-st.set_page_config(page_title="India benchmark • Crowd Shield", page_icon=None, layout="wide")
+st.set_page_config(page_title="How accurate is it? • Crowd Shield", page_icon=None, layout="wide")
 st.markdown(GLOBAL_CSS, unsafe_allow_html=True)
 init_state()
 
 rows = load()
 total_photos = len(list((INDIA / "images").glob("*.jpg"))) if (INDIA / "images").exists() else 0
-page_header("India benchmark", "The counter was trained on Chinese photos (ShanghaiTech). This is how it does on "
-            "Indian crowds: freely licensed photos where every head was marked by hand. None of them were used "
-            "for training.", "Results",
+page_header("How accurate is it?", "On standard test photos the counter gets 86.5% of packed crowds and 92.7% of "
+            "street crowds right. It learned from Chinese photos, so here is how it does on Indian crowds, photo by "
+            "photo, against heads counted by hand. None of these photos were used to train it.", "Proof",
             pills=[(f"{len(rows)} of {total_photos} photos hand-checked", "brand"),
                    ("Pilot: labelling in progress", "warn")])
 
@@ -117,3 +117,6 @@ with st.expander("How this is measured"):
   correction the app uses (fitted on held-out ShanghaiTech photos, never on these).
 - **Accuracy:** 1 − total absolute error ÷ total true count, the same measure as on ShanghaiTech.
 """)
+
+next_step("Try it yourself on a photo of a crowd, or on one of these Indian samples.", "pages/2_📤_Upload.py",
+          "Count people in a photo", "/Upload")

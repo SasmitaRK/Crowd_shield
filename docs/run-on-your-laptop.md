@@ -55,7 +55,7 @@ set CROWDSHIELD_ALLOW_PRIVATE_URLS=1            (Windows; on Mac or Linux: expor
 python -m crowdshield.live_cli --source http://192.168.1.7:8080/video --zones my_zones.json --interval 30 --log field_test.csv
 ```
 
-   Or run the app itself (`streamlit run main.py`), open **Live feed**, choose **Stream URL** and paste
+   Or run the app itself (`streamlit run main.py`), open **Watch a live camera**, choose **My own camera** and paste
    `http://192.168.1.7:8080/video`.
 4. Count the people in a few of the same moments by hand and compare them with `field_test.csv`. That
    comparison is a real field result you can quote.
