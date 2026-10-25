@@ -18,11 +18,11 @@ def code_stamp() -> int:
     return max((f.stat().st_mtime_ns for f in files if f.exists()), default=0)
 
 
-stamp = code_stamp()
-if getattr(sys, "crowdshield_code_stamp", None) != stamp:  # also on the first run: modules may predate it
+stamp, previous = code_stamp(), getattr(sys, "crowdshield_code_stamp", None)
+if previous != "tests" and previous != stamp:  # also on the first run: modules may predate it
     for name in [n for n in sys.modules if n.split(".")[0] in OWN_MODULES]:
         del sys.modules[name]
-sys.crowdshield_code_stamp = stamp
+    sys.crowdshield_code_stamp = stamp
 
 from crowdshield.notify import ready_channels  # noqa: E402
 from shared_state import init_state  # noqa: E402
