@@ -1,9 +1,31 @@
 """Crowd Shield: the app's entry point. Sets the look and the navigation, then runs the chosen page."""
 
+import sys
+from pathlib import Path
+
 import streamlit as st
 
-from crowdshield.notify import ready_channels
-from shared_state import init_state
+# Streamlit Community Cloud pulls new code into the running app but does not watch files, so pages
+# (re-read on every run) would meet the old copies of the shared modules still in memory: a page
+# importing a new helper then fails. This script runs fresh on every page view, so it notices when
+# the code on disk changed and drops the app's own modules, which then load again, new.
+ROOT = Path(__file__).resolve().parent
+OWN_MODULES = ("ui", "shared_state", "detection", "emailer", "crowdshield")
+
+
+def code_stamp() -> int:
+    files = [ROOT / f"{m}.py" for m in OWN_MODULES[:-1]] + list((ROOT / "crowdshield").rglob("*.py"))
+    return max((f.stat().st_mtime_ns for f in files if f.exists()), default=0)
+
+
+stamp, previous = code_stamp(), getattr(sys, "crowdshield_code_stamp", None)
+if previous != "tests" and previous != stamp:  # also on the first run: modules may predate it
+    for name in [n for n in sys.modules if n.split(".")[0] in OWN_MODULES]:
+        del sys.modules[name]
+    sys.crowdshield_code_stamp = stamp
+
+from crowdshield.notify import ready_channels  # noqa: E402
+from shared_state import init_state  # noqa: E402
 
 st.set_page_config(page_title="Crowd Shield", page_icon="assets/mark.svg", layout="wide",
                    initial_sidebar_state="expanded")
