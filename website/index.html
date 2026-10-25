@@ -260,7 +260,7 @@
         <div class="launch">
           <div>
             <button class="btn primary" id="launch" type="button" style="border:0;cursor:pointer;font:inherit;font-weight:600">▶ Launch Crowd Shield</button>
-            <p>Runs on free hosting. If nobody has used it for a while, it takes about 30 seconds to wake up.</p>
+            <p>Runs on free hosting. If nobody has used it for a while it is asleep: press <b>Yes, get this app back up</b> if you see it, and give it about a minute.</p>
             <ul><li>Site maps</li><li>Photo counting</li><li>Video monitor</li><li>Live feed</li><li>Evacuation plans and alerts</li><li>India benchmark</li></ul>
           </div>
         </div>
@@ -465,7 +465,7 @@ document.getElementById("launch").onclick = () => {
   const stage = document.getElementById("stage");
   stage.innerHTML =
     '<div class="launch" id="waking"><div><p style="color:#e2e8f0;font-weight:600;margin:0">Starting Crowd Shield...</p>' +
-    '<p>Free hosting puts the app to sleep when nobody is using it. Waking it takes about 30 seconds.</p>' +
+    '<p>Free hosting puts the app to sleep when nobody is using it. Waking it takes about a minute; if a <b>get this app back up</b> button appears, press it.</p>' +
     '<div class="wake"><i></i></div></div></div>' +
     '<iframe src="https://crowd-shield-india.streamlit.app/?embed=true&embed_options=light_theme" title="Crowd Shield live app"' +
     ' allow="clipboard-write; fullscreen"></iframe>';
