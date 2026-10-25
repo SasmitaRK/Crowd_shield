@@ -14,7 +14,7 @@ def get_active_model_key() -> str:
     return st.session_state.get("active_model", DEFAULT_MODEL_KEY)
 
 
-@st.cache_data(show_spinner="🔍 Analyzing image...", max_entries=12)  # a repeated photo is instant
+@st.cache_data(show_spinner=False, max_entries=12)  # a repeated photo is instant
 def process_image(image_bytes: bytes, model_key: str = DEFAULT_MODEL_KEY) -> dict:
     return analyse_image_bytes(image_bytes, model_key)
 

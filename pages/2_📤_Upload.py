@@ -11,7 +11,7 @@ from crowdshield.points import on_tile_progress
 from detection import process_segment, risk_level
 from shared_state import (GLOBAL_CSS, MAX_IMAGES_PER_SEGMENT, SEGMENTS, get_seg_thresholds, init_state,
                           zone_label)
-from ui import next_step, page_header, risk_pill, section
+from ui import next_step, page_header, risk_pill, section, working
 
 st.set_page_config(page_title="Count people in a photo • Crowd Shield", page_icon=None, layout="wide")
 st.markdown(GLOBAL_CSS, unsafe_allow_html=True)
@@ -105,35 +105,28 @@ run = c2.button("Count people", width="stretch", icon=":material/play_arrow:", d
 
 if run:
     results = {}
-    with st.status("Counting people...", expanded=True) as status:
-        bar = st.progress(0.0)
-        total_photos = sum(len(st.session_state.uploaded_images[z]) for z in segs_ready)
-        done_photos, started = 0, time.time()
-        st.caption("The free server takes about 30 seconds per photo. A photo you have already counted comes "
-                   "back instantly.")
-        tile_note = st.empty()
-        for idx, seg in enumerate(segs_ready):
+    total_photos = sum(len(st.session_state.uploaded_images[z]) for z in segs_ready)
+    done_photos, started = 0, time.time()
+    with working("Counting people", f"{total_photos} photo(s) in {len(segs_ready)} zone(s). About 30 seconds a "
+                 "photo; a photo counted before comes back instantly.", 0.0) as job:
+        for seg in segs_ready:
             img_list = st.session_state.uploaded_images[seg]
-            st.write(f"{zone_label(seg)}: {len(img_list)} photo(s)")
+            left = ("" if not done_photos else
+                    f" · about {(time.time() - started) / done_photos * (total_photos - done_photos):.0f} s left")
+            where = f"{zone_label(seg)}: photo {done_photos + 1} of {total_photos}{left}"
+            job.update(where, done_photos / total_photos)
             try:
-                with on_tile_progress(lambda d, n: tile_note.caption(
-                        f"Counting a large photo in {n} pieces: {d} of {n} done.")):
+                with on_tile_progress(lambda d, n, where=where: job.update(
+                        f"{where} · large photo, piece {d} of {n}",
+                        (done_photos + d / n) / total_photos)):
                     results[seg] = process_segment(
                         img_list, per_image_sources=st.session_state.image_sources.get(seg, []),
                         combine=st.session_state.get(f"combine_{seg}", "sum"))
-                tile_note.empty()
             except NotEnoughMemory as exc:
-                status.update(label="Not enough memory on this server", state="error", expanded=True)
                 st.error(str(exc))
                 st.stop()
-            st.write(f"{zone_label(seg)}: **{results[seg]['count']:,}** people, counted by the "
-                     f"{COUNTER_LABELS.get(results[seg].get('counter'), 'model')}")
-            bar.progress((idx + 1) / len(segs_ready))
             done_photos += len(img_list)
-            if done_photos < total_photos:
-                left = (time.time() - started) / done_photos * (total_photos - done_photos)
-                st.caption(f"About {left:.0f} s left for the other {total_photos - done_photos} photo(s).")
-        status.update(label=f"Counted {len(results)} zone(s)", state="complete", expanded=False)
+    st.success("Counted: " + " · ".join(f"{zone_label(seg)} {r['count']:,} people" for seg, r in results.items()))
     st.session_state.crowd_data = results
 
     seg_results = {seg: {"count": r["count"], "risk": risk_level(r["count"], get_seg_thresholds(seg))}
