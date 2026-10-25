@@ -1,13 +1,10 @@
-"""Settings: each zone's risk limits, where alerts go, what this server can do, and resets."""
-
-import os
+"""Settings: each zone's risk limits, saving and loading a session, resets, and what the server can do."""
 
 import streamlit as st
 
-from crowdshield import config, notify
+from crowdshield import config
 from crowdshield.risk import thresholds_from_area
 from crowdshield.session import BadSession, export_session, import_session
-from emailer import email_configured, send_email
 from shared_state import DEFAULT_THRESHOLDS, FRUIN_PRESETS, GLOBAL_CSS, SEGMENTS, init_state, zone_label
 from ui import page_header, section
 
@@ -15,7 +12,8 @@ st.set_page_config(page_title="Settings • Crowd Shield", page_icon=None, layou
 st.markdown(GLOBAL_CSS, unsafe_allow_html=True)
 init_state()
 
-page_header("Settings", "Each zone's risk limits, where alerts go, and what this server can do.", "Configure")
+page_header("Settings", "When each zone counts as crowded, saving your work for next time, and starting over.",
+            "Set up")
 
 LEVELS = (("moderate", "Moderate from"), ("high", "High Risk from"), ("critical", "Critical from"))
 
@@ -90,71 +88,6 @@ note = st.session_state.pop("limits_note", None)
 if note:
     (st.error if note.startswith("Not saved") else st.success)(note)
 
-# ── Alert channels ─────────────────────────────────────────────────────────
-section("Alert channels", "Where Crowd Shield sends alerts. Nothing is sent unless you press Send alerts on Alerts "
-        "and plans, switch alerts on in Live feed, or press a test button here.")
-tg, mail = st.columns(2)
-with tg:
-    st.markdown("**Telegram** (free, works on a phone)")
-    if notify.telegram_configured():
-        st.success("Telegram is set up.")
-        if st.button("Send a test message", key="tg_test"):
-            ok, message = notify.send_telegram("Crowd Shield test: alerts from this app reach this chat.")
-            (st.success if ok else st.error)(message)
-    else:
-        st.warning("Telegram is not set up.")
-    with st.expander("How to set up Telegram alerts (2 minutes)", expanded=not notify.telegram_configured()):
-        st.markdown("""
-1. In Telegram, open **@BotFather**, send `/newbot`, pick a name, and copy the **token** it gives you.
-2. Open your new bot and press **Start** (a bot can only message people who started it).
-3. Open `https://api.telegram.org/bot<TOKEN>/getUpdates` in a browser (put your token in) and copy the
-   number after `"chat":{"id":`. For a group, add the bot to it first; its id starts with `-`.
-4. Add two secrets: `TELEGRAM_BOT_TOKEN` and `TELEGRAM_CHAT_ID`. On Streamlit Community Cloud this is
-   **App settings → Secrets**: `TELEGRAM_BOT_TOKEN = "123:abc"` and `TELEGRAM_CHAT_ID = "123456789"`.
-        """)
-with mail:
-    st.markdown("**Email** (Gmail), one contact per zone on Response team")
-    if email_configured():
-        st.success("Gmail is set up.")
-        if st.button("Email a test to myself", key="mail_test"):
-            ok, message = send_email(os.environ["GMAIL_USER"], "Crowd Shield test",
-                                     "<p>Alerts from Crowd Shield reach this inbox.</p>")
-            (st.success if ok else st.error)(message)
-    else:
-        st.warning("Gmail is not set up.")
-    with st.expander("How to set up email alerts", expanded=not email_configured()):
-        st.markdown("""
-| Secret name | Value |
-|---|---|
-| `GMAIL_USER` | Gmail address that sends alerts |
-| `GMAIL_APP_PASSWORD` | 16-character app password from Google |
-
-1. Turn on 2-Step Verification at <https://myaccount.google.com/security>.
-2. Make an app password at <https://myaccount.google.com/apppasswords> (name it Crowd Shield).
-3. Add both as secrets (on Streamlit Community Cloud: **App settings → Secrets**).
-        """)
-
-# ── Server ─────────────────────────────────────────────────────────────────
-section("Server", "What this server can hold, and how it will count a photo right now. A server too small to run "
-        "a photo in one pass counts it in tiles, which keeps the detail. If even a tile would not fit, the app "
-        "says so instead of crashing.")
-limit, used, own = config.memory_limit_bytes(), config.memory_in_use_bytes(), config.own_rss_bytes()
-gb = lambda b: "unknown" if b is None else f"{b / 1e9:.1f} GB"  # noqa: E731
-work = config.default_work_side()
-try:
-    fit = config.fit_max_side(ceiling=work)
-    how = "one pass" if fit >= work else f"tiles of {fit} px"
-except config.NotEnoughMemory:
-    how = "none fits"
-c1, c2, c3, c4, c5 = st.columns(5)
-c1.metric("Memory limit", gb(limit))
-c2.metric("In use", gb(used), help="Memory used by everything running on this server.")
-c3.metric("This app", gb(own))
-c4.metric("Photo detail", f"{work} px", help="Photos are shrunk to this size (longer side) before counting.")
-c5.metric("Counted in", how, help="One pass if it fits in memory, otherwise tiles with a little overlap.")
-st.caption(f"Running from `{config.REPO_ROOT}`"
-           f"{' (Streamlit Community Cloud)' if config.on_streamlit_cloud() else ''}.")
-
 # ── Save and load ──────────────────────────────────────────────────────────
 section("Save and load your work", "Nothing is stored on the server, so closing the tab clears your counts, limits, "
         "contacts and drawn site. Save them to a file on your computer and load them next time. Photos are not "
@@ -217,3 +150,26 @@ r1.button("Clear photos and counts", width="stretch", on_click=clear_photos)
 r2.button("Clear contacts", width="stretch", on_click=clear_contacts)
 r3.button(f"Reset limits to {DEFAULT_THRESHOLDS['moderate']} / {DEFAULT_THRESHOLDS['high']} / "
           f"{DEFAULT_THRESHOLDS['critical']}", width="stretch", on_click=reset_limits)
+
+# ── Server ─────────────────────────────────────────────────────────────────
+with st.expander("About this server (for the curious)"):
+    st.caption("What this server can hold, and how it will count a photo right now. A server too small to count a "
+               "photo in one go counts it in pieces, which keeps the detail. If even a piece would not fit, the app "
+               "says so instead of crashing.")
+    limit, used, own = config.memory_limit_bytes(), config.memory_in_use_bytes(), config.own_rss_bytes()
+    gb = lambda b: "unknown" if b is None else f"{b / 1e9:.1f} GB"  # noqa: E731
+    work = config.default_work_side()
+    try:
+        fit = config.fit_max_side(ceiling=work)
+        how = "one pass" if fit >= work else f"tiles of {fit} px"
+    except config.NotEnoughMemory:
+        how = "none fits"
+    c1, c2, c3, c4, c5 = st.columns(5)
+    c1.metric("Memory limit", gb(limit))
+    c2.metric("In use", gb(used), help="Memory used by everything running on this server.")
+    c3.metric("This app", gb(own))
+    c4.metric("Photo detail", f"{work} px", help="Photos are shrunk to this size (longer side) before counting.")
+    c5.metric("Counted in", how, help="One pass if it fits in memory, otherwise tiles with a little overlap.")
+    st.caption(f"Running from `{config.REPO_ROOT}`"
+               f"{' (Streamlit Community Cloud)' if config.on_streamlit_cloud() else ''}.")
+

@@ -38,10 +38,10 @@ every risk level. A second demo covers Madurai's Chithirai festival: the Vaigai
 riverbed where Lord Kallazhagar enters the river (a crush there killed two people
 in April 2022), both banks, North Masi Street and the Meenakshi Temple. A time
 slider plays each simulated surge forward, and the zones can be downloaded as
-GeoJSON. With real counts from the Photo analysis page, or zones you draw yourself, it
+GeoJSON. With real counts from the Count people in a photo page, or zones you draw yourself, it
 becomes your own site's live view.
 
-The **Video** page puts this together. It opens on an example already analysed (15 s of Paris
+The **Analyse a video** page puts this together. It opens on an example already analysed (15 s of Paris
 Saint-Lazare station): the clip itself, with a dot on every head, each zone outlined in the colour of its
 risk and labelled with its live count, and a chart of each zone over time. With your own clip you pick a
 zone layout (whole picture, left and right, near and far, four quarters or custom boxes) and how many people
@@ -55,7 +55,7 @@ sample from a fixed camera at Paris Saint-Lazare station is built in: Baidax,
 [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/), via
 [Wikimedia Commons](https://commons.wikimedia.org/wiki/File:2025-11-06_17-33-16_-_Paris_-_Saint-Lazare.webm).
 
-The **Live feed** page watches a camera stream (RTSP, or an HTTP stream such as HLS or MJPEG) instead of a
+The **Watch a live camera** page watches a camera stream (RTSP, or an HTTP stream such as HLS or MJPEG) instead of a
 recorded clip. Every 30 to 300 seconds it grabs the newest frame, counts the people in each zone you drew,
 colours the zone by risk, follows the trend and estimates the time until the zone is full (a Theil-Sen
 trend on the counts, the same method as the video early warning). A **Demo feed** plays the Saint-Lazare
@@ -172,7 +172,7 @@ On the first 10 hand-checked photos (3,507 people) the counter is about **90% ac
 of them**, but **66.7% overall**, because of one failure: on a Mumbai railway photo it counts the
 gravel between the tracks as heads (1,267 against 415). Fine-tuning on 23 photos of empty Indian
 tracks fixed that photo (379 against 415) but made the model miss people in smaller crowds, and it
-was slightly worse on ShanghaiTech, so the app keeps the current model. The **India benchmark**
+was slightly worse on ShanghaiTech, so the app keeps the current model. The **How accurate is it?**
 page in the app shows per-scene accuracy and every photo with the true and the model's head points.
 This is a pilot until the remaining photos are labelled.
 

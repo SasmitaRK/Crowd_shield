@@ -13,7 +13,7 @@ from crowdshield.risk import thresholds_from_area
 from crowdshield.sitemap import (assess, list_sites, scenario_counts, site_from_drawings,
                                  timeline, to_geojson)
 from shared_state import FRUIN_PRESETS, GLOBAL_CSS, RISK_COLORS, SEGMENTS, init_state
-from ui import compact, page_header
+from ui import compact, next_step, page_header
 
 st.set_page_config(page_title="Site Map • Crowd Shield", page_icon=None, layout="wide")
 st.markdown(GLOBAL_CSS, unsafe_allow_html=True)
@@ -55,7 +55,9 @@ SITES = {s["short"]: s for s in list_sites()}
 # ---------------------------------------------------------------------------
 # Controls
 # ---------------------------------------------------------------------------
-page_header("Site map", "Zones sit on satellite imagery, so each one's ground area is measured from the map. People per m² sets its risk, and animated routes show where to move people along paths they can walk.", "Monitor", live=True)
+page_header("Site map", "Each zone of a real site on a satellite map, how crowded it is in people per m², and the "
+            "walking routes to move people along. Start with the Kumbh demo and play the surge forward.",
+            "Plan the response", live=True)
 
 site_options = list(SITES) + (["My site"] if "custom_site" in st.session_state else []) + ["Draw a new site"]
 with st.container(border=True):
@@ -310,7 +312,7 @@ else:
 tab_plan, tab_table, tab_use = st.tabs(["Evacuation plan", "Zone table", "Export and apply"])
 with tab_plan:
     if not counted:
-        st.caption("Count photos on Photo analysis, or pick the simulated surge, to see a plan.")
+        st.caption("Count people in a photo of each zone, or pick the simulated surge, to see a plan.")
     elif not plans:
         st.success("No zone is at High Risk or Critical. No one needs to move.")
     else:
@@ -367,7 +369,7 @@ with tab_use:
                            width="stretch")
     with b:
         st.markdown("**Use this map in the app**")
-        st.caption("Sets each zone's area, name and risk limits from the map, and tells Alerts and plans "
+        st.caption("Sets each zone's area, name and risk limits from the map, and tells the evacuation plan "
                    "which zones connect, so it only plans walkable moves.")
         if st.button("Apply map areas and routes", width="stretch"):
             for z, r in zones.items():
@@ -377,3 +379,6 @@ with tab_use:
             st.session_state.zone_names = {z: r["name"] for z, r in zones.items()}
             st.success(f"Applied areas and {preset_name.lower()} limits for zones "
                        f"{', '.join(zones)}, plus the routes between them.")
+
+next_step("Put your own numbers on the map: count the people in a photo of each zone, then pick My latest "
+          "analysis above.", "pages/2_Upload.py", "Count people in a photo", "/Upload")

@@ -1,4 +1,4 @@
-"""Video monitor: watch a crowd change second by second, with every head and every zone marked on the clip."""
+"""Analyse a video: watch a crowd change second by second, with every head and every zone marked on the clip."""
 
 import hashlib
 import json
@@ -13,14 +13,14 @@ import streamlit as st
 
 from crowdshield import counting
 from shared_state import GLOBAL_CSS, init_state
-from ui import kpi_cards, nav_link, page_header, section
+from ui import kpi_cards, nav_link, page_header, section, working
 
-st.set_page_config(page_title="Video monitor • Crowd Shield", page_icon=None, layout="wide")
+st.set_page_config(page_title="Analyse a video • Crowd Shield", page_icon=None, layout="wide")
 st.markdown(GLOBAL_CSS, unsafe_allow_html=True)
 init_state()
 
-page_header("Video monitor", "See how a crowd changes second by second. Crowd Shield puts a dot on every head, "
-            "colours each zone by how full it is, and raises an alarm if the crowd suddenly surges.", "Monitor")
+page_header("Analyse a video", "See how a crowd changes second by second. Crowd Shield puts a dot on every head, "
+            "colours each zone by how full it is, and raises an alarm if the crowd suddenly surges.", "Check a crowd")
 
 SAMPLES = Path(__file__).resolve().parent.parent / "assets" / "samples"
 SAMPLE_VIDEO = SAMPLES / "paris_saint_lazare_annotated.mp4"
@@ -157,7 +157,7 @@ with tab_example:
                 {z["name"]: z["capacity"] for z in data["zones"]}, calibrated=False, key="example")
     st.caption(SAMPLE_CREDIT + f" Analysed with the same code as your own clips ({data['counter']}, once a second). "
                "The zone sizes (40 and 50 people) are examples, chosen for the demo.")
-    nav_link("pages/8_📡_Live.py", "Want this on a camera that is live right now? Open Live feed",
+    nav_link("pages/8_Live.py", "Want this on a camera that is live right now? Watch a live camera",
              ":material/sensors:", "/Live")
 
 # ── Your own clip ─────────────────────────────────────────────────────────────────────────────────────
@@ -315,32 +315,33 @@ with tab_own:
             except Exception as exc:
                 st.error(f"Those four corners don't make a usable rectangle ({exc}).")
                 st.stop()
-        with st.spinner("Loading the counting model..."):
-            counter, counter_name = counting.make_counter()
+        job = working("Analysing your clip", "Getting the counting model ready...")
+        counter, counter_name = counting.make_counter()
         if counter is None:
+            job.done()
             st.error(f"Can't analyse: {counter_name}.")
             st.stop()
         recorder = PointRecorder() if counter_name.startswith("point model") else None
-        bar = st.progress(0.0, text="Counting people...")
         monitor = VideoMonitor(recorder or counter, fps, [Zone(n, p) for n, p in zones], calib=calib)
         path = clip_on_disk(data_bytes, suffix)
         out_path = path + ".annotated.mp4"
         try:
-            rows, events = monitor.run(iter_frames(path, max_seconds), progress=lambda i: bar.progress(
-                min(0.85, 0.85 * (i + 1) / n_frames), text=f"Counting people: second {i / fps:.0f} of {seconds:.0f}"))
-            bar.progress(0.9, text="Drawing the result...")
+            rows, events = monitor.run(iter_frames(path, max_seconds), progress=lambda i: job.update(
+                f"Counting people: second {i / fps:.0f} of {seconds:.0f}", 0.85 * (i + 1) / n_frames)
+                if i % max(1, round(fps / 2)) == 0 else None)
+            job.update("Drawing the dots and zones on your clip...", 0.9)
             render(iter_frames(path, max_seconds), fps, out_path, zones, rows, [] if handheld else events,
                    {} if calib else capacities, recorder.points if recorder else None, monitor.count_every)
             video = Path(out_path).read_bytes()
         except NotEnoughMemory as exc:
-            bar.empty()
+            job.done()
             st.error(str(exc))
             st.stop()
         finally:
             for p in (path, out_path):
                 if os.path.exists(p):
                     os.remove(p)
-        bar.empty()
+        job.done()
         st.session_state.video_result = {"settings": settings, "video": video, "rows": rows, "events": events,
                                          "calibrated": calib is not None, "handheld": handheld,
                                          "counter": counter_name}

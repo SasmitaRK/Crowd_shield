@@ -1,4 +1,4 @@
-"""Live feed: sample a camera stream every few seconds, count each zone, watch the trend, alert."""
+"""Watch a live camera: sample a camera stream every few seconds, count each zone, watch the trend, alert."""
 
 import os
 import time
@@ -8,19 +8,18 @@ import cv2
 import pandas as pd
 import streamlit as st
 
-from ui import kpi_cards, page_header, section
+from ui import kpi_cards, next_step, page_header, section, working
 
 from crowdshield import counting, live, notify
 from crowdshield.config import NotEnoughMemory
 from shared_state import GLOBAL_CSS, init_state
 
-st.set_page_config(page_title="Live feed • Crowd Shield", page_icon=None, layout="wide")
+st.set_page_config(page_title="Watch a live camera • Crowd Shield", page_icon=None, layout="wide")
 st.markdown(GLOBAL_CSS, unsafe_allow_html=True)
 init_state()
 
-page_header("Live feed", "Watch a camera stream zone by zone. Every few seconds Crowd Shield counts the people in each "
-            "zone, follows the trend, estimates the time until a zone is full and can alert your phone.",
-            "Monitor")
+page_header("Watch a live camera", "Crowd Shield looks at the camera every 30 seconds or more, counts the people "
+            "in each zone, shows the trend and warns you before a zone is full.", "Check a crowd")
 
 DEMO_CLIP = Path(__file__).resolve().parent.parent / "assets" / "samples" / "paris_saint_lazare.mp4"
 MIN_INTERVAL = int(os.environ.get("CROWDSHIELD_LIVE_MIN_S", 30))
@@ -28,9 +27,9 @@ RISK_ACCENT = {"Safe": "#10b981", "Moderate": "#f59e0b", "High Risk": "#f97316",
 RISK_BGR = {"Safe": (129, 185, 16), "Moderate": (11, 158, 245), "High Risk": (22, 115, 249), "Critical": (68, 68, 239)}
 DEMO_ZONES = [("Stairs", (0.67, 1.0), (0.25, 1.0), 30), ("Concourse", (0.0, 0.65), (0.53, 1.0), 30)]
 
-st.caption("This samples one frame every few seconds. It is not video-rate tracking: for walking speed, crowd "
-           "pressure and the surge alarm use the Video page. It runs while this page is open; to watch a camera "
-           "around the clock, run `python -m crowdshield.live_cli` on your own computer.")
+st.caption("It looks at one picture every 30 seconds or more, not at every frame (for sudden surges, use Analyse a "
+           "video). It runs while this page is open; to watch a camera all day, run it on a laptop "
+           "(docs/run-on-your-laptop.md).")
 
 # ---- 1. Source ------------------------------------------------------------
 SOURCES = ["Demo feed (a recorded clip played as if live)", "A real public camera (live now)", "My own camera"]
@@ -58,7 +57,7 @@ else:
 if link:
     resolved = st.session_state.setdefault("live_streams", {})
     if link not in resolved:
-        with st.spinner("Finding the camera's stream..."):
+        with working("Connecting to the camera", "Finding its live stream..."):
             stream, why = live.resolve_stream(link)
         if stream is None:
             st.error(why)
@@ -77,7 +76,7 @@ if st.session_state.get("live_key") != key:
     st.session_state.pop("live", None)
     st.session_state.live_first = None
 if st.session_state.get("live_first") is None:
-    with st.spinner("Reading a frame..."):
+    with working("Connecting to the camera", "Reading the first picture..."):
         feed = live.DemoFeed(DEMO_CLIP, step_s=1.0) if use_demo else None
         first = feed.next_frame() if use_demo else live.grab_frame(url)
     if first is None:
@@ -130,7 +129,7 @@ interval = c1.slider("Seconds between counts", MIN_INTERVAL, 300, max(MIN_INTERV
                           f"on this app it can't go below {MIN_INTERVAL} s.")
 channels = notify.ready_channels()
 send_alerts = c2.toggle("Send alerts", value=False, disabled=not channels,
-                        help="No alert channel is set up yet: add Telegram or Gmail in Settings." if not channels
+                        help="No alert channel is set up yet: add Telegram or Gmail in Team and alerts." if not channels
                         else f"Sends to {' and '.join(channels)}. A zone reaching High Risk or Critical is sent "
                              "once, then that zone stays quiet for 10 minutes.")
 running = c3.toggle("Monitoring", key="live_on", help="Start or stop counting.")
@@ -141,7 +140,7 @@ if st.session_state.get("live_sig") != signature:
     st.session_state.pop("live", None)
 
 if running and "live" not in st.session_state:
-    with st.spinner("Loading the counting model..."):
+    with working("Starting the monitor", "Getting the counting model ready. The first time takes about a minute."):
         counter, counter_name = counting.make_counter()
     if counter is None:
         st.error(f"Can't monitor: {counter_name}.")
@@ -232,3 +231,6 @@ def monitor_panel():
 
 
 monitor_panel()
+
+next_step("For sudden surges and walking speed, analyse a recorded clip second by second.", "pages/5_Video.py",
+          "Analyse a video", "/Video")

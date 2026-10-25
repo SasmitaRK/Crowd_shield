@@ -56,7 +56,7 @@ def test_analysis_page_plans_a_relocation():
     app = render(PAGES["Analysis"], crowd_data=crowd)
     text = " ".join(block.value for block in app.markdown)
     assert "Relocate <b>~36</b> people to Zone <b>B</b>" in text
-    assert any("Counted by the PET point model" in c.value for c in app.caption)
+    assert any("Counted by the main counting model (PET)" in c.value for c in app.caption)
 
 
 def test_settings_page():
@@ -84,7 +84,7 @@ def test_dashboard_shows_the_headline_results():
 
 def test_upload_page_says_which_model_counts():
     app = render(PAGES["Upload"])
-    assert any("PET point model" in block.value for block in app.markdown)
+    assert any("How it counts" in block.value for block in app.markdown)
 
 
 def test_benchmark_page_reports_the_india_pilot():

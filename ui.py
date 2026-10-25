@@ -164,6 +164,27 @@ GLOBAL_CSS = """
   }
   @media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
 
+  /* ── Loading: one look everywhere ──────────────────────── */
+  /* Streamlit's corner "Running..." figure becomes a slim teal line along the top while the app works. */
+  [data-testid="stStatusWidget"] { position: fixed !important; top: 0; left: 0; right: 0; height: 3px;
+    z-index: 999999; overflow: hidden; background: rgba(13,148,136,.15); }
+  [data-testid="stStatusWidget"] > * { display: none !important; }
+  [data-testid="stStatusWidget"]::after { content: ""; position: absolute; top: 0; bottom: 0; width: 30%;
+    background: linear-gradient(90deg, transparent, #14b8a6, transparent); animation: cs-sweep 1.1s ease-in-out infinite; }
+  @keyframes cs-sweep { 0% { left: -30%; } 100% { left: 100%; } }
+  .cs-load { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+             padding: 1rem 1.15rem; box-shadow: var(--shadow-sm); margin: .4rem 0 1rem; }
+  .cs-load .t { font-weight: 700; font-size: .95rem; color: var(--text); display: flex; align-items: center; gap: .55rem; }
+  .cs-load .t i { width: 9px; height: 9px; border-radius: 50%; background: var(--brand); display: inline-block;
+                  animation: cs-live 1.6s infinite; }
+  .cs-load .d { font-size: .82rem; color: var(--muted); margin: .25rem 0 .7rem; }
+  .cs-load .track { position: relative; height: 6px; border-radius: 99px; background: var(--brand-50); overflow: hidden; }
+  .cs-load .fill { position: absolute; left: 0; top: 0; bottom: 0; border-radius: 99px;
+                   background: linear-gradient(90deg, #0d9488, #2dd4bf); transition: width .4s ease; }
+  .cs-load .sweep { position: absolute; top: 0; bottom: 0; width: 35%; border-radius: 99px;
+                    background: linear-gradient(90deg, transparent, #2dd4bf, transparent); animation: cs-sweep 1.3s ease-in-out infinite; }
+  [data-testid="stSpinner"] i { border-top-color: var(--brand) !important; }
+
   /* ── Widgets ──────────────────────────────────────────── */
   .stButton > button, .stDownloadButton > button, [data-testid="stPageLink"] a {
     border-radius: 10px !important; font-weight: 600 !important;
@@ -236,6 +257,53 @@ def nav_link(page: str, label: str, icon: str | None = None, url: str = "") -> N
         st.page_link(page, label=label, icon=icon)
     except st.errors.StreamlitAPIException:
         st.markdown(f"[{label}]({url or '/'})")
+
+
+class Working:
+    """A loading card: what is happening, in plain words, with real progress when it is known.
+
+    with working("Counting people", "Zone A, 1 of 3") as job:
+        job.update("Zone B, 2 of 3", fraction=0.5)
+    The card disappears when the block ends. Without a fraction it shows a moving bar instead.
+    """
+
+    def __init__(self, title: str, detail: str = "", fraction: float | None = None):
+        self.title, self.detail, self.fraction = title, detail, fraction
+        self.slot = st.empty()
+
+    def update(self, detail: str | None = None, fraction: float | None = None, title: str | None = None):
+        self.title = title or self.title
+        self.detail = self.detail if detail is None else detail
+        self.fraction = fraction if fraction is not None else self.fraction
+        bar = ("<div class='sweep'></div>" if self.fraction is None else
+               f"<div class='fill' style='width:{max(2.0, min(1.0, self.fraction) * 100):.1f}%'></div>")
+        self.slot.markdown(f"<div class='cs-load'><div class='t'><i></i>{html.escape(self.title)}</div>"
+                           f"<div class='d'>{html.escape(self.detail) or '&nbsp;'}</div>"
+                           f"<div class='track'>{bar}</div></div>", unsafe_allow_html=True)
+
+    def __enter__(self):
+        return self
+
+    def done(self):
+        self.slot.empty()
+
+    def __exit__(self, *exc):
+        self.done()
+        return False
+
+
+def working(title: str, detail: str = "", fraction: float | None = None) -> Working:
+    """A loading card, shown straight away. Use it as a `with` block, or call .done() to remove it."""
+    job = Working(title, detail, fraction)
+    job.update()
+    return job
+
+
+def next_step(text: str, page: str, label: str, url: str, icon: str = ":material/arrow_forward:") -> None:
+    """The end of a page: one line on what to do next, and the link that does it, so nobody gets stuck."""
+    st.markdown(f"<div class='sec' style='margin-top:2rem'>Next</div><div class='sec-cap'>{html.escape(text)}</div>",
+                unsafe_allow_html=True)
+    nav_link(page, label, icon, url)
 
 
 def compact(n: float) -> str:

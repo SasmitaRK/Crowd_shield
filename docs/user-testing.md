@@ -11,10 +11,10 @@ bottom; only real sessions belong there.
 - Use the **sample photos** and the **Demo feed**; the live server is slow on a new photo.
 
 ## Tasks (say them out loud, then stay quiet and watch)
-1. "Find out how many people are in this photo." (Photo analysis, sample photo)
+1. "Find out how many people are in this photo." (Count people in a photo, sample photo)
 2. "Which zone at the Kumbh site is in the most danger, and why?" (Site map)
 3. "If that zone is full, where would you send people?" (Site map, evacuation plan)
-4. "How would you know if a crowd is building up on a camera?" (Live feed, demo)
+4. "How would you know if a crowd is building up on a camera?" (Watch a live camera, demo)
 5. "How would you want to be warned?" (Settings, alert channels)
 
 For each task note: did they finish, how long it took, where they hesitated, anything they said out loud.
