@@ -373,8 +373,8 @@ moving?", never "who is this?".
   prompt for a human to look, not a prediction of the future.
 - It has not been used at a real event or by real staff yet. [docs/user-testing.md](docs/user-testing.md) is
   a 15-minute test to run with someone who works with crowds, and the app has a feedback form.
-- The hosted demo runs on free hosting: it sleeps when unused (about 30 s to wake), has 3.2 GB of memory, so
-  it counts photos at a reduced size, and takes 30 to 60 seconds on a new photo.
+- The hosted demo runs on free hosting: it sleeps when unused (about a minute to wake, after pressing its wake-up button), has 3.2 GB of memory, so
+  it counts large photos in pieces (same accuracy), and takes about 30 seconds on a new photo.
 
 ## Team and credits
 

@@ -109,7 +109,7 @@ if run:
         bar = st.progress(0.0)
         total_photos = sum(len(st.session_state.uploaded_images[z]) for z in segs_ready)
         done_photos, started = 0, time.time()
-        st.caption("The free server takes about a minute per photo. A photo you have already counted comes "
+        st.caption("The free server takes about 30 seconds per photo. A photo you have already counted comes "
                    "back instantly.")
         tile_note = st.empty()
         for idx, seg in enumerate(segs_ready):
