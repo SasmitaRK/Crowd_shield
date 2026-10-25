@@ -94,11 +94,44 @@ def points_from_model(model, device: str, img_bgr: np.ndarray) -> np.ndarray:
     return pts * np.array([h, w], dtype=float)
 
 
+PAD = 256  # PET pads its input up to a multiple of this (pet/util/misc.py), so that is the real size it computes
+TILE_PLAN = "padded"  # "padded" plans tiles by PET's padded size; "square" is the original layout, kept to compare
+
+
+def _padded(n: int) -> int:
+    return -(-n // PAD) * PAD
+
+
 def tile_layout(height: int, width: int, tile_side: int, margin: int = TILE_MARGIN) -> list[tuple]:
-    """Split an image into cores (y0, y1, x0, x1) that cover it exactly once, each small enough that
-    the core plus `margin` pixels of context on every side fits in `tile_side`."""
-    core = max(64, tile_side - 2 * margin)
-    rows, cols = max(1, -(-height // core)), max(1, -(-width // core))
+    """Split an image into cores (y0, y1, x0, x1) that cover it exactly once.
+
+    A tile is its core plus up to `margin` pixels of context on each inner side. PET pads every input
+    up to a multiple of 256 px, and its memory follows that padded size, so the plan keeps every tile's
+    padded area within the padded area of a `tile_side` square (the size that fits in memory) and picks
+    the split with the least padded area in total: for a 1024 x 768 photo, two 1024-wide strips instead
+    of four squares that are mostly padding.
+    """
+    if TILE_PLAN == "square":
+        core = max(64, tile_side - 2 * margin)
+        rows, cols = max(1, -(-height // core)), max(1, -(-width // core))
+    else:
+        budget = _padded(tile_side) ** 2
+        best = None
+        for rows in range(1, max(1, height // 64) + 1):
+            tile_h = -(-height // rows) + margin * min(2, rows - 1)
+            for cols in range(1, max(1, width // 64) + 1):
+                tile_w = -(-width // cols) + margin * min(2, cols - 1)
+                area = _padded(tile_h) * _padded(tile_w)
+                if area > budget:
+                    continue
+                cost = (rows * cols * area, rows * cols)
+                if best is None or cost < best[0]:
+                    best = (cost, rows, cols)
+        if best is None:  # even 64 px cores don't fit: fall back to the smallest squares
+            core = 64
+            rows, cols = max(1, -(-height // core)), max(1, -(-width // core))
+        else:
+            _, rows, cols = best
     ys = np.linspace(0, height, rows + 1).round().astype(int)
     xs = np.linspace(0, width, cols + 1).round().astype(int)
     return [(ys[r], ys[r + 1], xs[c], xs[c + 1]) for r in range(rows) for c in range(cols)]

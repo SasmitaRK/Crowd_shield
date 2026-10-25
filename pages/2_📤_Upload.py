@@ -160,6 +160,13 @@ if data:
             st.metric(f"People in zone {seg}", f"{d['count']:,}", label_visibility="collapsed",
                       help=f"Counted by the {COUNTER_LABELS.get(d.get('counter'), 'model')} from "
                            f"{d['image_count']} photo(s)")
+            for r in d.get("per_image") or []:
+                check = r.get("check") or {}
+                if check.get("disagree"):
+                    st.warning(f"Check this count: a second model found about {check['dm_count']:,} people "
+                               f"where the point model found {r['count']:,}. This usually means dots on "
+                               "gravel, waves or boards. Look at the dots before acting on it.",
+                               icon=":material/visibility:")
             lead = max(d.get("per_image") or [{}], key=lambda r: r.get("count", 0))
             if lead.get("overlay") is not None:
                 import cv2

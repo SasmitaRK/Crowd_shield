@@ -1,0 +1,71 @@
+{
+ "ShanghaiTech A": {
+  "square-1024/704": {
+   "photos": 182,
+   "accuracy": 0.8612,
+   "mae": 60.13,
+   "tiles": 444,
+   "seconds": 155
+  },
+  "padded-1024/704": {
+   "photos": 182,
+   "accuracy": 0.8641,
+   "mae": 58.89,
+   "tiles": 241,
+   "seconds": 51
+  },
+  "whole-1024": {
+   "photos": 182,
+   "accuracy": 0.865,
+   "mae": 58.5,
+   "tiles": 0,
+   "seconds": 42
+  }
+ },
+ "ShanghaiTech B": {
+  "square-1024/704": {
+   "photos": 316,
+   "accuracy": 0.9332,
+   "mae": 8.27,
+   "tiles": 1264,
+   "seconds": 297
+  },
+  "padded-1024/704": {
+   "photos": 316,
+   "accuracy": 0.9325,
+   "mae": 8.36,
+   "tiles": 632,
+   "seconds": 116
+  },
+  "whole-1024": {
+   "photos": 316,
+   "accuracy": 0.9272,
+   "mae": 9.01,
+   "tiles": 0,
+   "seconds": 92
+  }
+ },
+ "India (10 hand-labelled)": {
+  "square-1024/704": {
+   "photos": 10,
+   "accuracy": 0.6859,
+   "mae": 110.15,
+   "tiles": 40,
+   "seconds": 6
+  },
+  "padded-1024/704": {
+   "photos": 10,
+   "accuracy": 0.6789,
+   "mae": 112.62,
+   "tiles": 20,
+   "seconds": 4
+  },
+  "whole-1024": {
+   "photos": 10,
+   "accuracy": 0.6554,
+   "mae": 120.86,
+   "tiles": 0,
+   "seconds": 3
+  }
+ }
+}

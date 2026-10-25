@@ -259,6 +259,38 @@ So the hosted app now counts about as well as a big server, in less memory, but 
 On the 10 hand-labelled Indian photos the smaller 704 px pass scored higher (81.9% vs 68.6% tiled and
 66.6% at 2048 px), because shrinking hides the railway-gravel failure; with 10 photos that is a hint, not a result.
 
+**Tiles that fit PET's padding.** PET pads every input up to a multiple of 256 px, so a 704 px square tile is
+really computed as 768 x 768, mostly padding. The tile plan now picks the split with the least padded area
+whose every tile still fits the same memory: a 1024 x 768 photo becomes two full-width strips instead of
+four squares. On a CPU set up like the free server (2 threads; [results/tile_plan_speed.json](results/tile_plan_speed.json),
+[results/tile_plan_accuracy.json](results/tile_plan_accuracy.json)):
+
+| Tile plan | Tiles (SH A) | ShanghaiTech A | ShanghaiTech B | India (10) | Median time per photo | Peak memory |
+|---|---:|---:|---:|---:|---:|---:|
+| Squares (before) | 444 | 86.1% | 93.3% | 68.6% | 22.1 s | 1.95 GB |
+| **Padded strips (now)** | **241** | **86.4%** | **93.25%** | 67.9% | **15.4 s** | **1.89 GB** |
+
+About 30% faster in slightly less memory, with ShanghaiTech accuracy unchanged within noise.
+
+### A second opinion on suspicious counts
+
+The point model's known failure is dots on things that are not heads: railway gravel, waves on the horizon,
+rows of advertising boards. The density model (DM-Count) fails differently, so after counting a photo the
+app also runs DM-Count on it at 768 px. When PET counts more than 2.5 times as many people (and at least 50),
+the result says "Check this count" and asks the user to look at the dots. The count itself is still PET's.
+Measured on Kaggle over 603 photos ([results/second_opinion.json](results/second_opinion.json)):
+
+| Photos | Flagged |
+|---|---|
+| 498 ShanghaiTech test photos | 0 |
+| 9 well-counted hand-labelled Indian photos | 0 |
+| Mumbai railway photo (PET 1,282, true 415) | flagged |
+| 95 Indian photos without a hand count | 1 (a stadium: a band of dots along the advertising boards) |
+
+It adds about 3 s per photo, and runs only when at least 700 MB of memory is free, so it cannot crash a
+small server; `CROWDSHIELD_SECOND_OPINION=0` turns it off. With one confirmed failure to learn from, this
+is a cautious first rule, to be re-checked as more Indian photos are labelled.
+
 ## Run it
 
 ```bash
