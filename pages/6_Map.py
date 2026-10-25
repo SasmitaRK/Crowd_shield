@@ -381,4 +381,4 @@ with tab_use:
                        f"{', '.join(zones)}, plus the routes between them.")
 
 next_step("Put your own numbers on the map: count the people in a photo of each zone, then pick My latest "
-          "analysis above.", "pages/2_📤_Upload.py", "Count people in a photo", "/Upload")
+          "analysis above.", "pages/2_Upload.py", "Count people in a photo", "/Upload")

@@ -13,25 +13,25 @@ init_state()
 # Organised by what a visitor wants to do, in the order they would do it.
 PAGES = {
     "": [
-        st.Page("pages/0_🏠_Dashboard.py", title="Home", icon=":material/home:", default=True),
+        st.Page("pages/0_Dashboard.py", title="Home", icon=":material/home:", default=True),
     ],
     "Check a crowd": [
-        st.Page("pages/2_📤_Upload.py", title="Count people in a photo", icon=":material/photo_camera:",
+        st.Page("pages/2_Upload.py", title="Count people in a photo", icon=":material/photo_camera:",
                 url_path="Upload"),
-        st.Page("pages/5_🎥_Video.py", title="Analyse a video", icon=":material/videocam:", url_path="Video"),
-        st.Page("pages/8_📡_Live.py", title="Watch a live camera", icon=":material/sensors:", url_path="Live"),
+        st.Page("pages/5_Video.py", title="Analyse a video", icon=":material/videocam:", url_path="Video"),
+        st.Page("pages/8_Live.py", title="Watch a live camera", icon=":material/sensors:", url_path="Live"),
     ],
     "Plan the response": [
-        st.Page("pages/6_🗺️_Map.py", title="Site map", icon=":material/map:", url_path="Map"),
-        st.Page("pages/3_📊_Analysis.py", title="Evacuation plan and alerts", icon=":material/campaign:",
+        st.Page("pages/6_Map.py", title="Site map", icon=":material/map:", url_path="Map"),
+        st.Page("pages/3_Analysis.py", title="Evacuation plan and alerts", icon=":material/campaign:",
                 url_path="Analysis"),
     ],
     "Set up": [
-        st.Page("pages/1_👥_Agents.py", title="Team and alerts", icon=":material/groups:", url_path="Agents"),
-        st.Page("pages/4_⚙️_Settings.py", title="Settings", icon=":material/tune:", url_path="Settings"),
+        st.Page("pages/1_Agents.py", title="Team and alerts", icon=":material/groups:", url_path="Agents"),
+        st.Page("pages/4_Settings.py", title="Settings", icon=":material/tune:", url_path="Settings"),
     ],
     "Proof": [
-        st.Page("pages/7_📈_Benchmark.py", title="How accurate is it?", icon=":material/verified:",
+        st.Page("pages/7_Benchmark.py", title="How accurate is it?", icon=":material/verified:",
                 url_path="Benchmark"),
     ],
 }

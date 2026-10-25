@@ -60,7 +60,7 @@ def send_email(to_addr: str, subject: str, html_body: str,
 # Email template builders
 # ---------------------------------------------------------------------------
 
-def _html_wrap(header_color: str, header_icon: str, header_text: str,
+def _html_wrap(header_color: str, header_text: str,
                body_html: str, has_image: bool = False) -> str:
     image_block = (
         '<div style="margin:1rem 0;border-radius:12px;overflow:hidden;'
@@ -68,7 +68,7 @@ def _html_wrap(header_color: str, header_icon: str, header_text: str,
         '<img src="cid:crowd_image" style="width:100%;max-width:680px;'
         'display:block" alt="Critical crowd zone" />'
         '<p style="margin:4px 8px;font-size:0.75em;color:#888">'
-        '📷 Highest-density detection image from this zone</p>'
+        'The busiest photo of this zone, with a dot on every head</p>'
         '</div>'
     ) if has_image else ""
 
@@ -81,7 +81,7 @@ def _html_wrap(header_color: str, header_icon: str, header_text: str,
         <!-- Header -->
         <div style="background:{header_color};padding:28px 32px">
           <h1 style="color:white;margin:0;font-size:1.5rem">
-            {header_icon} {header_text}
+            {header_text}
           </h1>
         </div>
         <!-- Body -->
@@ -118,8 +118,7 @@ def build_critical_email(seg: str, count: int,
     """
     is_critical = risk_level == "Critical"
     color   = "#c0392b" if is_critical else "#e67e22"
-    icon    = "🔴" if is_critical else "🟠"
-    subject = (f"{icon} Crowd Shield alert: {'CRITICAL' if is_critical else 'HIGH RISK'} "
+    subject = (f"Crowd Shield alert: {'CRITICAL' if is_critical else 'HIGH RISK'} "
                f"— Zone {seg}")
 
     allowable = max(0, thresholds["critical"] - count)
@@ -162,7 +161,7 @@ def build_critical_email(seg: str, count: int,
 
     <div style="background:#fff3f3;border:1px solid #f5c6cb;border-radius:10px;
          padding:14px 18px;margin-bottom:1.2rem">
-      <b style="color:#c0392b">🚫 Entry &amp; Route Actions — Zone {seg}</b>
+      <b style="color:#c0392b">Entries and routes — Zone {seg}</b>
       <ul style="margin:.5rem 0 0;padding-left:1.4rem;color:#333">
         <li>Close <b>all main entry points</b> to this zone immediately.</li>
         <li>Block access routes leading directly to Zone {seg}.</li>
@@ -174,7 +173,7 @@ def build_critical_email(seg: str, count: int,
 
     <div style="background:#fff8f0;border:1px solid #fde3c0;border-radius:10px;
          padding:14px 18px;margin-bottom:1.2rem">
-      <b style="color:#e67e22">🚶 Evacuation Orders</b>
+      <b style="color:#e67e22">Moving people out</b>
       <ul style="margin:.5rem 0 0;padding-left:1.4rem;color:#333">
         <li>Open <b>all exit points</b> and guide people towards
             {"Zone " + target_seg if target_seg else "adjacent safe areas"}.</li>
@@ -185,12 +184,12 @@ def build_critical_email(seg: str, count: int,
       </ul>
     </div>
 
-    {'<p style="color:#c0392b;font-weight:700">⚠️ CRITICAL LEVEL REACHED — '
+    {'<p style="color:#c0392b;font-weight:700">CRITICAL LEVEL REACHED — '
      'Activate emergency crowd management protocol immediately.</p>'
      if is_critical else ''}
     """
 
-    html = _html_wrap(color, icon,
+    html = _html_wrap(color,
                       f"{'CRITICAL' if is_critical else 'HIGH RISK'} — Zone {seg}",
                       body, has_image=has_image)
     return subject, html
@@ -201,7 +200,7 @@ def build_receiving_email(seg: str, count: int,
                            move_count: int,
                            thresholds: dict) -> tuple[str, str]:
     """Build notice email for the agent at the receiving (destination) zone."""
-    subject = f"📋 Crowd Shield notice: Incoming crowd to Zone {seg}"
+    subject = f"Crowd Shield notice: people coming to Zone {seg}"
     remaining_cap = max(0, thresholds["high"] - count - move_count)
     rows = "".join([
         _info_row("Your zone", f"<b>{seg}</b>"),
@@ -225,7 +224,7 @@ def build_receiving_email(seg: str, count: int,
     </table>
     <div style="background:#f0fff4;border:1px solid #b2dfdb;border-radius:10px;
          padding:14px 18px">
-      <b style="color:#27ae60">✅ Preparation Checklist — Zone {seg}</b>
+      <b style="color:#27ae60">Getting ready — Zone {seg}</b>
       <ul style="margin:.5rem 0 0;padding-left:1.4rem;color:#333">
         <li>Open entry points and ensure clear pathways for incoming crowd.</li>
         <li>Assign staff to guide arrivals to less congested sub-areas.</li>
@@ -236,6 +235,6 @@ def build_receiving_email(seg: str, count: int,
     </div>
     """
 
-    html = _html_wrap("#27ae60", "📋",
+    html = _html_wrap("#27ae60",
                       f"Incoming Crowd Notice — Zone {seg}", body)
     return subject, html

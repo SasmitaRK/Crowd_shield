@@ -169,4 +169,4 @@ if data:
                "if they land on railway gravel, tiles, rails or patterned cloth instead of heads, the count is "
                "too high. This is the model's known weak spot (see How accurate is it?).")
     next_step("See which zones are too crowded, where to move people, and tell your team.",
-              "pages/3_📊_Analysis.py", "Go to the evacuation plan and alerts", "/Analysis")
+              "pages/3_Analysis.py", "Go to the evacuation plan and alerts", "/Analysis")

@@ -232,5 +232,5 @@ def monitor_panel():
 
 monitor_panel()
 
-next_step("For sudden surges and walking speed, analyse a recorded clip second by second.", "pages/5_🎥_Video.py",
+next_step("For sudden surges and walking speed, analyse a recorded clip second by second.", "pages/5_Video.py",
           "Analyse a video", "/Video")

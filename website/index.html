@@ -167,7 +167,7 @@
   /* honesty */
   .lesson { display: grid; grid-template-columns: 40px 1fr; gap: 14px; }
   .lesson .ic { width: 40px; height: 40px; border-radius: 10px; display: grid; place-items: center; font-size: 1.2rem;
-                background: #fff7ed; border: 1px solid #fed7aa; }
+                background: #fff7ed; border: 1px solid #fed7aa; color: #c2410c; }
 
   /* privacy band */
   .band { background: var(--brand-50); border-top: 1px solid var(--brand-100); border-bottom: 1px solid var(--brand-100); padding: 56px 0; }
@@ -397,15 +397,15 @@
       <p class="lead">A safety tool that hides its failures is dangerous. These are published in full.</p>
     </div>
     <div class="grid g3">
-      <div class="card lesson"><div class="ic">🛤️</div><div><h3>Gravel looks like heads</h3>
+      <div class="card lesson"><div class="ic"><svg width='22' height='22' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' aria-hidden='true'><path d='M7 3 4 21M17 3l3 18M5.5 8h13M5 13h14M4.5 18h15'/></svg></div><div><h3>Gravel looks like heads</h3>
         <p>From above, railway ballast reads as a sea of heads: 1,262 counted where there were 415. Retraining
           fixed that photo but hurt the others, so I kept the better model and documented the failure.</p></div></div>
-      <div class="card lesson"><div class="ic">📱</div><div><h3>Phones move</h3>
+      <div class="card lesson"><div class="ic"><svg width='22' height='22' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' aria-hidden='true'><rect x='7' y='2' width='10' height='20' rx='2'/><path d='M11 18h2'/></svg></div><div><h3>Phones move</h3>
         <p>All 15 freely licensed Indian crowd clips I found were filmed handheld, so speed readings measured the camera, not the crowd.
           The app now detects a moving camera and hides motion results instead of guessing.</p></div></div>
-      <div class="card lesson"><div class="ic">⏱️</div><div><h3>No GPU, still useful</h3>
+      <div class="card lesson"><div class="ic"><svg width='22' height='22' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' aria-hidden='true'><circle cx='12' cy='13' r='8'/><path d='M12 9v4l2.5 2.5M9 2h6'/></svg></div><div><h3>No GPU, still useful</h3>
         <p>On a plain 4-core CPU, PET takes about 16 s per photo. The free server has 3.2 GB, so it counts big
-          photos in overlapping tiles: same accuracy, about a minute each. A live feed is recounted every 30 s or
+          photos in overlapping pieces: same accuracy, about 30 seconds each. A live feed is recounted every 30 s or
           more; video-rate analysis would need a GPU.</p></div></div>
     </div>
     <div class="card" style="margin-top:20px">

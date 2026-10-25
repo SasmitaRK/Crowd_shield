@@ -157,7 +157,7 @@ with tab_example:
                 {z["name"]: z["capacity"] for z in data["zones"]}, calibrated=False, key="example")
     st.caption(SAMPLE_CREDIT + f" Analysed with the same code as your own clips ({data['counter']}, once a second). "
                "The zone sizes (40 and 50 people) are examples, chosen for the demo.")
-    nav_link("pages/8_📡_Live.py", "Want this on a camera that is live right now? Watch a live camera",
+    nav_link("pages/8_Live.py", "Want this on a camera that is live right now? Watch a live camera",
              ":material/sensors:", "/Live")
 
 # ── Your own clip ─────────────────────────────────────────────────────────────────────────────────────

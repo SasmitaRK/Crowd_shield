@@ -47,13 +47,13 @@ section("Start here", "Pick what you have. Each one works in a minute, and each 
         "you have nothing to hand.")
 START = [
     ("photo_camera", "I have a photo", "From CCTV, a drone or a phone. Get a dot on every head and a count.",
-     "pages/2_📤_Upload.py", "Count people in a photo", "/Upload"),
+     "pages/2_Upload.py", "Count people in a photo", "/Upload"),
     ("videocam", "I have a video clip", "See how a crowd changes second by second, and spot sudden surges.",
-     "pages/5_🎥_Video.py", "Analyse a video", "/Video"),
+     "pages/5_Video.py", "Analyse a video", "/Video"),
     ("sensors", "I have a live camera", "Recount every 30 seconds and warn before a zone fills up.",
-     "pages/8_📡_Live.py", "Watch a live camera", "/Live"),
+     "pages/8_Live.py", "Watch a live camera", "/Live"),
     ("map", "I'm just exploring", "Open the Kumbh Mela site map and play a crowd surge forward.",
-     "pages/6_🗺️_Map.py", "Open the site map", "/Map"),
+     "pages/6_Map.py", "Open the site map", "/Map"),
 ]
 for col, (ic, title, body, target, label, url) in zip(st.columns(4), START):
     with col:
@@ -109,7 +109,7 @@ if data:
             f"<div style='font-size:1.7rem;font-weight:800;margin:.45rem 0 .1rem'>{count}</div>"
             f"<div style='font-size:.75rem;color:#64748b'>{'people' if d else 'not counted'}</div></div>",
             unsafe_allow_html=True)
-    nav_link("pages/3_📊_Analysis.py", "See the evacuation plan and send alerts", ":material/campaign:", "/Analysis")
+    nav_link("pages/3_Analysis.py", "See the evacuation plan and send alerts", ":material/campaign:", "/Analysis")
     if history:
         with st.expander(f"Earlier counts in this session ({len(history)})"):
             for entry in history[:8]:
@@ -119,4 +119,4 @@ if data:
 
 st.caption("The accuracy figures come from test photos the model never saw in training, and from 10 hand-counted "
            "Indian photos where one railway photo is a known failure.")
-nav_link("pages/7_📈_Benchmark.py", "How accurate is it? See every test photo", ":material/verified:", "/Benchmark")
+nav_link("pages/7_Benchmark.py", "How accurate is it? See every test photo", ":material/verified:", "/Benchmark")
