@@ -1,0 +1,388 @@
+{
+ "clip": "assets/samples/paris_saint_lazare.mp4",
+ "fps": 30.0,
+ "size": [
+  640,
+  360
+ ],
+ "counter": "point model (PET)",
+ "zones": [
+  {
+   "name": "Stairs",
+   "polygon": [
+    [
+     428.8,
+     90.0
+    ],
+    [
+     640.0,
+     90.0
+    ],
+    [
+     640.0,
+     360.0
+    ],
+    [
+     428.8,
+     360.0
+    ]
+   ],
+   "capacity": 40
+  },
+  {
+   "name": "Concourse",
+   "polygon": [
+    [
+     0.0,
+     190.8
+    ],
+    [
+     416.0,
+     190.8
+    ],
+    [
+     416.0,
+     360.0
+    ],
+    [
+     0.0,
+     360.0
+    ]
+   ],
+   "capacity": 50
+  }
+ ],
+ "rows": [
+  {
+   "t": 0.0,
+   "zone": "Stairs",
+   "people": 32.654188999846134,
+   "area_m2": null,
+   "per_m2": null,
+   "level": null,
+   "speed": 0.0,
+   "pressure": null,
+   "eta_s": null
+  },
+  {
+   "t": 0.0,
+   "zone": "Concourse",
+   "people": 33.67463240609133,
+   "area_m2": null,
+   "per_m2": null,
+   "level": null,
+   "speed": 0.0,
+   "pressure": null,
+   "eta_s": null
+  },
+  {
+   "t": 1.0,
+   "zone": "Stairs",
+   "people": 23.724540527375957,
+   "area_m2": null,
+   "per_m2": null,
+   "level": null,
+   "speed": 53.067840576171875,
+   "pressure": null,
+   "eta_s": null
+  },
+  {
+   "t": 1.0,
+   "zone": "Concourse",
+   "people": 19.59853347913666,
+   "area_m2": null,
+   "per_m2": null,
+   "level": null,
+   "speed": 54.01177978515625,
+   "pressure": null,
+   "eta_s": null
+  },
+  {
+   "t": 2.0,
+   "zone": "Stairs",
+   "people": 26.549638815899165,
+   "area_m2": null,
+   "per_m2": null,
+   "level": null,
+   "speed": 33.42780303955078,
+   "pressure": null,
+   "eta_s": null
+  },
+  {
+   "t": 2.0,
+   "zone": "Concourse",
+   "people": 24.50735890698384,
+   "area_m2": null,
+   "per_m2": null,
+   "level": null,
+   "speed": 49.46462631225586,
+   "pressure": null,
+   "eta_s": null
+  },
+  {
+   "t": 3.0,
+   "zone": "Stairs",
+   "people": 18.46604869940804,
+   "area_m2": null,
+   "per_m2": null,
+   "level": null,
+   "speed": 65.63289642333984,
+   "pressure": null,
+   "eta_s": null
+  },
+  {
+   "t": 3.0,
+   "zone": "Concourse",
+   "people": 29.750856237935178,
+   "area_m2": null,
+   "per_m2": null,
+   "level": null,
+   "speed": 50.37336730957031,
+   "pressure": null,
+   "eta_s": null
+  },
+  {
+   "t": 4.0,
+   "zone": "Stairs",
+   "people": 25.582078413113425,
+   "area_m2": null,
+   "per_m2": null,
+   "level": null,
+   "speed": 43.72109603881836,
+   "pressure": null,
+   "eta_s": null
+  },
+  {
+   "t": 4.0,
+   "zone": "Concourse",
+   "people": 29.675210959211576,
+   "area_m2": null,
+   "per_m2": null,
+   "level": null,
+   "speed": 51.1444206237793,
+   "pressure": null,
+   "eta_s": null
+  },
+  {
+   "t": 5.0,
+   "zone": "Stairs",
+   "people": 25.50245893481141,
+   "area_m2": null,
+   "per_m2": null,
+   "level": null,
+   "speed": 39.39639663696289,
+   "pressure": null,
+   "eta_s": null
+  },
+  {
+   "t": 5.0,
+   "zone": "Concourse",
+   "people": 42.84413101048317,
+   "area_m2": null,
+   "per_m2": null,
+   "level": null,
+   "speed": 53.587345123291016,
+   "pressure": null,
+   "eta_s": null
+  },
+  {
+   "t": 6.0,
+   "zone": "Stairs",
+   "people": 21.45132163232576,
+   "area_m2": null,
+   "per_m2": null,
+   "level": null,
+   "speed": 39.99331283569336,
+   "pressure": null,
+   "eta_s": null
+  },
+  {
+   "t": 6.0,
+   "zone": "Concourse",
+   "people": 33.70921970794048,
+   "area_m2": null,
+   "per_m2": null,
+   "level": null,
+   "speed": 59.506954193115234,
+   "pressure": null,
+   "eta_s": null
+  },
+  {
+   "t": 7.0,
+   "zone": "Stairs",
+   "people": 28.641765606958796,
+   "area_m2": null,
+   "per_m2": null,
+   "level": null,
+   "speed": 36.483123779296875,
+   "pressure": null,
+   "eta_s": null
+  },
+  {
+   "t": 7.0,
+   "zone": "Concourse",
+   "people": 25.57300500621321,
+   "area_m2": null,
+   "per_m2": null,
+   "level": null,
+   "speed": 63.33308410644531,
+   "pressure": null,
+   "eta_s": null
+  },
+  {
+   "t": 8.0,
+   "zone": "Stairs",
+   "people": 21.5199352210153,
+   "area_m2": null,
+   "per_m2": null,
+   "level": null,
+   "speed": 37.2054443359375,
+   "pressure": null,
+   "eta_s": null
+  },
+  {
+   "t": 8.0,
+   "zone": "Concourse",
+   "people": 27.66848814130538,
+   "area_m2": null,
+   "per_m2": null,
+   "level": null,
+   "speed": 62.744285583496094,
+   "pressure": null,
+   "eta_s": null
+  },
+  {
+   "t": 9.0,
+   "zone": "Stairs",
+   "people": 28.71432090595507,
+   "area_m2": null,
+   "per_m2": null,
+   "level": null,
+   "speed": 35.774898529052734,
+   "pressure": null,
+   "eta_s": null
+  },
+  {
+   "t": 9.0,
+   "zone": "Concourse",
+   "people": 23.586763601320236,
+   "area_m2": null,
+   "per_m2": null,
+   "level": null,
+   "speed": 60.21112823486328,
+   "pressure": null,
+   "eta_s": null
+  },
+  {
+   "t": 10.0,
+   "zone": "Stairs",
+   "people": 27.827964315790567,
+   "area_m2": null,
+   "per_m2": null,
+   "level": null,
+   "speed": 37.473350524902344,
+   "pressure": null,
+   "eta_s": null
+  },
+  {
+   "t": 10.0,
+   "zone": "Concourse",
+   "people": 25.766633625732005,
+   "area_m2": null,
+   "per_m2": null,
+   "level": null,
+   "speed": 51.31231689453125,
+   "pressure": null,
+   "eta_s": null
+  },
+  {
+   "t": 11.0,
+   "zone": "Stairs",
+   "people": 29.664685807207327,
+   "area_m2": null,
+   "per_m2": null,
+   "level": null,
+   "speed": 48.23213577270508,
+   "pressure": null,
+   "eta_s": null
+  },
+  {
+   "t": 11.0,
+   "zone": "Concourse",
+   "people": 28.6417656069588,
+   "area_m2": null,
+   "per_m2": null,
+   "level": null,
+   "speed": 55.94440460205078,
+   "pressure": null,
+   "eta_s": null
+  },
+  {
+   "t": 12.0,
+   "zone": "Stairs",
+   "people": 31.779150296137487,
+   "area_m2": null,
+   "per_m2": null,
+   "level": null,
+   "speed": 58.11714172363281,
+   "pressure": null,
+   "eta_s": null
+  },
+  {
+   "t": 12.0,
+   "zone": "Concourse",
+   "people": 33.829418057178614,
+   "area_m2": null,
+   "per_m2": null,
+   "level": null,
+   "speed": 53.93893051147461,
+   "pressure": null,
+   "eta_s": null
+  },
+  {
+   "t": 13.0,
+   "zone": "Stairs",
+   "people": 34.93290373655836,
+   "area_m2": null,
+   "per_m2": null,
+   "level": null,
+   "speed": 37.268760681152344,
+   "pressure": null,
+   "eta_s": null
+  },
+  {
+   "t": 13.0,
+   "zone": "Concourse",
+   "people": 22.603643594243643,
+   "area_m2": null,
+   "per_m2": null,
+   "level": null,
+   "speed": 49.48611831665039,
+   "pressure": null,
+   "eta_s": null
+  },
+  {
+   "t": 14.0,
+   "zone": "Stairs",
+   "people": 26.765270736343464,
+   "area_m2": null,
+   "per_m2": null,
+   "level": null,
+   "speed": 38.380584716796875,
+   "pressure": null,
+   "eta_s": null
+  },
+  {
+   "t": 14.0,
+   "zone": "Concourse",
+   "people": 23.67697026676537,
+   "area_m2": null,
+   "per_m2": null,
+   "level": null,
+   "speed": 52.57393264770508,
+   "pressure": null,
+   "eta_s": null
+  }
+ ],
+ "events": []
+}

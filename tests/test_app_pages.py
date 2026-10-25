@@ -93,13 +93,12 @@ def test_benchmark_page_reports_the_india_pilot():
     assert "Known failure" in text
 
 
-def test_video_page_opens_the_sample_clip_as_a_fixed_camera():
+def test_video_page_shows_the_analysed_example_straight_away():
     app = render(PAGES["Video"])
-    app.radio[0].set_value("Sample: Paris Saint-Lazare station").run()
-    assert not app.exception, [e.message for e in app.exception]
-    assert any("450 frames" in block.value for block in app.caption)
-    assert not app.warning  # no moving-camera warning: the station camera is fixed
-    assert [box.value for box in app.text_input] == ["Stairs", "Concourse"]
+    assert [t.label for t in app.tabs] == ["Example: a busy Paris station", "Analyse your own clip"]
+    text = " ".join(m.value for m in app.markdown)
+    assert "Stairs" in text and "Concourse" in text and "people at most" in text
+    assert any("No surge" in s.value for s in app.success)
 
 
 def test_photo_page_offers_instant_sample_photos():

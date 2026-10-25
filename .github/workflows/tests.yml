@@ -22,8 +22,8 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
-      - run: pip install streamlit matplotlib seaborn opencv-python-headless numpy scipy pytest folium streamlit-folium
-      - run: pytest -q tests/test_app_pages.py tests/test_overlay.py tests/test_live_page.py
+      - run: pip install streamlit matplotlib opencv-python-headless numpy scipy pytest folium streamlit-folium imageio-ffmpeg
+      - run: pytest -q tests/test_app_pages.py tests/test_overlay.py tests/test_live_page.py tests/test_live.py tests/test_tiles.py tests/test_crosscheck.py tests/test_video_render.py
 
   detection:
     runs-on: ubuntu-latest

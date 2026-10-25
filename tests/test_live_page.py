@@ -39,6 +39,30 @@ def test_live_page_demo_feed_counts_and_charts(monkeypatch):
 
 def test_live_page_refuses_a_private_stream_address():
     app = render()
-    app.radio[0].set_value("Stream URL").run()
+    app.radio[0].set_value("My own camera").run()
     app.text_input[0].set_value("http://127.0.0.1:8080/stream").run()
     assert any("private network" in e.value for e in app.error)
+
+
+def test_live_page_opens_a_public_camera_through_its_page_link(monkeypatch):
+    import numpy as np
+
+    from crowdshield import live
+
+    monkeypatch.setattr(live, "resolve_stream", lambda link: ("https://s31.ipcamlive.com/streams/x/stream.m3u8", ""))
+    monkeypatch.setattr(live, "check_url", lambda url, allow_private=None: (True, ""))
+    monkeypatch.setattr(live, "grab_frame", lambda *a, **k: np.zeros((540, 960, 3), np.uint8))
+    app = render()
+    app.radio[0].set_value("A real public camera (live now)").run()
+    assert not app.exception, [e.message for e in app.exception]
+    assert any("Blackpool" in c.value for c in app.caption)
+    assert any(t.label == "Monitoring" for t in app.toggle)
+
+
+def test_live_page_says_when_a_public_camera_is_offline(monkeypatch):
+    from crowdshield import live
+
+    monkeypatch.setattr(live, "resolve_stream", lambda link: (None, "That camera is offline right now."))
+    app = render()
+    app.radio[0].set_value("A real public camera (live now)").run()
+    assert any("offline" in e.value for e in app.error)

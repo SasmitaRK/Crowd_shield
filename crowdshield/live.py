@@ -54,6 +54,53 @@ def check_url(url: str, allow_private: bool | None = None) -> tuple[bool, str]:
     return True, ""
 
 
+# Many public webcams (seafronts, town squares, ski slopes) are hosted on ipcamlive.com. Their stream
+# address changes, so a camera's page link is turned into its current stream with the same open lookup
+# the site's own player uses.
+IPCAMLIVE_LOOKUP = "https://ipcamlive.com/player/getcamerastreamstate.php"
+PUBLIC_CAMERAS = {
+    "Blackpool seafront, UK (live)": {
+        "link": "https://ipcamlive.com/6745eb6be37dd",
+        "credit": "Live public webcam by Granada Apartments, Blackpool, hosted on ipcamlive.com. Busiest in the "
+                  "daytime and on summer evenings; quiet at night.",
+    },
+}
+
+
+def ipcamlive_alias(url: str) -> str | None:
+    """The camera alias in an ipcamlive link (ipcamlive.com/<alias> or player.php?alias=<alias>), else None."""
+    import re
+
+    parsed = urlparse(url.strip())
+    if not parsed.hostname or not parsed.hostname.endswith("ipcamlive.com") or parsed.path.endswith(".m3u8"):
+        return None
+    match = re.search(r"alias=([0-9a-z]+)", parsed.query) or re.fullmatch(r"/([0-9a-z]{8,20})/?", parsed.path)
+    return match.group(1) if match else None
+
+
+def resolve_stream(url: str, timeout_s: float = 15.0) -> tuple[str | None, str]:
+    """(stream address, "") for a link the app can read: an ipcamlive camera page is looked up; any other
+    address is returned as it is. (None, reason) when the camera is offline or the lookup fails."""
+    alias = ipcamlive_alias(url)
+    if not alias:
+        return url.strip(), ""
+    import json
+    import time
+    import urllib.request
+
+    lookup = f"{IPCAMLIVE_LOOKUP}?_={int(time.time() * 1000)}&token=&alias={alias}&targetdomain=ipcamlive.com"
+    request = urllib.request.Request(lookup, headers={
+        "User-Agent": "Mozilla/5.0 (Crowd Shield)", "Referer": f"https://ipcamlive.com/player/player.php?alias={alias}"})
+    try:
+        with urllib.request.urlopen(request, timeout=timeout_s) as response:
+            details = json.loads(response.read().decode())["details"]
+    except Exception as exc:
+        return None, f"Could not look up that camera on ipcamlive ({type(exc).__name__})."
+    if str(details.get("streamavailable")) != "1" or not details.get("streamid"):
+        return None, "That camera is offline right now. Try again later or pick another one."
+    return f"{details['address']}streams/{details['streamid']}/stream.m3u8", ""
+
+
 def grab_frame(source, timeout_ms: int = 10000, skip: int = 2, max_width: int = MAX_WIDTH):
     """The newest frame from a stream or file, shrunk to `max_width`, or None if it cannot be read.
 
