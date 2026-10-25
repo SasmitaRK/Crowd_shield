@@ -41,9 +41,13 @@ slider plays each simulated surge forward, and the zones can be downloaded as
 GeoJSON. With real counts from the Photo analysis page, or zones you draw yourself, it
 becomes your own site's live view.
 
-The **Video** page puts this together: upload a clip from a fixed camera, mark
-the floor rectangle and the zones, and get per-zone density, speed, pressure,
-warnings and a CSV of every reading.
+The **Video** page puts this together. It opens on an example already analysed (15 s of Paris
+Saint-Lazare station): the clip itself, with a dot on every head, each zone outlined in the colour of its
+risk and labelled with its live count, and a chart of each zone over time. With your own clip you pick a
+zone layout (whole picture, left and right, near and far, four quarters or custom boxes) and how many people
+each zone holds, and get the same annotated video back (H.264, plays in any browser, downloadable) with a
+CSV of every reading. Marking a floor rectangle of known size switches the zones to people per m², and adds
+walking speed, crowd pressure and time-to-danger.
 It streams the clip frame by frame instead of loading it whole, so memory stays
 flat however long the clip is. The hosted demo analyses up to 20 seconds (set
 `CROWDSHIELD_MAX_VIDEO_S` to raise it on your own machine), and a 15-second
@@ -55,7 +59,9 @@ The **Live feed** page watches a camera stream (RTSP, or an HTTP stream such as 
 recorded clip. Every 30 to 300 seconds it grabs the newest frame, counts the people in each zone you drew,
 colours the zone by risk, follows the trend and estimates the time until the zone is full (a Theil-Sen
 trend on the counts, the same method as the video early warning). A **Demo feed** plays the Saint-Lazare
-sample as if it were live, so it can be tried without a camera.
+sample as if it were live, and **A real public camera** watches a live public webcam (the Blackpool seafront)
+so it can be tried on a real stream with no camera of your own. Links to cameras hosted on ipcamlive.com work
+too: the app looks up the camera's current stream the way the site's own player does.
 
 It samples one frame at a time, because counting a frame with the point model takes seconds. It is not
 video-rate tracking: speed, crowd pressure and the surge alarm still need the Video page and a fixed camera.

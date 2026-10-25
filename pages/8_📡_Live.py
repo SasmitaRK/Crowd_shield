@@ -33,28 +33,45 @@ st.caption("This samples one frame every few seconds. It is not video-rate track
            "around the clock, run `python -m crowdshield.live_cli` on your own computer.")
 
 # ---- 1. Source ------------------------------------------------------------
-source = st.radio("Source", ["Demo feed (a recorded clip played as if live)", "Stream URL"], horizontal=True,
-                  label_visibility="collapsed")
-use_demo = source.startswith("Demo")
-url = ""
+SOURCES = ["Demo feed (a recorded clip played as if live)", "A real public camera (live now)", "My own camera"]
+source = st.radio("Source", SOURCES, horizontal=True, label_visibility="collapsed")
+use_demo = source == SOURCES[0]
+link = url = ""
 if use_demo:
     st.caption("The demo steps through a 15-second clip of Paris Saint-Lazare station (Baidax, CC BY-SA 4.0, via "
                "Wikimedia Commons) one second per sample, looping, so you can see the monitor work with no camera.")
+elif source == SOURCES[1]:
+    camera = st.selectbox("Camera", list(live.PUBLIC_CAMERAS))
+    link = live.PUBLIC_CAMERAS[camera]["link"]
+    st.caption(live.PUBLIC_CAMERAS[camera]["credit"] + " Crowd Shield reads one frame at a time and keeps nothing.")
 else:
-    url = st.text_input("Stream address", placeholder="rtsp://camera/stream  or  https://example.com/live.m3u8",
-                        help="RTSP, or an HTTP(S) stream such as HLS (.m3u8) or MJPEG. The camera must be "
-                             "reachable from the internet; this hosted app cannot see private networks.")
-    if not url:
-        st.info("Paste a stream address, or switch to the demo feed. For a camera on your own network, run "
-                "Crowd Shield on your computer with `CROWDSHIELD_ALLOW_PRIVATE_URLS=1`.")
+    link = st.text_input("Camera address", placeholder="rtsp://camera/stream, https://example.com/live.m3u8 or an "
+                         "ipcamlive.com camera link",
+                         help="RTSP, an HTTP(S) stream such as HLS (.m3u8) or MJPEG, or the page link of a camera "
+                              "hosted on ipcamlive.com. The camera must be reachable from the internet; this hosted "
+                              "app cannot see private networks.")
+    if not link:
+        st.info("Paste a camera address, or pick the demo or the public camera above. For a camera on your own "
+                "network (or a phone running the free IP Webcam app), run Crowd Shield on your computer with "
+                "`CROWDSHIELD_ALLOW_PRIVATE_URLS=1`; see docs/run-on-your-laptop.md.")
         st.stop()
+if link:
+    resolved = st.session_state.setdefault("live_streams", {})
+    if link not in resolved:
+        with st.spinner("Finding the camera's stream..."):
+            stream, why = live.resolve_stream(link)
+        if stream is None:
+            st.error(why)
+            st.stop()
+        resolved[link] = stream
+    url = resolved[link]
     ok, reason = live.check_url(url)
     if not ok:
         st.error(reason)
         st.stop()
 
 # ---- 2. First frame and zones ------------------------------------------------
-key = ("demo",) if use_demo else ("url", url)
+key = ("demo",) if use_demo else ("url", link)
 if st.session_state.get("live_key") != key:
     st.session_state.live_key, st.session_state.live_on = key, False
     st.session_state.pop("live", None)
@@ -139,6 +156,11 @@ if running and "live" not in st.session_state:
 def tick():
     state = st.session_state.live
     frame = state["feed"].next_frame() if state["feed"] else live.grab_frame(url)
+    if frame is None and link and live.ipcamlive_alias(link):  # its stream address may have moved
+        fresh, _ = live.resolve_stream(link)
+        if fresh:
+            st.session_state.live_streams[link] = fresh
+            frame = live.grab_frame(fresh)
     if frame is None:
         st.warning("Could not read the stream just now. Trying again next time.")
         return

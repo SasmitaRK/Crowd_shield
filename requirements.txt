@@ -14,3 +14,5 @@ scipy>=1.10
 # Site map: Leaflet maps inside Streamlit.
 folium>=0.20
 streamlit-folium>=0.27
+# Writes the annotated video as H.264 MP4, which every browser plays (brings its own ffmpeg).
+imageio-ffmpeg>=0.5

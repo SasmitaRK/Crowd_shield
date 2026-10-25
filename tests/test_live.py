@@ -164,3 +164,27 @@ def test_a_bad_frame_does_not_stop_the_command_line_monitor(tmp_path, monkeypatc
     assert live_cli.main(["--source", str(SAMPLE), "--zones", str(zones), "--interval", "1"]) == 0
     captured = capsys.readouterr()
     assert "Stairs" in captured.out and "Could not count this frame" in captured.err and "Stopped." in captured.out
+
+
+@pytest.mark.parametrize("url, alias", [
+    ("https://ipcamlive.com/6745eb6be37dd", "6745eb6be37dd"),
+    ("https://g0.ipcamlive.com/player/player.php?alias=6745eb6be37dd&autoplay=1", "6745eb6be37dd"),
+    ("http://s31.ipcamlive.com/streams/abc/stream.m3u8", None),
+    ("https://example.com/6745eb6be37dd", None),
+])
+def test_ipcamlive_links_are_recognised(url, alias):
+    assert live.ipcamlive_alias(url) == alias
+
+
+def test_an_ipcamlive_page_is_turned_into_its_current_stream(monkeypatch):
+    import io
+    import urllib.request
+
+    reply = {"details": {"streamavailable": "1", "streamid": "xyz", "address": "http://s31.ipcamlive.com/"}}
+    monkeypatch.setattr(urllib.request, "urlopen", lambda *a, **k: io.BytesIO(json.dumps(reply).encode()))
+    assert live.resolve_stream("https://ipcamlive.com/6745eb6be37dd") == (
+        "http://s31.ipcamlive.com/streams/xyz/stream.m3u8", "")
+    reply["details"]["streamavailable"] = "0"
+    stream, why = live.resolve_stream("https://ipcamlive.com/6745eb6be37dd")
+    assert stream is None and "offline" in why
+    assert live.resolve_stream("rtsp://cam.example.com/live") == ("rtsp://cam.example.com/live", "")
