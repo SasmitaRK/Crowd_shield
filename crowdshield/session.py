@@ -34,6 +34,7 @@ def export_session(state) -> str:
         "zone_names": state.get("zone_names"),
         "zone_adjacency": state.get("zone_adjacency"),
         "custom_site": state.get("custom_site"),
+        "limits_source": state.get("limits_source"),
         "counts": counts,
     }
     return json.dumps({k: v for k, v in payload.items() if v not in (None, {}, [])}, indent=1)
@@ -105,6 +106,8 @@ def import_session(text: str) -> dict:
             raw["zone_adjacency"], lambda v, s: [z for z in v if z in SEGMENTS and z != s], "The routes")
     if "custom_site" in raw and isinstance(raw["custom_site"], dict):
         out["custom_site"] = raw["custom_site"]
+    if isinstance(raw.get("limits_source"), str):
+        out["limits_source"] = raw["limits_source"][:200]
     if "counts" in raw:
         out["crowd_data"] = _zone_map(raw["counts"], _count, "The counts")
     return out

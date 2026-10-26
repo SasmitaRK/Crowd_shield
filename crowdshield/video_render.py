@@ -81,7 +81,9 @@ def annotate(frame: np.ndarray, t: float, zones: list[tuple[str, list]], reading
         x, y = pts.min(axis=0)
         text = name if row is None else f"{name}: {row['people']:.0f}" + (f" - {level}" if level else "")
         _label(out, text, (int(x) + 8, int(y) + 22), colour=(255, 255, 255), bg=colour)
-    _label(out, f"Crowd Shield  {int(t // 60):02d}:{t % 60:04.1f}", (10, 24), scale=0.5)
+    clock = f"Crowd Shield  {int(t // 60):02d}:{t % 60:04.1f}"
+    (tw, _), _ = cv2.getTextSize(clock, cv2.FONT_HERSHEY_SIMPLEX, 0.5, 1)
+    _label(out, clock, (out.shape[1] - tw - 12, 24), scale=0.5)  # top-right: zone labels sit top-left
     if surge:
         h, w = out.shape[:2]
         cv2.rectangle(out, (0, h - 36), (w, h), (40, 40, 220), -1)

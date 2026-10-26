@@ -13,7 +13,7 @@ import streamlit as st
 
 from crowdshield import counting
 from shared_state import GLOBAL_CSS, init_state
-from ui import kpi_cards, nav_link, page_header, section, working
+from ui import kpi_cards, nav_link, page_header, section, working, zone_picker
 
 st.set_page_config(page_title="Analyse a video • Crowd Shield", page_icon=None, layout="wide")
 st.markdown(GLOBAL_CSS, unsafe_allow_html=True)
@@ -35,15 +35,6 @@ MAX_SECONDS = int(os.environ.get("CROWDSHIELD_MAX_VIDEO_S", 20))
 LEVEL_HEX = {"Safe": "#10b981", "Moderate": "#f59e0b", "High Risk": "#f97316", "Critical": "#ef4444",
              "Normal": "#10b981", "Crowded": "#f59e0b", "Dangerous": "#f97316", "Crush risk": "#ef4444"}
 ZONE_HEX = ["#2a78d6", "#eb6834", "#1baf7a", "#8b5cf6"]
-# Zone layouts as (name, left, top, right, bottom), fractions of the picture.
-PRESETS = {
-    "Whole picture": [("Whole view", 0, 0, 1, 1)],
-    "Left and right": [("Left", 0, 0, .5, 1), ("Right", .5, 0, 1, 1)],
-    "Near and far": [("Far", 0, 0, 1, .5), ("Near", 0, .5, 1, 1)],
-    "Four quarters": [("Far left", 0, 0, .5, .5), ("Far right", .5, 0, 1, .5),
-                      ("Near left", 0, .5, .5, 1), ("Near right", .5, .5, 1, 1)],
-}
-
 st.markdown("""
 <style>
   .steps { display:grid; grid-template-columns: repeat(3, 1fr); gap:.8rem; margin:.2rem 0 1.2rem; }
@@ -52,7 +43,8 @@ st.markdown("""
             align-items:center; justify-content:center; font-size:.75rem; margin-right:.45rem; }
   .step span { font-weight:700; font-size:.88rem; color:#0f172a; }
   .step p { margin:.3rem 0 0; font-size:.8rem; color:#64748b; line-height:1.45; }
-  @media (max-width: 640px) { .steps { grid-template-columns: 1fr; } }
+  @media (max-width: 640px) { .steps { gap:.4rem; } .step { padding:.5rem .55rem; } .step p { display:none; }
+                              .step span { font-size:.78rem; } }
 </style>
 <div class="steps">
   <div class="step"><b>1</b><span>Choose a clip</span><p>From a camera that stays still: CCTV, a drone holding
@@ -255,23 +247,7 @@ with tab_own:
     section("2. Mark the zones")
     left, right = st.columns([3, 2], gap="large")
     with right:
-        layout = st.radio("Layout", list(PRESETS) + ["Custom boxes"], horizontal=True)
-        boxes = PRESETS.get(layout) or [(f"Zone {chr(65 + i)}", 0, 0, 1, 1) for i in range(
-            st.number_input("How many zones", 1, 4, 2))]
-        zones, capacities = [], {}
-        for i, (default_name, fx0, fy0, fx1, fy1) in enumerate(boxes):
-            c1, c2 = st.columns([3, 2])
-            name = c1.text_input(f"Zone {i + 1} name", default_name, key=f"vz_name_{layout}_{i}")
-            capacities[name] = int(c2.number_input("Holds comfortably", 1, 100_000, 40, key=f"vz_cap_{layout}_{i}",
-                                                   help="How many people this part of the picture holds comfortably. "
-                                                        "A zone turns amber at half of it, orange at three quarters "
-                                                        "and red when full."))
-            if layout == "Custom boxes":
-                x0, x1 = st.slider(f"{name}: left to right (%)", 0, 100, (int(i * 100 / len(boxes)),
-                                   int((i + 1) * 100 / len(boxes))), key=f"vz_x_{i}")
-                y0, y1 = st.slider(f"{name}: top to bottom (%)", 0, 100, (30, 100), key=f"vz_y_{i}")
-                fx0, fx1, fy0, fy1 = x0 / 100, x1 / 100, y0 / 100, y1 / 100
-            zones.append((name, [(w * fx0, h * fy0), (w * fx1, h * fy0), (w * fx1, h * fy1), (w * fx0, h * fy1)]))
+        zones, capacities = zone_picker(w, h, "vz")
 
         with st.expander("Optional: measure people per m²"):
             calibrate = st.checkbox("I know the size of a rectangle on the floor",

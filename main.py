@@ -28,7 +28,7 @@ from crowdshield.notify import ready_channels  # noqa: E402
 from shared_state import init_state  # noqa: E402
 
 st.set_page_config(page_title="Crowd Shield", page_icon="assets/mark.svg", layout="wide",
-                   initial_sidebar_state="expanded")
+                   initial_sidebar_state="auto")  # open on computers, closed on phones
 st.logo("assets/logo.svg", icon_image="assets/mark.svg", size="large")
 init_state()
 

@@ -8,7 +8,7 @@ import cv2
 import pandas as pd
 import streamlit as st
 
-from ui import kpi_cards, next_step, page_header, section, working
+from ui import kpi_cards, next_step, page_header, section, working, zone_picker
 
 from crowdshield import counting, live, notify
 from crowdshield.config import NotEnoughMemory
@@ -25,7 +25,7 @@ DEMO_CLIP = Path(__file__).resolve().parent.parent / "assets" / "samples" / "par
 MIN_INTERVAL = int(os.environ.get("CROWDSHIELD_LIVE_MIN_S", 30))
 RISK_ACCENT = {"Safe": "#10b981", "Moderate": "#f59e0b", "High Risk": "#f97316", "Critical": "#ef4444"}
 RISK_BGR = {"Safe": (129, 185, 16), "Moderate": (11, 158, 245), "High Risk": (22, 115, 249), "Critical": (68, 68, 239)}
-DEMO_ZONES = [("Stairs", (0.67, 1.0), (0.25, 1.0), 30), ("Concourse", (0.0, 0.65), (0.53, 1.0), 30)]
+DEMO_LAYOUT = {"Stairs and concourse": [("Stairs", 0.67, 0.25, 1.0, 1.0, 30), ("Concourse", 0.0, 0.53, 0.65, 1.0, 30)]}
 
 st.caption("It looks at one picture every 30 seconds or more, not at every frame (for sudden surges, use Analyse a "
            "video). It runs while this page is open; to watch a camera all day, run it on a laptop "
@@ -90,22 +90,11 @@ h, w = first.shape[:2]
 left, right = st.columns([3, 2])
 with right:
     st.markdown("### Zones to watch")
-    n_zones = st.number_input("Number of zones", 1, 4, 2 if use_demo else 1)
-    zones = {}
-    for i in range(int(n_zones)):
-        if use_demo and i < len(DEMO_ZONES):
-            label, (fx0, fx1), (fy0, fy1), cap = DEMO_ZONES[i]
-        else:
-            label, (fx0, fx1), (fy0, fy1), cap = chr(65 + i), (i / n_zones, (i + 1) / n_zones), (0.3, 1.0), 40
-        tag = ("d" if use_demo else "u") + str(i)
-        name = st.text_input(f"Zone {i + 1} name", label, key=f"lz_n_{tag}")
-        capacity = st.number_input(f"{name}: people it holds comfortably", 2, 100000, cap, key=f"lz_c_{tag}",
-                                   help="Risk levels start at 50% (Moderate), 75% (High Risk) and 100% "
-                                        "(Critical) of this number.")
-        x0, x1 = st.slider(f"{name}: left to right (px)", 0, w, (int(w * fx0), int(w * fx1)), key=f"lz_x_{tag}")
-        y0, y1 = st.slider(f"{name}: top to bottom (px)", 0, h, (int(h * fy0), int(h * fy1)), key=f"lz_y_{tag}")
-        zones[name] = {"polygon": [(x0, y0), (x1, y0), (x1, y1), (x0, y1)],
-                       "thresholds": live.capacity_thresholds(capacity)}
+    picked, caps = zone_picker(w, h, "lz_demo" if use_demo else "lz", extra=DEMO_LAYOUT if use_demo else None)
+    zones = {name: {"polygon": poly, "thresholds": live.capacity_thresholds(caps[name])} for name, poly in picked}
+
+
+from crowdshield.video_render import _label  # noqa: E402
 
 
 def draw(frame, levels=None):
@@ -114,12 +103,13 @@ def draw(frame, levels=None):
         (x0, y0), _, (x1, y1), _ = info["polygon"]
         colour = RISK_BGR[levels[name]] if levels and name in levels else (200, 160, 0)
         cv2.rectangle(out, (int(x0), int(y0)), (int(x1), int(y1)), colour, 3)
-        cv2.putText(out, name, (int(x0) + 6, int(y0) + 22), cv2.FONT_HERSHEY_SIMPLEX, 0.7, colour, 2, cv2.LINE_AA)
+        level = levels.get(name) if levels else None
+        _label(out, f"{name} - {level}" if level else name, (int(x0) + 10, int(y0) + 24), bg=colour)
     return cv2.cvtColor(out, cv2.COLOR_BGR2RGB)
 
 
 with left:
-    st.image(draw(first), caption="First frame, with the zones (use the sliders to move them)", width="stretch")
+    st.image(draw(first), caption="The camera right now, with your zones", width="stretch")
 
 # ---- 3. Run ------------------------------------------------------------------
 st.markdown("---")

@@ -5,7 +5,7 @@ import streamlit as st
 from crowdshield import config
 from crowdshield.risk import thresholds_from_area
 from crowdshield.session import BadSession, export_session, import_session
-from shared_state import DEFAULT_THRESHOLDS, FRUIN_PRESETS, GLOBAL_CSS, SEGMENTS, init_state, zone_label
+from shared_state import DEFAULT_LIMITS, DEFAULT_THRESHOLDS, FRUIN_PRESETS, GLOBAL_CSS, SEGMENTS, init_state, zone_label
 from ui import page_header, section
 
 st.set_page_config(page_title="Settings • Crowd Shield", page_icon=None, layout="wide")
@@ -51,6 +51,8 @@ with st.expander("Work out limits from each zone's area"):
         st.session_state.seg_areas.update(areas)
         st.session_state.thresholds.update(new)
         show_limits(new)
+        if new:
+            st.session_state.limits_source = f"the zone areas you entered in Settings, at the \"{preset_name}\" limits"
         st.session_state.limits_note = (f"Worked out limits for zone(s) {', '.join(new)}." if new else
                                         "Enter an area for at least one zone.")
 
@@ -80,6 +82,7 @@ def save_limits():
                                         "the one before it.")
     else:
         st.session_state.thresholds = new
+        st.session_state.limits_source = "limits you set by hand in Settings"
         st.session_state.limits_note = "Saved."
 
 
@@ -110,9 +113,12 @@ def load_session():
     for seg in SEGMENTS:  # the boxes on this and other pages read these keys first
         st.session_state.pop(f"agent_input_{seg}", None)
         st.session_state.pop(f"area_{seg}", None)
+    if "thresholds" in loaded and "limits_source" not in loaded:
+        st.session_state.limits_source = "your saved session"
     show_limits(st.session_state.thresholds)
     names = {"crowd_data": "counts", "thresholds": "risk limits", "agents": "contacts", "custom_site": "drawn site",
-             "zone_names": "zone names", "seg_areas": "areas", "zone_adjacency": "routes"}
+             "zone_names": "zone names", "seg_areas": "areas", "zone_adjacency": "routes",
+             "limits_source": "where the limits came from"}
     st.session_state.session_note = ("success", "Loaded: " + ", ".join(names.get(k, k) for k in loaded) + ".")
 
 
@@ -143,6 +149,7 @@ def clear_contacts():
 def reset_limits():
     st.session_state.thresholds = {s: dict(DEFAULT_THRESHOLDS) for s in SEGMENTS}
     show_limits(st.session_state.thresholds)
+    st.session_state.limits_source = DEFAULT_LIMITS
 
 
 r1, r2, r3 = st.columns(3)
