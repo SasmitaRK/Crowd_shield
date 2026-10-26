@@ -25,7 +25,7 @@ st.markdown(
     "<div><div class='sec' style='margin:0 0 .25rem'>How it counts</div>"
     "<div style='font-size:.88rem'>An AI model trained on thousands of crowd photos puts a dot on each head</div></div>"
     "<div><div class='sec' style='margin:0 0 .25rem'>How accurate</div>"
-    "<div style='font-size:.88rem'>About 86 to 93% on test photos; always glance at the dots</div></div>"
+    "<div style='font-size:.88rem'>About 86 to 92% on test photos; always glance at the dots</div></div>"
     "<div><div class='sec' style='margin:0 0 .25rem'>Privacy</div>"
     "<div style='font-size:.88rem'>Photos stay in this session only. No faces, no names.</div></div>"
     "</div>",
@@ -166,7 +166,7 @@ if data:
                 import cv2
 
                 st.image(cv2.cvtColor(lead["overlay"], cv2.COLOR_BGR2RGB), width="stretch")
-    st.caption("A count is an estimate (about 86 to 93% accurate on test photos). Look at where the dots sit: "
+    st.caption("A count is an estimate (about 86 to 92% accurate on test photos). Look at where the dots sit: "
                "if they land on railway gravel, tiles, rails or patterned cloth instead of heads, the count is "
                "too high. This is the model's known weak spot (see How accurate is it?).")
     next_step("See which zones are too crowded, where to move people, and tell your team.",

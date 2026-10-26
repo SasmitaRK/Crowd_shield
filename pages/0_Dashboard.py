@@ -34,9 +34,9 @@ st.markdown(f"""
   <p>Crowd Shield counts the people in camera pictures, works out how crowded each part of a site is,
   and tells the team where to move people before it becomes dangerous.</p>
   <div class="stats">
-    <div class="stat"><b>92.7%</b><span>accurate on street crowds</span></div>
-    <div class="stat"><b>86.5%</b><span>accurate on packed crowds</span></div>
-    <div class="stat"><b>9 / 10</b><span>Indian test photos counted about 90% right</span></div>
+    <div class="stat"><b>91%</b><span>accurate on hand-counted Indian photos</span></div>
+    <div class="stat"><b>92.1%</b><span>accurate on street crowds</span></div>
+    <div class="stat"><b>86.1%</b><span>accurate on packed crowds</span></div>
     <div class="stat"><b>11 / 11</b><span>sudden surges caught in test videos</span></div>
   </div>
 </div>
@@ -117,6 +117,6 @@ if data:
                 st.markdown(f"<div style='margin:.3rem 0'><b>{entry['timestamp']}</b> · {entry['total']:,} people "
                             f"&nbsp; {pills}</div>", unsafe_allow_html=True)
 
-st.caption("The accuracy figures come from test photos the model never saw in training, and from 10 hand-counted "
-           "Indian photos where one railway photo is a known failure.")
+st.caption("The accuracy figures come from test photos the model never saw in training: the ShanghaiTech test sets "
+           "and 10 hand-counted Indian photos, all counted at full detail.")
 nav_link("pages/7_Benchmark.py", "How accurate is it? See every test photo", ":material/verified:", "/Benchmark")

@@ -9,7 +9,7 @@ def test_pilot_numbers_match_the_published_ones():
     rows = load()
     assert len(rows) == 10
     assert sum(r["true"] for r in rows) == 3507
-    assert accuracy(rows) == pytest.approx(0.667, abs=0.001)
+    assert accuracy(rows) == pytest.approx(0.911, abs=0.001)
 
 
 def test_ignore_zones_drop_points_from_both_sides():

@@ -78,7 +78,7 @@ def test_map_page_shows_the_kumbh_demo_with_an_evacuation_plan():
 def test_dashboard_shows_the_headline_results():
     app = render(PAGES["Dashboard"])
     text = " ".join(block.value for block in app.markdown)
-    assert "92.7%" in text and "86.5%" in text
+    assert "92.1%" in text and "86.1%" in text and "91%" in text
 
 
 def test_upload_page_says_which_model_counts():
@@ -89,7 +89,7 @@ def test_upload_page_says_which_model_counts():
 def test_benchmark_page_reports_the_india_pilot():
     app = render(PAGES["Benchmark"])
     text = " ".join(block.value for block in app.markdown)
-    assert "Known failure" in text
+    assert "Hardest photo" in text and "What changed" in text
 
 
 def test_video_page_shows_the_analysed_example_straight_away():

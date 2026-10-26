@@ -162,3 +162,4 @@ cython_debug/
 models/dmcount_shab.pth
 models/*.part
 models/pet_shab.pth
+models/pet_qnrf.pth

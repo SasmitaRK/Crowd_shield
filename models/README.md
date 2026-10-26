@@ -5,7 +5,8 @@ releases, and checks each file's SHA-256 (`crowdshield/weights.py`):
 
 | File | Model | Release |
 |---|---|---|
-| `pet_shab.pth` | PET point model, fine-tuned on ShanghaiTech A + B (the app's counter) | `pet-shab-v1` |
+| `pet_qnrf.pth` | PET point model, fine-tuned on ShanghaiTech A + B and UCF-QNRF (the app's counter) | `pet-qnrf-v1` |
+| `pet_shab.pth` | The first PET model, ShanghaiTech A + B only (kept for comparison) | `pet-shab-v1` |
 | `dmcount_shab.pth` | DM-Count density model (backup counter, and the second opinion) | `dmcount-shab-v1` |
 
 The original app's YOLO detectors are no longer shipped. They were never used for counting once PET was in,

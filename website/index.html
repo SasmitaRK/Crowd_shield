@@ -229,8 +229,9 @@
       <a class="btn ghost" href="https://github.com/khushi-git-7/Crowd_shield" target="_blank" rel="noopener">Source code</a>
     </div>
     <div class="stats">
-      <div class="stat"><b>86.5%</b><span>counting accuracy, packed crowds<br>(ShanghaiTech A)</span></div>
-      <div class="stat"><b>92.7%</b><span>counting accuracy, streets<br>(ShanghaiTech B)</span></div>
+      <div class="stat"><b>91%</b><span>counting accuracy on<br>hand-counted Indian photos</span></div>
+      <div class="stat"><b>86.1%</b><span>counting accuracy, packed crowds<br>(ShanghaiTech A)</span></div>
+      <div class="stat"><b>92.1%</b><span>counting accuracy, streets<br>(ShanghaiTech B)</span></div>
       <div class="stat"><b>11 / 11</b><span>crowd surges caught on UMN video</span></div>
       <div class="stat"><b>0</b><span>false alarms on the same test</span></div>
       <div class="stat"><b>105</b><span>freely licensed Indian crowd photos in the test set</span></div>
@@ -286,8 +287,8 @@
         <img class="fig" src="assets/plan.jpg" alt="Evacuation plan and alerts: Each zone against its limits, and orders for every zone's team (example numbers)." loading="lazy" style="width:100%">
         <p class="cap">Each zone against its limits, and orders for every zone's team (example numbers).</p></div>
       <div class="card"><div class="k">How accurate is it?</div>
-        <img class="fig" src="assets/accuracy.jpg" alt="How accurate is it?: Every hand-counted Indian photo, including the railway photo it gets wrong." loading="lazy" style="width:100%">
-        <p class="cap">Every hand-counted Indian photo, including the railway photo it gets wrong.</p></div>
+        <img class="fig" src="assets/accuracy.jpg" alt="How accurate is it?: Every hand-counted Indian photo, with the model's count and the true one." loading="lazy" style="width:100%">
+        <p class="cap">Every hand-counted Indian photo, with the model's count and the true one.</p></div>
     </div>
   </div>
 </section>
@@ -385,7 +386,7 @@
     <div class="grid g2">
       <div class="card">
         <div class="k">Counting · ShanghaiTech test sets</div>
-        <h3 style="margin-top:.4rem">From 7% to 86.5% on packed crowds</h3>
+        <h3 style="margin-top:.4rem">From 7% to 86% on packed crowds</h3>
         <table aria-label="Counting accuracy by method">
           <thead><tr><th>Method</th><th>Packed (A)</th><th></th><th>Streets (B)</th><th></th></tr></thead>
           <tbody id="acc"></tbody>
@@ -404,8 +405,9 @@
         <div class="card">
           <div class="k">India test set</div>
           <h3 style="margin-top:.4rem">105 photos of melas, festivals, stations and temples</h3>
-          <p>All freely licensed from Wikimedia Commons, with credits. On the first 10 hand-checked photos, 9
-            are about 90% accurate. The 10th is the railway photo below.</p>
+          <p>All freely licensed from Wikimedia Commons, with credits. On the first 10 hand-checked photos the
+            first model scored 66.7%, because it took railway gravel for heads. The second, also trained on 1,200
+            dense crowd photos and on empty Indian tracks, scores 91% (86% on the free online server).</p>
         </div>
       </div>
     </div>
@@ -499,7 +501,7 @@ document.getElementById("launch").onclick = () => {
 
 // Accuracy table (results/shanghaitech/comparison.md)
 (function () {
-  const rows = [["Original app (YOLO)", 7.1, 42.1], ["DM-Count", 83.8, 86.4], ["PET + correction", 86.5, 92.7]];
+  const rows = [["Original app (YOLO)", 7.1, 42.1], ["DM-Count", 83.8, 86.4], ["PET + correction", 86.5, 92.7], ["PET v2 (+ UCF-QNRF)", 86.1, 92.1]];
   document.getElementById("acc").innerHTML = rows.map(([m, a, b], i) => {
     const best = i === rows.length - 1 ? "best" : "";
     return `<tr class="${best}"><td>${m}</td>

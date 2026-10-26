@@ -1,11 +1,16 @@
-"""Crowd counting with head points: PET, fine-tuned on ShanghaiTech A + B.
+"""Crowd counting with head points: PET, fine-tuned on ShanghaiTech and UCF-QNRF.
 
 PET (Liu et al., ICCV 2023) puts one point on each head it finds, so it gives
 both the count and where every person is. On the ShanghaiTech test photos it
 was the most accurate counter we tried (see results/shanghaitech).
 
-The raw count is passed through one correction, true ≈ 1.375 × raw^0.942,
-fitted on the 70 held-out training photos (never on test photos). It trims
+This is the second version (pet-qnrf-v1): the first (pet-shab-v1) fine-tuned once
+more on ShanghaiTech A (twice over) + B, the 1,201 dense UCF-QNRF photos and 23
+people-free Indian railway photos. It counts Indian crowds far better (see
+results/model_v2) and is level with the first on ShanghaiTech.
+
+The raw count is passed through one correction, true ≈ 1.340 × raw^0.947,
+fitted on held-out training photos (never on test photos). It trims
 PET's overcounting in packed crowds and its undercounting on streets.
 """
 
@@ -21,10 +26,10 @@ import numpy as np
 from .config import MIN_SIDE, REPO_ROOT, default_max_side, default_work_side, fit_max_side
 from .weights import RELEASES, fetch
 
-WEIGHTS = REPO_ROOT / "models" / "pet_shab.pth"
-WEIGHTS_URL = f"{RELEASES}/pet-shab-v1/pet_shab.pth"
-WEIGHTS_SHA256 = "5a7c6590e61938e42c6b3a2bbde5fbec34ee7eb8b2c9cae0fdba2a45d8437595"
-CORRECTION = (1.375, 0.942)  # true ≈ a * raw ** b, fitted on held-out training photos
+WEIGHTS = REPO_ROOT / "models" / "pet_qnrf.pth"
+WEIGHTS_URL = f"{RELEASES}/pet-qnrf-v1/pet_qnrf.pth"
+WEIGHTS_SHA256 = "e8476157d314606f143947b0f94d4f915e5f22ef11e26e69d5188ce0f0a2ed92"
+CORRECTION = (1.340, 0.947)  # true ≈ a * raw ** b, fitted on held-out training photos
 MAX_SIDE = default_max_side()  # kept for callers that read it; counting uses WORK_SIDE below
 WORK_SIDE = default_work_side()  # the detail to count at; a small server does it in tiles
 TILE_MARGIN = 48  # context around each tile's core, in pixels, so heads at a seam are still seen whole
