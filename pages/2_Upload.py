@@ -9,7 +9,7 @@ from crowdshield import benchmark
 from crowdshield.config import COUNTER_LABELS, NotEnoughMemory
 from crowdshield.points import on_tile_progress
 from detection import process_segment, risk_level
-from shared_state import (GLOBAL_CSS, MAX_IMAGES_PER_SEGMENT, SEGMENTS, get_seg_thresholds, init_state,
+from shared_state import (GLOBAL_CSS, MAX_IMAGES_PER_SEGMENT, SEGMENTS, get_seg_thresholds, init_state, limits_note,
                           zone_label)
 from ui import next_step, page_header, risk_pill, section, working
 
@@ -142,7 +142,8 @@ if run:
 # ── Results ────────────────────────────────────────────────────────────────
 data = st.session_state.crowd_data
 if data:
-    section("3. Results", "The photo with the most people in each zone, with a dot on every head.")
+    section("3. Results", "The photo with the most people in each zone, with a dot on every head. "
+            + limits_note())
     cols = st.columns(len(data))
     for col, (seg, d) in zip(cols, data.items()):
         risk = risk_level(d["count"], get_seg_thresholds(seg))

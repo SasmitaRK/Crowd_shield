@@ -37,8 +37,24 @@ def init_state():
         st.session_state.seg_areas = {s: 0 for s in SEGMENTS}
     if "alert_count" not in st.session_state:
         st.session_state.alert_count = 0
+    if "limits_source" not in st.session_state:  # where the zones' risk limits came from, said on every page
+        st.session_state.limits_source = DEFAULT_LIMITS
     if "detection_history" not in st.session_state:
         st.session_state.detection_history = []
+
+
+DEFAULT_LIMITS = (f"the defaults ({DEFAULT_THRESHOLDS['moderate']} / {DEFAULT_THRESHOLDS['high']} / "
+                  f"{DEFAULT_THRESHOLDS['critical']} people in every zone)")
+
+
+def limits_note() -> str:
+    """One line on where the risk limits come from, so a count reads the same on every page."""
+    source = st.session_state.get("limits_source", DEFAULT_LIMITS)
+    note = f"Risk limits come from {source}."
+    if source == DEFAULT_LIMITS:
+        note += (" For limits based on each zone's real size, open the Site map and press Apply map areas "
+                 "(or enter areas in Settings).")
+    return note
 
 
 def get_seg_thresholds(seg: str) -> dict:

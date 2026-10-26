@@ -299,6 +299,46 @@ def working(title: str, detail: str = "", fraction: float | None = None) -> Work
     return job
 
 
+# Zone layouts as (name, left, top, right, bottom), fractions of the picture.
+ZONE_LAYOUTS = {
+    "Whole picture": [("Whole view", 0, 0, 1, 1)],
+    "Left and right": [("Left", 0, 0, .5, 1), ("Right", .5, 0, 1, 1)],
+    "Near and far": [("Far", 0, 0, 1, .5), ("Near", 0, .5, 1, 1)],
+    "Four quarters": [("Far left", 0, 0, .5, .5), ("Far right", .5, 0, 1, .5),
+                      ("Near left", 0, .5, .5, 1), ("Near right", .5, .5, 1, 1)],
+}
+
+
+def zone_picker(width: int, height: int, key: str, extra: dict | None = None,
+                capacity: int = 40) -> tuple[list, dict]:
+    """Pick zones on a camera picture the simple way: a layout, a name and a capacity per zone.
+
+    `extra` adds layouts ahead of the standard ones, as {name: [(zone, left, top, right, bottom[, capacity])]}.
+    Returns ([(name, polygon in pixels)], {name: people it holds comfortably}).
+    """
+    layouts = {**(extra or {}), **ZONE_LAYOUTS}
+    layout = st.radio("Layout", list(layouts) + ["Custom boxes"], horizontal=True, key=f"{key}_layout")
+    boxes = layouts.get(layout) or [(f"Zone {chr(65 + i)}", 0, 0, 1, 1) for i in range(
+        st.number_input("How many zones", 1, 4, 2, key=f"{key}_n"))]
+    zones, capacities = [], {}
+    for i, box in enumerate(boxes):
+        default_name, fx0, fy0, fx1, fy1 = box[:5]
+        c1, c2 = st.columns([3, 2])
+        name = c1.text_input(f"Zone {i + 1} name", default_name, key=f"{key}_name_{layout}_{i}")
+        capacities[name] = int(c2.number_input(
+            "Holds comfortably", 1, 100_000, box[5] if len(box) > 5 else capacity, key=f"{key}_cap_{layout}_{i}",
+            help="How many people this part of the picture holds comfortably. A zone turns amber at half of it, "
+                 "orange at three quarters and red when full."))
+        if layout == "Custom boxes":
+            x0, x1 = st.slider(f"{name}: left to right (%)", 0, 100, (int(i * 100 / len(boxes)),
+                               int((i + 1) * 100 / len(boxes))), key=f"{key}_x_{i}")
+            y0, y1 = st.slider(f"{name}: top to bottom (%)", 0, 100, (30, 100), key=f"{key}_y_{i}")
+            fx0, fx1, fy0, fy1 = x0 / 100, x1 / 100, y0 / 100, y1 / 100
+        w, h = width, height
+        zones.append((name, [(w * fx0, h * fy0), (w * fx1, h * fy0), (w * fx1, h * fy1), (w * fx0, h * fy1)]))
+    return zones, capacities
+
+
 def next_step(text: str, page: str, label: str, url: str, icon: str = ":material/arrow_forward:") -> None:
     """The end of a page: one line on what to do next, and the link that does it, so nobody gets stuck."""
     st.markdown(f"<div class='sec' style='margin-top:2rem'>Next</div><div class='sec-cap'>{html.escape(text)}</div>",

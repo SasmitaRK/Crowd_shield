@@ -59,34 +59,41 @@ page_header("Site map", "Each zone of a real site on a satellite map, how crowde
             "walking routes to move people along. Start with the Kumbh demo and play the surge forward.",
             "Plan the response", live=True)
 
+SIM, MINE = "An example surge (made-up numbers)", "My counted photos"
+BEST, NEAREST = "Best overall", "Nearest zone first"
 site_options = list(SITES) + (["My site"] if "custom_site" in st.session_state else []) + ["Draw a new site"]
 with st.container(border=True):
     c1, c2, c3, c4 = st.columns([5, 3, 3, 3])
     with c1:
         site_choice = st.selectbox("Site", site_options,
-                                   help="Demo sites are real places with illustrative zones.")
+                                   help="The demo sites are real places; their zones are drawn for illustration. "
+                                        "Choose Draw a new site to outline your own.")
     is_draw = site_choice == "Draw a new site"
     is_demo = site_choice in SITES
     has_analysis = bool(st.session_state.crowd_data)
     with c2:
-        sources = (["Simulated surge"] if is_demo else []) + (["My latest analysis"] if has_analysis else [])
-        source = st.selectbox("People counts", sources or ["No counts yet"], disabled=is_draw)
+        sources = ([SIM] if is_demo else []) + ([MINE] if has_analysis else [])
+        source = st.selectbox("Crowd numbers", sources or ["Nothing counted yet"], disabled=is_draw,
+                              help="Use the made-up example to see how the map works, or the people you counted "
+                                   "in photos (zone A on the photo page is zone A here).")
     with c3:
-        preset_name = st.selectbox("Density standard", list(FRUIN_PRESETS),
+        preset_name = st.selectbox("Safety limits for", list(FRUIN_PRESETS),
                                    index=list(FRUIN_PRESETS).index("Crowded events / concerts"),
-                                   help="People per m² at which each risk level starts (Fruin).")
+                                   help="How many people per m² count as crowded, dangerous or critical. Stricter "
+                                        "for corridors and gates, looser for events where people stand close "
+                                        "(after Fruin's crowd-safety levels).")
     with c4:
         planner_name = st.selectbox(
-            "Evacuation planner", ["Optimised", "Simple rule"],
-            help="Optimised solves the whole network at once (minimum-cost flow): it places as many "
-                 "people as the zones can take, along the shortest walks. The simple rule sends each "
-                 "crowded zone to its nearest zone with room, one after another.")
+            "How to plan moves", [BEST, NEAREST],
+            help="Best overall looks at the whole site at once: it finds room for as many people as possible, "
+                 "along the shortest walks. Nearest zone first sends each crowded zone to its nearest zone with "
+                 "room, one at a time, and can leave people with nowhere to go.")
     step = None
-    if is_demo and source == "Simulated surge":
+    if is_demo and source == SIM:
         steps = timeline(SITES[site_choice])
-        label = st.select_slider("Simulation time", [s["label"] for s in steps],
+        label = st.select_slider("Time in the example", [s["label"] for s in steps],
                                  value=next(s["label"] for s in steps if s["factor"] == 1.0),
-                                 help="Plays the simulated surge forward: watch zones fill and routes appear.")
+                                 help="Move it to play the surge forward: watch zones fill up and routes appear.")
         step = next(s for s in steps if s["label"] == label)
 
 preset = FRUIN_PRESETS[preset_name]
@@ -174,13 +181,17 @@ if is_draw:
 # Assess the site
 # ---------------------------------------------------------------------------
 site = SITES[site_choice] if is_demo else st.session_state.custom_site
-if source == "Simulated surge":
+if source == SIM:
     counts = scenario_counts(site, step["factor"])
-elif source == "My latest analysis":
+elif source == MINE:
     counts = {z: d["count"] for z, d in st.session_state.crowd_data.items() if z in site["zones"]}
 else:
     counts = {}
-planner = "optimal" if planner_name == "Optimised" else "simple"
+planner = "optimal" if planner_name == BEST else "simple"
+if source == MINE and not st.session_state.get("limits_source", "").startswith(f"each zone's area on the {site_choice}"):
+    st.info("This map judges your counts by people per m² of each zone. The photo and evacuation-plan pages still "
+            f"use limits from {st.session_state.get('limits_source')}, so a zone can look different there. To use "
+            "this map everywhere, press Apply map areas and routes in the Export and apply tab below.")
 view = assess(site, counts, preset, planner=planner)
 zones, plans = view["zones"], view["plans"]
 
@@ -194,8 +205,8 @@ peak = max(counted, key=lambda r: r["per_m2"]) if counted else None
 at_risk = [z for z, r in zones.items() if r["risk"] in ("High Risk", "Critical")]
 moving = sum(p["move"] for p in plans if p["target"])
 chip = ("<span class='pill warn'>Simulated counts</span> <span class='pill neutral'>Illustrative zones, "
-        "not the official layout</span>" if source == "Simulated surge" and is_demo
-        else "<span class='pill warn'>Simulated counts</span>" if source == "Simulated surge"
+        "not the official layout</span>" if source == SIM and is_demo
+        else "<span class='pill warn'>Simulated counts</span>" if source == SIM
         else "<span class='pill brand'>Counts from your photos</span> <span class='pill neutral'>Illustrative "
              "zones, not the official layout</span>" if counted and is_demo
         else "<span class='pill brand'>Counts from your photos</span>" if counted else "")
@@ -301,7 +312,7 @@ with panel_col:
 
 if is_demo:
     st.caption(f"{site['disclaimer']} "
-               + (site["scenario_note"] if source == "Simulated surge" else "")
+               + (site["scenario_note"] if source == SIM else "")
                + " Imagery © Esri, Maxar; map data © OpenStreetMap contributors.")
 else:
     st.caption("Imagery © Esri, Maxar; map data © OpenStreetMap contributors.")
@@ -321,17 +332,17 @@ with tab_plan:
         counted_rows = {z: r for z, r in zones.items() if r["count"] is not None}
         both = {name: plan_summary(assess(site, counts, preset, planner=key)["plans"],
                                    view["distance_m"], counted_rows)
-                for name, key in (("Simple rule", "simple"), ("Optimised", "optimal"))}
+                for name, key in ((NEAREST, "simple"), (BEST, "optimal"))}
         st.dataframe(
-            [{"Planner": name, "People moved": f"{r['moved']:,}",
+            [{"Way of planning": name, "People moved": f"{r['moved']:,}",
               "Left with nowhere to go": f"{r['unresolved']:,}",
-              "People x metres walked": f"{r['people_metres']:,.0f}"} for name, r in both.items()],
+              "Total walking (person-metres)": f"{r['people_metres']:,.0f}"} for name, r in both.items()],
             hide_index=True, width="stretch")
-        if both["Simple rule"]["unresolved"] > both["Optimised"]["unresolved"]:
-            st.caption("The simple rule gives up on people when its nearest zone fills up. The optimised "
-                       "plan finds room for them in other zones, even ones reached through a busy zone.")
+        if both[NEAREST]["unresolved"] > both[BEST]["unresolved"]:
+            st.caption("Nearest zone first gives up on people once the nearest zone is full. Best overall finds "
+                       "room for them in other zones, even ones reached through a busy zone.")
         else:
-            st.caption("People x metres is the total walking the plan asks for: lower is easier to carry out.")
+            st.caption("Total walking is every person's walk added up: lower is easier to carry out.")
     for p in plans:
         src = zones[p["high"]]
         if p["target"]:
@@ -377,8 +388,10 @@ with tab_use:
                 st.session_state.thresholds[z] = thresholds_from_area(r["area_m2"], preset)
             st.session_state.zone_adjacency = view["adjacency"]
             st.session_state.zone_names = {z: r["name"] for z, r in zones.items()}
+            st.session_state.limits_source = (f"each zone's area on the {site_choice} map, at the "
+                                              f"\"{preset_name}\" safety limits")
             st.success(f"Applied areas and {preset_name.lower()} limits for zones "
                        f"{', '.join(zones)}, plus the routes between them.")
 
-next_step("Put your own numbers on the map: count the people in a photo of each zone, then pick My latest "
-          "analysis above.", "pages/2_Upload.py", "Count people in a photo", "/Upload")
+next_step("Put your own numbers on the map: count the people in a photo of each zone, then pick My counted "
+          "photos above.", "pages/2_Upload.py", "Count people in a photo", "/Upload")

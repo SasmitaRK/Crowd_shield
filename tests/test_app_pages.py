@@ -112,9 +112,9 @@ def test_map_page_compares_the_simple_rule_with_the_optimised_plan():
     pytest.importorskip("streamlit_folium")
     app = render(PAGES["Map"])
     names = [box.label for box in app.selectbox]
-    assert "Evacuation planner" in names
-    box = next(b for b in app.selectbox if b.label == "Evacuation planner")
-    box.set_value("Simple rule").run()
+    assert "How to plan moves" in names
+    box = next(b for b in app.selectbox if b.label == "How to plan moves")
+    box.set_value("Nearest zone first").run()
     assert not app.exception, [e.message for e in app.exception]
 
 
@@ -177,3 +177,16 @@ def test_photo_and_alert_pages_warn_when_the_two_models_disagree():
     assert any("Check this count" in w.value and "415" in w.value for w in up.warning)
     alerts = render(PAGES["Analysis"], crowd_data={"A": zone})
     assert any("Check this count" in w.value for w in alerts.warning)
+
+
+def test_pages_say_where_the_risk_limits_come_from():
+    app = render(PAGES["Analysis"], crowd_data={"A": zone_result(95)})
+    assert any("Risk limits come from the defaults" in m.value for m in app.markdown)
+
+
+def test_map_warns_when_its_rule_differs_from_the_plan_page():
+    pytest.importorskip("streamlit_folium")
+    app = render(PAGES["Map"], crowd_data={"A": zone_result(95)})
+    next(b for b in app.selectbox if b.label == "Crowd numbers").set_value("My counted photos").run()
+    assert not app.exception, [e.message for e in app.exception]
+    assert any("Apply map areas and routes" in i.value for i in app.info)

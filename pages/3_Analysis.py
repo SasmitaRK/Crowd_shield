@@ -12,7 +12,7 @@ from crowdshield.config import COUNTER_LABELS
 from crowdshield.risk import plan_optimal
 from detection import risk_level
 from emailer import build_critical_email, build_receiving_email, email_configured, send_email
-from shared_state import GLOBAL_CSS, RISK_COLORS, SEGMENTS, get_seg_thresholds, init_state, zone_label
+from shared_state import GLOBAL_CSS, RISK_COLORS, SEGMENTS, get_seg_thresholds, init_state, limits_note, zone_label
 from ui import compact, kpi_cards, nav_link, page_header, risk_pill, section
 
 st.set_page_config(page_title="Evacuation plan and alerts • Crowd Shield", page_icon=None, layout="wide")
@@ -64,7 +64,7 @@ kpi_cards([
 
 # ── Zones ──────────────────────────────────────────────────────────────────
 section("Zones", "Each zone's count against its limits (the marks on the bar are Moderate, High Risk and "
-        "Critical). Limits come from Settings, or from the Site map once you apply one.")
+        "Critical). " + limits_note())
 cols = st.columns(len(seg_info))
 for col, (seg, info) in zip(cols, seg_info.items()):
     t, count, colour = info["thresholds"], info["count"], RISK_COLORS[info["risk"]]
