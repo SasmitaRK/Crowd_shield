@@ -131,7 +131,7 @@ def base_map(centre, zoom):
   .ring { position:absolute; left:13px; top:13px; width:26px; height:26px; margin:-13px 0 0 -13px;
           border-radius:50%; border:3px solid currentColor; animation: ring 1.6s ease-out infinite; }
   @keyframes ring { 0% {transform:scale(.7); opacity:.95} 100% {transform:scale(3.4); opacity:0} }
-  .map-legend { position:absolute; left:10px; bottom:26px; z-index:999; background:rgba(15,23,42,.86);
+  .map-legend { position:absolute; left:10px; bottom:72px; z-index:999; background:rgba(15,23,42,.86);
                 color:#e2e8f0; border-radius:10px; padding:8px 10px; font:600 11px/1.5 Inter, sans-serif;
                 box-shadow:0 4px 18px rgba(0,0,0,.35); }
   .map-legend i { display:inline-block; width:10px; height:10px; border-radius:3px; margin-right:6px;

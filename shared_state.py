@@ -65,6 +65,16 @@ def get_seg_thresholds(seg: str) -> dict:
     return t[seg]
 
 
+def zone_title(seg: str) -> str:
+    """HTML for a zone card's title: the letter, and its place name on its own line so narrow cards never cut it."""
+    import html
+
+    name = st.session_state.get("zone_names", {}).get(seg)
+    return (f"<div style='min-width:0'><b style='font-size:.9rem'>Zone {seg}</b>"
+            + (f"<div style='font-size:.76rem;color:#64748b;line-height:1.3'>{html.escape(name)}</div>" if name else "")
+            + "</div>")
+
+
 def zone_label(seg: str) -> str:
     """"Zone A", or "Zone A · Sangam Nose" once a site map has named the zones."""
     name = st.session_state.get("zone_names", {}).get(seg)

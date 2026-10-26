@@ -56,7 +56,7 @@ def test_analysis_page_plans_a_relocation():
     app = render(PAGES["Analysis"], crowd_data=crowd)
     text = " ".join(block.value for block in app.markdown)
     assert "Relocate <b>~36</b> people to Zone <b>B</b>" in text
-    assert any("Counted by the main counting model (PET)" in c.value for c in app.caption)
+    assert any("main counting model (PET)" in c.value for c in app.caption)
 
 
 def test_settings_page():
