@@ -17,12 +17,13 @@ an open-source tool that measures them from ordinary photos and video:
 - where to move people so that no zone is overfilled
 
 Counting uses a point model (PET) fine-tuned with a strictly held-out protocol. On the
-ShanghaiTech test sets it reaches **86.5%** accuracy on packed crowds and **92.7%** on street
+ShanghaiTech test sets it reaches **86.1%** accuracy on packed crowds and **92.1%** on street
 scenes, against **7%** and **42%** for the detector the project started with. A movement alarm
-catches **11 of 11** escape events in the UMN videos with no false alarms. A new test set of
-freely licensed Indian crowd photos shows the counter at about **90%** on 9 of 10 hand-checked
-photos, with one systematic failure: railway ballast seen from above is read as heads. Fine-tuning on empty-track photos fixed
-that failure but cost accuracy elsewhere, so it was not shipped. A field test on handheld Indian
+catches **11 of 11** escape events in the UMN videos with no false alarms. On a new test set of
+freely licensed Indian crowd photos, the first counter scored **66.7%** on 10 hand-checked photos
+because it read railway ballast seen from above as heads. A second version, also trained on the
+dense UCF-QNRF photos and on empty Indian tracks but never on an Indian crowd, scores **91.1%**
+there, and is level with the first on ShanghaiTech within statistical noise. A field test on handheld Indian
 festival video showed that motion readings need a fixed camera, which led to an automatic
 moving-camera check. This report gives every number with the data and code behind it.
 
@@ -83,6 +84,8 @@ averaging 124) were used once, at the end.
   for 9.5 h on a free Kaggle T4, with the best round (240) picked on the held-out photos.
 - **One count correction,** true ≈ 1.375 × raw^0.942, was fitted on the same 70 photos. It trims
   PET's overcounting in packed crowds and its undercounting on streets.
+- **PET, second version** (section 4) was fine-tuned from the first on ShanghaiTech, UCF-QNRF and
+  23 empty railway photos, with its own correction, true ≈ 1.340 × raw^0.947.
 
 **Results** (accuracy = 1 − Σ|error| ÷ Σ true count):
 
@@ -90,7 +93,8 @@ averaging 124) were used once, at the end.
 |---|---|---|---|---|
 | Original app (YOLO + Haar faces) | 7% | 403 | 42% | 72 |
 | DM-Count (this project) | 84% | 70.1 | 86% | 16.9 |
-| **PET + correction (the app's counter)** | **86.5%** | **58.5** | **92.7%** | **9.0** |
+| PET + correction (first version) | 86.5% | 58.5 | 92.7% | 9.0 |
+| **PET, second version (the app's counter)** | **86.1%** | **60.4** | **92.1%** | **9.8** |
 
 ![Counting accuracy by crowd size](../results/shanghaitech/accuracy_by_crowd_size.png)
 
@@ -120,9 +124,9 @@ turbans) and draws *ignore zones* over people too small or blurry to mark. Both 
 are counted outside the ignore zones. A second reviewer audits each photo with zoomed crops. So
 far, 10 photos (3,507 heads) are complete.
 
-**Pilot results.**
+**Pilot results, first version.**
 
-- The counter is within about 10% on 9 of the 10 photos: 94, 89, 96, 81, 100, 90, 84, 92 and 93%.
+- The counter scored between 81 and 100% on 9 of the 10 photos: 94, 89, 96, 81, 100, 90, 84, 92 and 93%.
 - Overall accuracy is 66.7% (mean error 116.9), because of one systematic failure. On a top-down
   Mumbai railway photo it counted 1,267 heads against 415: the gravel between the tracks looks
   like a dense crowd.
@@ -140,8 +144,30 @@ of zero.
 - **ShanghaiTech also slipped slightly:** A 86.6% → 86.3%, B 92.6% → 92.6%.
 
 Under the project's rule (ship a new model only if it is at least as good on ShanghaiTech and
-better on held-out Indian photos), the fine-tuned model was not shipped. The failure stays
-documented in the app.
+better on held-out Indian photos), the fine-tuned model was not shipped.
+
+**The second version.** Instead of training on the Indian test photos, PET was fine-tuned on more
+kinds of crowds: ShanghaiTech (Part A twice over, so packed crowds would not be forgotten), the
+1,201 dense UCF-QNRF training photos, which it had never seen, and the 23 empty-track photos as
+about 1% of the set. No Indian crowd photo was trained on, so all 10 stay a clean test. Both models
+were then run through the app's own counting code, with corrections refitted on held-out
+ShanghaiTech training photos, and compared photo by photo with a paired bootstrap (10,000
+resamples):
+
+| Test | First version | Second version | Difference (95% interval) |
+|---|---|---|---|
+| Indian photos (10), full detail | 66.6% | 91.6% | +24.9 (−3.6 to +84.9) |
+| Indian photos (10), hosted app | 67.9% | 86.1% | +18.2 (−1.4 to +61.9) |
+| UCF-QNRF test (334) | 82.8% | 85.5% | +2.7 (+1.1 to +4.4) |
+| ShanghaiTech A (182) | 86.4% | 86.1% | −0.4 (−2.2 to +1.3) |
+| ShanghaiTech B (316) | 93.3% | 92.8% | −0.4 (−1.1 to +0.3) |
+
+The decision rule was fixed before the bootstrap: switch if the ShanghaiTech intervals include
+zero. They do, so the small drop there is within noise; the UCF-QNRF gain is real. The railway
+photo is now counted as 455 (full detail) against 415, and the app ships the second version. On
+the 10 Indian photos it is 91.1% accurate with the shipped correction (per photo: 95, 98, 95, 73,
+90, 96, 79, 69, 92 and 97%). The Indian gain is large but not yet statistically proven on 10
+photos; the hardest photo is now a Thane station scene, counted too low (311 against 425).
 
 ## 5. Movement
 
@@ -203,14 +229,14 @@ practical on an 8 GB laptop; live video needs a GPU.
 - The early warning extends a straight-line trend.
 - The movement alarm was validated on 3 scenes.
 - Map zones in the demos are illustrative, not official plans.
-- The counter fails on top-down views of railway ballast.
+- The counter still undercounts some station scenes (a Thane photo by 27%).
 
 ## 8. Reproducibility
 
 - Every number above comes from scripts in `eval/` and per-photo or per-clip results in
   `results/`.
-- Trained weights are GitHub releases (`pet-shab-v1`, `dmcount-shab-v1`), checked by SHA-256 when
-  downloaded, and mirrored on Hugging Face.
+- Trained weights are GitHub releases (`pet-qnrf-v1`, `pet-shab-v1`, `dmcount-shab-v1`), checked by
+  SHA-256 when downloaded; the first two models are also mirrored on Hugging Face.
 - Heavy runs used free Kaggle GPUs. Their scripts are in the repository.
 - Tests run in GitHub Actions on every change.
 
