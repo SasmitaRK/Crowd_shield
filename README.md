@@ -15,6 +15,19 @@ signs were there minutes before: too many people per square metre, and a
 crowd starting to push. Crowd Shield is an attempt to measure those signs
 with ordinary cameras.
 
+## A look at the app
+
+| | |
+|---|---|
+| ![Home: where to start](docs/screenshots/home.jpg) | ![A video analysed: a dot on every head, zones coloured by how full they are](docs/screenshots/video.jpg) |
+| **Home.** Pick what you have: a photo, a video clip, a live camera, or the demo map. | **Analyse a video.** Every head marked, zones turning amber and red as they fill, each zone over time. |
+| ![Site map of the Sangam at Prayagraj with zones and evacuation routes](docs/screenshots/map.jpg) | ![Evacuation plan: risk per zone and where to move people](docs/screenshots/plan.jpg) |
+| **Site map.** Zones on satellite imagery, people per m², and walking routes for moving people. | **Evacuation plan and alerts.** Each zone against its limits, and orders for every zone's team. |
+| ![A sample Indian photo counted: 74 by the model, 74 by hand](docs/screenshots/photo.jpg) | ![How accurate is it: hand-counted Indian photos and the known failure](docs/screenshots/accuracy.jpg) |
+| **Count people in a photo.** A sample from Mumbai's Ganesh festival: 74 by the model, 74 by hand. | **How accurate is it?** Every hand-counted Indian photo, including the one it gets wrong. |
+
+The plan screenshot uses an example session with made-up counts.
+
 ## What it does
 
 ![How Crowd Shield works](docs/architecture.svg)

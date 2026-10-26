@@ -35,6 +35,7 @@ jobs:
           cp results/shanghaitech/accuracy_by_crowd_size.png results/umn/timeline.png _site/assets/
           mv _site/assets/timeline.png _site/assets/umn_timeline.png
           cp results/india_video/field_test.jpg _site/assets/
+          cp docs/screenshots/*.jpg _site/assets/
           cp paper/crowd_shield_report.pdf _site/report.pdf
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3

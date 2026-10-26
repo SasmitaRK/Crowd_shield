@@ -9,7 +9,7 @@ from crowdshield import benchmark
 from crowdshield.config import COUNTER_LABELS, NotEnoughMemory
 from crowdshield.points import on_tile_progress
 from detection import process_segment, risk_level
-from shared_state import (GLOBAL_CSS, MAX_IMAGES_PER_SEGMENT, SEGMENTS, get_seg_thresholds, init_state, limits_note,
+from shared_state import (GLOBAL_CSS, MAX_IMAGES_PER_SEGMENT, SEGMENTS, get_seg_thresholds, init_state, limits_note, zone_title,
                           zone_label)
 from ui import next_step, page_header, risk_pill, section, working
 
@@ -149,7 +149,7 @@ if data:
         risk = risk_level(d["count"], get_seg_thresholds(seg))
         with col:
             st.markdown(f"<div style='display:flex;justify-content:space-between;align-items:center;gap:.4rem'>"
-                        f"<b style='font-size:.88rem'>{zone_label(seg)}</b>{risk_pill(risk)}</div>",
+                        f"{zone_title(seg)}{risk_pill(risk)}</div>",
                         unsafe_allow_html=True)
             st.metric(f"People in zone {seg}", f"{d['count']:,}", label_visibility="collapsed",
                       help=f"Counted by the {COUNTER_LABELS.get(d.get('counter'), 'model')} from "

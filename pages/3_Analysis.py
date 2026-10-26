@@ -12,7 +12,7 @@ from crowdshield.config import COUNTER_LABELS
 from crowdshield.risk import plan_optimal
 from detection import risk_level
 from emailer import build_critical_email, build_receiving_email, email_configured, send_email
-from shared_state import GLOBAL_CSS, RISK_COLORS, SEGMENTS, get_seg_thresholds, init_state, limits_note, zone_label
+from shared_state import GLOBAL_CSS, RISK_COLORS, SEGMENTS, get_seg_thresholds, init_state, limits_note, zone_label, zone_title
 from ui import compact, kpi_cards, nav_link, page_header, risk_pill, section
 
 st.set_page_config(page_title="Evacuation plan and alerts • Crowd Shield", page_icon=None, layout="wide")
@@ -74,9 +74,8 @@ for col, (seg, info) in zip(cols, seg_info.items()):
     room = t["critical"] - count
     with col, st.container(border=True):
         st.markdown(
-            f"<div style='display:flex;justify-content:space-between;align-items:center;gap:.4rem'>"
-            f"<b style='font-size:.88rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis'>"
-            f"{html.escape(zone_label(seg))}</b>{risk_pill(info['risk'])}</div>"
+            f"<div style='display:flex;justify-content:space-between;align-items:flex-start;gap:.4rem'>"
+            f"{zone_title(seg)}{risk_pill(info['risk'])}</div>"
             f"<div style='font-size:1.7rem;font-weight:800;font-variant-numeric:tabular-nums;margin-top:.3rem'>"
             f"{count:,}<span style='font-size:.8rem;color:#64748b;font-weight:600'> people</span></div>"
             f"<div class='zbar'><div class='fill' style='width:{min(count / scale, 1) * 100:.1f}%;"
@@ -92,8 +91,7 @@ for col, (seg, info) in zip(cols, seg_info.items()):
             lead = max(shown, key=lambda r: r["count"])
             st.image(cv2.cvtColor(lead["overlay"], cv2.COLOR_BGR2RGB), width="stretch",
                      caption=f"Busiest photo: {lead['count']:,} people" if len(per_img) > 1 else None)
-        st.caption(f"Counted by the {COUNTER_LABELS.get(info['counter'], 'model')} from "
-                   f"{info['image_count']} photo(s)")
+        st.caption(f"{info['image_count']} photo(s) · {COUNTER_LABELS.get(info['counter'], 'model')}")
         if any((r.get("check") or {}).get("disagree") for r in per_img):
             st.warning("Check this count: a second model found far fewer people. Look at the dots on "
                        "Count people in a photo before acting on it.", icon=":material/visibility:")
