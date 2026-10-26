@@ -49,15 +49,19 @@ st.markdown(
     unsafe_allow_html=True)
 
 # ── By scene ───────────────────────────────────────────────────────────────
-left, right = st.columns([5, 6], gap="large")
+left, right = st.columns([6, 5], gap="large")
 with left:
     section("By scene")
     scenes = pd.DataFrame(by_scene(rows))
-    scenes["accuracy"] = scenes["accuracy"].clip(lower=0)
+    scenes["accuracy"] = scenes["accuracy"].clip(lower=0) * 100
     st.dataframe(scenes, hide_index=True, width="stretch", column_config={
-        "scene": "Scene", "photos": "Photos", "people": st.column_config.NumberColumn("People", format="%d"),
-        "accuracy": st.column_config.ProgressColumn("Accuracy", min_value=0.0, max_value=1.0, format="percent"),
-        "mae": st.column_config.NumberColumn("Off by", help="Average people off, per photo", format="%.0f"),
+        "scene": st.column_config.TextColumn("Scene", width=170),
+        "photos": st.column_config.NumberColumn("Photos", width=60),
+        "people": st.column_config.NumberColumn("People", format="%d", width=64),
+        "accuracy": st.column_config.ProgressColumn("Accuracy", min_value=0.0, max_value=100.0, format="%.0f%%",
+                                                    width=100),
+        "mae": st.column_config.NumberColumn("Off by", help="Average people off, per photo", format="%.0f",
+                                             width=60),
     })
     st.caption("Accuracy below zero (more error than people) is shown as 0. Scenes with one or two "
                "photos are a hint, not a result, until more photos are labelled.")
