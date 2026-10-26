@@ -1,5 +1,7 @@
 """Streamlit wrappers around the Crowd Shield core in crowdshield/."""
 
+import hashlib
+
 import streamlit as st
 
 from crowdshield.config import DEFAULT_MODEL_KEY, MODEL_REGISTRY, SOURCE_MODEL_MAP
@@ -14,9 +16,30 @@ def get_active_model_key() -> str:
     return st.session_state.get("active_model", DEFAULT_MODEL_KEY)
 
 
-@st.cache_data(show_spinner=False, max_entries=12)  # a repeated photo is instant
+CACHE_SIZE = 12  # photos kept, so a repeated photo is instant
+
+
+@st.cache_resource
+def _counted() -> dict:
+    return {}
+
+
 def process_image(image_bytes: bytes, model_key: str = DEFAULT_MODEL_KEY) -> dict:
-    return analyse_image_bytes(image_bytes, model_key)
+    """Count one photo, or return the count already made for the same photo by the same model.
+
+    Not st.cache_data: that would also record the progress bar the page draws while counting and replay
+    it into a later page run, which fails, and its key would not change when the model's weights do.
+    """
+    from crowdshield.points import WEIGHTS_SHA256
+
+    key = (hashlib.sha256(image_bytes).hexdigest(), model_key, WEIGHTS_SHA256)
+    store = _counted()
+    if key not in store:
+        result = analyse_image_bytes(image_bytes, model_key)
+        while len(store) >= CACHE_SIZE:
+            store.pop(next(iter(store)))
+        store[key] = result
+    return dict(store[key])
 
 
 def process_segment(image_bytes_list: list,
