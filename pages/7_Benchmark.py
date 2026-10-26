@@ -17,9 +17,9 @@ init_state()
 
 rows = load()
 total_photos = len(list((INDIA / "images").glob("*.jpg"))) if (INDIA / "images").exists() else 0
-page_header("How accurate is it?", "On standard test photos the counter gets 86.5% of packed crowds and 92.7% of "
-            "street crowds right. It learned from Chinese photos, so here is how it does on Indian crowds, photo by "
-            "photo, against heads counted by hand. None of these photos were used to train it.", "Proof",
+page_header("How accurate is it?", "On standard test photos the counter gets 86.1% of packed crowds and 92.1% of "
+            "street crowds right. It learned from public crowd photos, never from an Indian crowd, so here is how it "
+            "does on Indian crowds, photo by photo, against heads counted by hand.", "Proof",
             pills=[(f"{len(rows)} of {total_photos} photos hand-checked", "brand"),
                    ("Pilot: labelling in progress", "warn")])
 
@@ -39,11 +39,13 @@ kpi_cards([
 ], accents=["#0d9488", "#2a78d6", "#94a3b8", "#1baf7a"])
 
 st.markdown(
-    f"<div class='card' style='margin-top:1rem;font-size:.9rem'><b>Known failure:</b> on "
+    f"<div class='card' style='margin-top:1rem;font-size:.9rem'><b>Hardest photo:</b> on "
     f"<b>{html.escape(worst['title'])}</b> the model counted <b>{worst['model']:,.0f}</b> against "
-    f"<b>{worst['true']:,}</b> real people, because the gravel between railway tracks looks like a sea of "
-    f"heads from above. Fine-tuning on empty-track photos fixed that photo but made the model miss people in "
-    f"smaller crowds, so the app keeps the current model and reports the failure here.</div>",
+    f"<b>{worst['true']:,}</b> real people ({'too few' if worst['error'] < 0 else 'too many'}).<br>"
+    f"<b>What changed:</b> the first model took the gravel between Mumbai's railway tracks for heads and counted "
+    f"1,267 people against 415. The current one also learned from 1,200 dense crowd photos (UCF-QNRF) and from "
+    f"photos of empty Indian tracks, and counts that photo as 455. These counts use full detail, as on a laptop; "
+    f"the free online server counts at lower detail and scores 86% on the same 10 photos.</div>",
     unsafe_allow_html=True)
 
 # ── By scene ───────────────────────────────────────────────────────────────

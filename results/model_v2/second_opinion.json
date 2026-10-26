@@ -1,0 +1,4128 @@
+{
+ "flagged": {
+  "india/IN_62.jpg": {
+   "pet": 7996.0,
+   "dm_count": 2171,
+   "ratio": 3.68,
+   "disagree": true
+  }
+ },
+ "rows": {
+  "india/IN_01.jpg": {
+   "pet": 83.0,
+   "dm_count": 60,
+   "ratio": 1.38,
+   "disagree": false
+  },
+  "india/IN_02.jpg": {
+   "pet": 682.6,
+   "dm_count": 527,
+   "ratio": 1.3,
+   "disagree": false
+  },
+  "india/IN_03.jpg": {
+   "pet": 940.6,
+   "dm_count": 866,
+   "ratio": 1.09,
+   "disagree": false
+  },
+  "india/IN_04.jpg": {
+   "pet": 850.7,
+   "dm_count": 780,
+   "ratio": 1.09,
+   "disagree": false
+  },
+  "india/IN_05.jpg": {
+   "pet": 323.3,
+   "dm_count": 299,
+   "ratio": 1.08,
+   "disagree": false
+  },
+  "india/IN_06.jpg": {
+   "pet": 311.2,
+   "dm_count": 294,
+   "ratio": 1.06,
+   "disagree": false
+  },
+  "india/IN_07.jpg": {
+   "pet": 380.0,
+   "dm_count": 371,
+   "ratio": 1.02,
+   "disagree": false
+  },
+  "india/IN_08.jpg": {
+   "pet": 475.6,
+   "dm_count": 413,
+   "ratio": 1.15,
+   "disagree": false
+  },
+  "india/IN_09.jpg": {
+   "pet": 814.4,
+   "dm_count": 573,
+   "ratio": 1.42,
+   "disagree": false
+  },
+  "india/IN_10.jpg": {
+   "pet": 896.6,
+   "dm_count": 902,
+   "ratio": 0.99,
+   "disagree": false
+  },
+  "india/IN_100.jpg": {
+   "pet": 244.3,
+   "dm_count": 192,
+   "ratio": 1.27,
+   "disagree": false
+  },
+  "india/IN_101.jpg": {
+   "pet": 143.4,
+   "dm_count": 90,
+   "ratio": 1.59,
+   "disagree": false
+  },
+  "india/IN_102.jpg": {
+   "pet": 255.7,
+   "dm_count": 244,
+   "ratio": 1.05,
+   "disagree": false
+  },
+  "india/IN_103.jpg": {
+   "pet": 138.5,
+   "dm_count": 180,
+   "ratio": 0.77,
+   "disagree": false
+  },
+  "india/IN_104.jpg": {
+   "pet": 11.9,
+   "dm_count": 37,
+   "ratio": 0.32,
+   "disagree": false
+  },
+  "india/IN_105.jpg": {
+   "pet": 44.1,
+   "dm_count": 33,
+   "ratio": 1.34,
+   "disagree": false
+  },
+  "india/IN_11.jpg": {
+   "pet": 42.0,
+   "dm_count": 35,
+   "ratio": 1.21,
+   "disagree": false
+  },
+  "india/IN_12.jpg": {
+   "pet": 76.9,
+   "dm_count": 70,
+   "ratio": 1.1,
+   "disagree": false
+  },
+  "india/IN_13.jpg": {
+   "pet": 842.7,
+   "dm_count": 704,
+   "ratio": 1.2,
+   "disagree": false
+  },
+  "india/IN_14.jpg": {
+   "pet": 82.0,
+   "dm_count": 88,
+   "ratio": 0.93,
+   "disagree": false
+  },
+  "india/IN_15.jpg": {
+   "pet": 52.4,
+   "dm_count": 53,
+   "ratio": 0.98,
+   "disagree": false
+  },
+  "india/IN_16.jpg": {
+   "pet": 587.3,
+   "dm_count": 587,
+   "ratio": 1.0,
+   "disagree": false
+  },
+  "india/IN_17.jpg": {
+   "pet": 590.9,
+   "dm_count": 610,
+   "ratio": 0.97,
+   "disagree": false
+  },
+  "india/IN_18.jpg": {
+   "pet": 44.1,
+   "dm_count": 58,
+   "ratio": 0.76,
+   "disagree": false
+  },
+  "india/IN_19.jpg": {
+   "pet": 939.7,
+   "dm_count": 968,
+   "ratio": 0.97,
+   "disagree": false
+  },
+  "india/IN_20.jpg": {
+   "pet": 327.1,
+   "dm_count": 245,
+   "ratio": 1.33,
+   "disagree": false
+  },
+  "india/IN_21.jpg": {
+   "pet": 127.7,
+   "dm_count": 107,
+   "ratio": 1.19,
+   "disagree": false
+  },
+  "india/IN_22.jpg": {
+   "pet": 1112.1,
+   "dm_count": 819,
+   "ratio": 1.36,
+   "disagree": false
+  },
+  "india/IN_23.jpg": {
+   "pet": 404.9,
+   "dm_count": 277,
+   "ratio": 1.46,
+   "disagree": false
+  },
+  "india/IN_24.jpg": {
+   "pet": 122.8,
+   "dm_count": 145,
+   "ratio": 0.85,
+   "disagree": false
+  },
+  "india/IN_25.jpg": {
+   "pet": 563.8,
+   "dm_count": 486,
+   "ratio": 1.16,
+   "disagree": false
+  },
+  "india/IN_26.jpg": {
+   "pet": 616.1,
+   "dm_count": 733,
+   "ratio": 0.84,
+   "disagree": false
+  },
+  "india/IN_27.jpg": {
+   "pet": 513.9,
+   "dm_count": 255,
+   "ratio": 2.02,
+   "disagree": false
+  },
+  "india/IN_28.jpg": {
+   "pet": 1330.5,
+   "dm_count": 1007,
+   "ratio": 1.32,
+   "disagree": false
+  },
+  "india/IN_29.jpg": {
+   "pet": 70.8,
+   "dm_count": 99,
+   "ratio": 0.72,
+   "disagree": false
+  },
+  "india/IN_30.jpg": {
+   "pet": 157.0,
+   "dm_count": 116,
+   "ratio": 1.35,
+   "disagree": false
+  },
+  "india/IN_31.jpg": {
+   "pet": 22.9,
+   "dm_count": 21,
+   "ratio": 1.08,
+   "disagree": false
+  },
+  "india/IN_32.jpg": {
+   "pet": 232.0,
+   "dm_count": 279,
+   "ratio": 0.83,
+   "disagree": false
+  },
+  "india/IN_33.jpg": {
+   "pet": 27.2,
+   "dm_count": 21,
+   "ratio": 1.27,
+   "disagree": false
+  },
+  "india/IN_34.jpg": {
+   "pet": 35.7,
+   "dm_count": 27,
+   "ratio": 1.3,
+   "disagree": false
+  },
+  "india/IN_35.jpg": {
+   "pet": 46.2,
+   "dm_count": 47,
+   "ratio": 0.98,
+   "disagree": false
+  },
+  "india/IN_36.jpg": {
+   "pet": 104.0,
+   "dm_count": 76,
+   "ratio": 1.37,
+   "disagree": false
+  },
+  "india/IN_37.jpg": {
+   "pet": 224.4,
+   "dm_count": 165,
+   "ratio": 1.36,
+   "disagree": false
+  },
+  "india/IN_38.jpg": {
+   "pet": 73.9,
+   "dm_count": 69,
+   "ratio": 1.08,
+   "disagree": false
+  },
+  "india/IN_39.jpg": {
+   "pet": 1590.5,
+   "dm_count": 1374,
+   "ratio": 1.16,
+   "disagree": false
+  },
+  "india/IN_40.jpg": {
+   "pet": 639.5,
+   "dm_count": 482,
+   "ratio": 1.33,
+   "disagree": false
+  },
+  "india/IN_41.jpg": {
+   "pet": 123.8,
+   "dm_count": 96,
+   "ratio": 1.29,
+   "disagree": false
+  },
+  "india/IN_42.jpg": {
+   "pet": 889.5,
+   "dm_count": 525,
+   "ratio": 1.7,
+   "disagree": false
+  },
+  "india/IN_43.jpg": {
+   "pet": 170.6,
+   "dm_count": 149,
+   "ratio": 1.15,
+   "disagree": false
+  },
+  "india/IN_44.jpg": {
+   "pet": 180.3,
+   "dm_count": 175,
+   "ratio": 1.03,
+   "disagree": false
+  },
+  "india/IN_45.jpg": {
+   "pet": 116.9,
+   "dm_count": 127,
+   "ratio": 0.92,
+   "disagree": false
+  },
+  "india/IN_46.jpg": {
+   "pet": 82.0,
+   "dm_count": 110,
+   "ratio": 0.74,
+   "disagree": false
+  },
+  "india/IN_47.jpg": {
+   "pet": 60.6,
+   "dm_count": 83,
+   "ratio": 0.73,
+   "disagree": false
+  },
+  "india/IN_48.jpg": {
+   "pet": 101.0,
+   "dm_count": 98,
+   "ratio": 1.03,
+   "disagree": false
+  },
+  "india/IN_49.jpg": {
+   "pet": 232.9,
+   "dm_count": 214,
+   "ratio": 1.09,
+   "disagree": false
+  },
+  "india/IN_50.jpg": {
+   "pet": 135.6,
+   "dm_count": 122,
+   "ratio": 1.11,
+   "disagree": false
+  },
+  "india/IN_51.jpg": {
+   "pet": 63.7,
+   "dm_count": 61,
+   "ratio": 1.05,
+   "disagree": false
+  },
+  "india/IN_52.jpg": {
+   "pet": 420.6,
+   "dm_count": 502,
+   "ratio": 0.84,
+   "disagree": false
+  },
+  "india/IN_53.jpg": {
+   "pet": 1147.8,
+   "dm_count": 659,
+   "ratio": 1.74,
+   "disagree": false
+  },
+  "india/IN_54.jpg": {
+   "pet": 491.1,
+   "dm_count": 538,
+   "ratio": 0.91,
+   "disagree": false
+  },
+  "india/IN_55.jpg": {
+   "pet": 200.5,
+   "dm_count": 170,
+   "ratio": 1.18,
+   "disagree": false
+  },
+  "india/IN_56.jpg": {
+   "pet": 322.4,
+   "dm_count": 171,
+   "ratio": 1.88,
+   "disagree": false
+  },
+  "india/IN_57.jpg": {
+   "pet": 877.2,
+   "dm_count": 744,
+   "ratio": 1.18,
+   "disagree": false
+  },
+  "india/IN_58.jpg": {
+   "pet": 112.9,
+   "dm_count": 55,
+   "ratio": 2.06,
+   "disagree": false
+  },
+  "india/IN_59.jpg": {
+   "pet": 175.4,
+   "dm_count": 76,
+   "ratio": 2.3,
+   "disagree": false
+  },
+  "india/IN_60.jpg": {
+   "pet": 160.0,
+   "dm_count": 184,
+   "ratio": 0.87,
+   "disagree": false
+  },
+  "india/IN_61.jpg": {
+   "pet": 58.6,
+   "dm_count": 73,
+   "ratio": 0.8,
+   "disagree": false
+  },
+  "india/IN_62.jpg": {
+   "pet": 7996.0,
+   "dm_count": 2171,
+   "ratio": 3.68,
+   "disagree": true
+  },
+  "india/IN_63.jpg": {
+   "pet": 59.6,
+   "dm_count": 60,
+   "ratio": 0.99,
+   "disagree": false
+  },
+  "india/IN_64.jpg": {
+   "pet": 194.7,
+   "dm_count": 192,
+   "ratio": 1.01,
+   "disagree": false
+  },
+  "india/IN_65.jpg": {
+   "pet": 219.6,
+   "dm_count": 278,
+   "ratio": 0.79,
+   "disagree": false
+  },
+  "india/IN_66.jpg": {
+   "pet": 73.9,
+   "dm_count": 79,
+   "ratio": 0.94,
+   "disagree": false
+  },
+  "india/IN_67.jpg": {
+   "pet": 50.3,
+   "dm_count": 54,
+   "ratio": 0.94,
+   "disagree": false
+  },
+  "india/IN_68.jpg": {
+   "pet": 99.0,
+   "dm_count": 99,
+   "ratio": 1.0,
+   "disagree": false
+  },
+  "india/IN_69.jpg": {
+   "pet": 143.4,
+   "dm_count": 89,
+   "ratio": 1.61,
+   "disagree": false
+  },
+  "india/IN_70.jpg": {
+   "pet": 196.6,
+   "dm_count": 128,
+   "ratio": 1.54,
+   "disagree": false
+  },
+  "india/IN_71.jpg": {
+   "pet": 594.5,
+   "dm_count": 438,
+   "ratio": 1.36,
+   "disagree": false
+  },
+  "india/IN_72.jpg": {
+   "pet": 128.7,
+   "dm_count": 114,
+   "ratio": 1.13,
+   "disagree": false
+  },
+  "india/IN_73.jpg": {
+   "pet": 454.5,
+   "dm_count": 562,
+   "ratio": 0.81,
+   "disagree": false
+  },
+  "india/IN_74.jpg": {
+   "pet": 174.5,
+   "dm_count": 157,
+   "ratio": 1.11,
+   "disagree": false
+  },
+  "india/IN_75.jpg": {
+   "pet": 53.4,
+   "dm_count": 43,
+   "ratio": 1.25,
+   "disagree": false
+  },
+  "india/IN_76.jpg": {
+   "pet": 160.0,
+   "dm_count": 178,
+   "ratio": 0.9,
+   "disagree": false
+  },
+  "india/IN_77.jpg": {
+   "pet": 50.3,
+   "dm_count": 39,
+   "ratio": 1.3,
+   "disagree": false
+  },
+  "india/IN_78.jpg": {
+   "pet": 18.5,
+   "dm_count": 34,
+   "ratio": 0.55,
+   "disagree": false
+  },
+  "india/IN_79.jpg": {
+   "pet": 38.8,
+   "dm_count": 29,
+   "ratio": 1.33,
+   "disagree": false
+  },
+  "india/IN_80.jpg": {
+   "pet": 15.2,
+   "dm_count": 16,
+   "ratio": 0.97,
+   "disagree": false
+  },
+  "india/IN_81.jpg": {
+   "pet": 72.9,
+   "dm_count": 106,
+   "ratio": 0.69,
+   "disagree": false
+  },
+  "india/IN_82.jpg": {
+   "pet": 677.2,
+   "dm_count": 662,
+   "ratio": 1.02,
+   "disagree": false
+  },
+  "india/IN_83.jpg": {
+   "pet": 104.0,
+   "dm_count": 129,
+   "ratio": 0.81,
+   "disagree": false
+  },
+  "india/IN_84.jpg": {
+   "pet": 174.5,
+   "dm_count": 160,
+   "ratio": 1.09,
+   "disagree": false
+  },
+  "india/IN_85.jpg": {
+   "pet": 97.0,
+   "dm_count": 97,
+   "ratio": 1.0,
+   "disagree": false
+  },
+  "india/IN_86.jpg": {
+   "pet": 33.6,
+   "dm_count": 77,
+   "ratio": 0.44,
+   "disagree": false
+  },
+  "india/IN_87.jpg": {
+   "pet": 15.2,
+   "dm_count": 32,
+   "ratio": 0.47,
+   "disagree": false
+  },
+  "india/IN_88.jpg": {
+   "pet": 85.0,
+   "dm_count": 55,
+   "ratio": 1.54,
+   "disagree": false
+  },
+  "india/IN_89.jpg": {
+   "pet": 126.7,
+   "dm_count": 114,
+   "ratio": 1.11,
+   "disagree": false
+  },
+  "india/IN_90.jpg": {
+   "pet": 219.6,
+   "dm_count": 226,
+   "ratio": 0.97,
+   "disagree": false
+  },
+  "india/IN_91.jpg": {
+   "pet": 341.0,
+   "dm_count": 201,
+   "ratio": 1.69,
+   "disagree": false
+  },
+  "india/IN_92.jpg": {
+   "pet": 222.5,
+   "dm_count": 198,
+   "ratio": 1.13,
+   "disagree": false
+  },
+  "india/IN_93.jpg": {
+   "pet": 70.8,
+   "dm_count": 69,
+   "ratio": 1.03,
+   "disagree": false
+  },
+  "india/IN_94.jpg": {
+   "pet": 89.0,
+   "dm_count": 113,
+   "ratio": 0.79,
+   "disagree": false
+  },
+  "india/IN_95.jpg": {
+   "pet": 219.6,
+   "dm_count": 220,
+   "ratio": 1.0,
+   "disagree": false
+  },
+  "india/IN_96.jpg": {
+   "pet": 82.0,
+   "dm_count": 67,
+   "ratio": 1.23,
+   "disagree": false
+  },
+  "india/IN_97.jpg": {
+   "pet": 54.5,
+   "dm_count": 50,
+   "ratio": 1.09,
+   "disagree": false
+  },
+  "india/IN_98.jpg": {
+   "pet": 152.2,
+   "dm_count": 128,
+   "ratio": 1.19,
+   "disagree": false
+  },
+  "india/IN_99.jpg": {
+   "pet": 42.0,
+   "dm_count": 45,
+   "ratio": 0.92,
+   "disagree": false
+  },
+  "SHA/IMG_1.jpg": {
+   "true": 172,
+   "pet": 210.0,
+   "dm_count": 238,
+   "ratio": 0.88,
+   "disagree": false
+  },
+  "SHA/IMG_2.jpg": {
+   "true": 1111,
+   "pet": 1138.3,
+   "dm_count": 1376,
+   "ratio": 0.83,
+   "disagree": false
+  },
+  "SHA/IMG_3.jpg": {
+   "true": 297,
+   "pet": 402.2,
+   "dm_count": 448,
+   "ratio": 0.9,
+   "disagree": false
+  },
+  "SHA/IMG_4.jpg": {
+   "true": 170,
+   "pet": 179.3,
+   "dm_count": 160,
+   "ratio": 1.12,
+   "disagree": false
+  },
+  "SHA/IMG_5.jpg": {
+   "true": 817,
+   "pet": 706.7,
+   "dm_count": 667,
+   "ratio": 1.06,
+   "disagree": false
+  },
+  "SHA/IMG_6.jpg": {
+   "true": 361,
+   "pet": 380.9,
+   "dm_count": 365,
+   "ratio": 1.04,
+   "disagree": false
+  },
+  "SHA/IMG_7.jpg": {
+   "true": 568,
+   "pet": 563.8,
+   "dm_count": 519,
+   "ratio": 1.09,
+   "disagree": false
+  },
+  "SHA/IMG_8.jpg": {
+   "true": 1326,
+   "pet": 872.8,
+   "dm_count": 734,
+   "ratio": 1.19,
+   "disagree": false
+  },
+  "SHA/IMG_9.jpg": {
+   "true": 371,
+   "pet": 275.5,
+   "dm_count": 238,
+   "ratio": 1.16,
+   "disagree": false
+  },
+  "SHA/IMG_10.jpg": {
+   "true": 502,
+   "pet": 444.5,
+   "dm_count": 489,
+   "ratio": 0.91,
+   "disagree": false
+  },
+  "SHA/IMG_11.jpg": {
+   "true": 1068,
+   "pet": 1052.8,
+   "dm_count": 1066,
+   "ratio": 0.99,
+   "disagree": false
+  },
+  "SHA/IMG_12.jpg": {
+   "true": 321,
+   "pet": 188.0,
+   "dm_count": 173,
+   "ratio": 1.08,
+   "disagree": false
+  },
+  "SHA/IMG_13.jpg": {
+   "true": 584,
+   "pet": 635.0,
+   "dm_count": 615,
+   "ratio": 1.03,
+   "disagree": false
+  },
+  "SHA/IMG_14.jpg": {
+   "true": 762,
+   "pet": 712.1,
+   "dm_count": 653,
+   "ratio": 1.09,
+   "disagree": false
+  },
+  "SHA/IMG_15.jpg": {
+   "true": 341,
+   "pet": 325.2,
+   "dm_count": 293,
+   "ratio": 1.11,
+   "disagree": false
+  },
+  "SHA/IMG_16.jpg": {
+   "true": 416,
+   "pet": 548.4,
+   "dm_count": 406,
+   "ratio": 1.35,
+   "disagree": false
+  },
+  "SHA/IMG_17.jpg": {
+   "true": 1156,
+   "pet": 1247.6,
+   "dm_count": 1168,
+   "ratio": 1.07,
+   "disagree": false
+  },
+  "SHA/IMG_18.jpg": {
+   "true": 227,
+   "pet": 164.8,
+   "dm_count": 161,
+   "ratio": 1.02,
+   "disagree": false
+  },
+  "SHA/IMG_19.jpg": {
+   "true": 230,
+   "pet": 212.9,
+   "dm_count": 198,
+   "ratio": 1.08,
+   "disagree": false
+  },
+  "SHA/IMG_20.jpg": {
+   "true": 460,
+   "pet": 449.1,
+   "dm_count": 519,
+   "ratio": 0.86,
+   "disagree": false
+  },
+  "SHA/IMG_21.jpg": {
+   "true": 717,
+   "pet": 633.2,
+   "dm_count": 669,
+   "ratio": 0.95,
+   "disagree": false
+  },
+  "SHA/IMG_22.jpg": {
+   "true": 212,
+   "pet": 277.4,
+   "dm_count": 243,
+   "ratio": 1.14,
+   "disagree": false
+  },
+  "SHA/IMG_23.jpg": {
+   "true": 429,
+   "pet": 439.9,
+   "dm_count": 404,
+   "ratio": 1.09,
+   "disagree": false
+  },
+  "SHA/IMG_24.jpg": {
+   "true": 553,
+   "pet": 535.7,
+   "dm_count": 581,
+   "ratio": 0.92,
+   "disagree": false
+  },
+  "SHA/IMG_25.jpg": {
+   "true": 243,
+   "pet": 185.1,
+   "dm_count": 218,
+   "ratio": 0.85,
+   "disagree": false
+  },
+  "SHA/IMG_26.jpg": {
+   "true": 497,
+   "pet": 444.5,
+   "dm_count": 391,
+   "ratio": 1.14,
+   "disagree": false
+  },
+  "SHA/IMG_27.jpg": {
+   "true": 760,
+   "pet": 789.5,
+   "dm_count": 1031,
+   "ratio": 0.77,
+   "disagree": false
+  },
+  "SHA/IMG_28.jpg": {
+   "true": 423,
+   "pet": 504.8,
+   "dm_count": 636,
+   "ratio": 0.79,
+   "disagree": false
+  },
+  "SHA/IMG_29.jpg": {
+   "true": 309,
+   "pet": 298.1,
+   "dm_count": 236,
+   "ratio": 1.26,
+   "disagree": false
+  },
+  "SHA/IMG_30.jpg": {
+   "true": 307,
+   "pet": 299.9,
+   "dm_count": 267,
+   "ratio": 1.12,
+   "disagree": false
+  },
+  "SHA/IMG_31.jpg": {
+   "true": 250,
+   "pet": 264.2,
+   "dm_count": 239,
+   "ratio": 1.1,
+   "disagree": false
+  },
+  "SHA/IMG_32.jpg": {
+   "true": 961,
+   "pet": 992.4,
+   "dm_count": 1077,
+   "ratio": 0.92,
+   "disagree": false
+  },
+  "SHA/IMG_33.jpg": {
+   "true": 475,
+   "pet": 435.3,
+   "dm_count": 382,
+   "ratio": 1.14,
+   "disagree": false
+  },
+  "SHA/IMG_34.jpg": {
+   "true": 89,
+   "pet": 102.0,
+   "dm_count": 68,
+   "ratio": 1.5,
+   "disagree": false
+  },
+  "SHA/IMG_35.jpg": {
+   "true": 567,
+   "pet": 633.2,
+   "dm_count": 569,
+   "ratio": 1.11,
+   "disagree": false
+  },
+  "SHA/IMG_36.jpg": {
+   "true": 1266,
+   "pet": 1072.0,
+   "dm_count": 968,
+   "ratio": 1.11,
+   "disagree": false
+  },
+  "SHA/IMG_37.jpg": {
+   "true": 195,
+   "pet": 188.0,
+   "dm_count": 203,
+   "ratio": 0.93,
+   "disagree": false
+  },
+  "SHA/IMG_38.jpg": {
+   "true": 717,
+   "pet": 793.1,
+   "dm_count": 730,
+   "ratio": 1.09,
+   "disagree": false
+  },
+  "SHA/IMG_39.jpg": {
+   "true": 196,
+   "pet": 174.5,
+   "dm_count": 133,
+   "ratio": 1.31,
+   "disagree": false
+  },
+  "SHA/IMG_40.jpg": {
+   "true": 236,
+   "pet": 290.6,
+   "dm_count": 265,
+   "ratio": 1.1,
+   "disagree": false
+  },
+  "SHA/IMG_41.jpg": {
+   "true": 249,
+   "pet": 208.1,
+   "dm_count": 159,
+   "ratio": 1.31,
+   "disagree": false
+  },
+  "SHA/IMG_42.jpg": {
+   "true": 797,
+   "pet": 895.7,
+   "dm_count": 893,
+   "ratio": 1.0,
+   "disagree": false
+  },
+  "SHA/IMG_43.jpg": {
+   "true": 116,
+   "pet": 121.8,
+   "dm_count": 118,
+   "ratio": 1.03,
+   "disagree": false
+  },
+  "SHA/IMG_44.jpg": {
+   "true": 366,
+   "pet": 353.1,
+   "dm_count": 357,
+   "ratio": 0.99,
+   "disagree": false
+  },
+  "SHA/IMG_45.jpg": {
+   "true": 138,
+   "pet": 156.1,
+   "dm_count": 98,
+   "ratio": 1.59,
+   "disagree": false
+  },
+  "SHA/IMG_46.jpg": {
+   "true": 373,
+   "pet": 417.8,
+   "dm_count": 434,
+   "ratio": 0.96,
+   "disagree": false
+  },
+  "SHA/IMG_47.jpg": {
+   "true": 316,
+   "pet": 342.9,
+   "dm_count": 395,
+   "ratio": 0.87,
+   "disagree": false
+  },
+  "SHA/IMG_48.jpg": {
+   "true": 384,
+   "pet": 401.2,
+   "dm_count": 392,
+   "ratio": 1.02,
+   "disagree": false
+  },
+  "SHA/IMG_49.jpg": {
+   "true": 511,
+   "pet": 494.8,
+   "dm_count": 540,
+   "ratio": 0.92,
+   "disagree": false
+  },
+  "SHA/IMG_50.jpg": {
+   "true": 997,
+   "pet": 523.9,
+   "dm_count": 1017,
+   "ratio": 0.52,
+   "disagree": false
+  },
+  "SHA/IMG_51.jpg": {
+   "true": 297,
+   "pet": 345.7,
+   "dm_count": 276,
+   "ratio": 1.25,
+   "disagree": false
+  },
+  "SHA/IMG_52.jpg": {
+   "true": 134,
+   "pet": 138.5,
+   "dm_count": 111,
+   "ratio": 1.25,
+   "disagree": false
+  },
+  "SHA/IMG_53.jpg": {
+   "true": 175,
+   "pet": 178.3,
+   "dm_count": 183,
+   "ratio": 0.98,
+   "disagree": false
+  },
+  "SHA/IMG_54.jpg": {
+   "true": 529,
+   "pet": 645.8,
+   "dm_count": 588,
+   "ratio": 1.1,
+   "disagree": false
+  },
+  "SHA/IMG_55.jpg": {
+   "true": 149,
+   "pet": 150.2,
+   "dm_count": 127,
+   "ratio": 1.18,
+   "disagree": false
+  },
+  "SHA/IMG_56.jpg": {
+   "true": 349,
+   "pet": 436.2,
+   "dm_count": 299,
+   "ratio": 1.46,
+   "disagree": false
+  },
+  "SHA/IMG_57.jpg": {
+   "true": 356,
+   "pet": 363.3,
+   "dm_count": 417,
+   "ratio": 0.87,
+   "disagree": false
+  },
+  "SHA/IMG_58.jpg": {
+   "true": 198,
+   "pet": 201.4,
+   "dm_count": 155,
+   "ratio": 1.3,
+   "disagree": false
+  },
+  "SHA/IMG_59.jpg": {
+   "true": 466,
+   "pet": 477.4,
+   "dm_count": 487,
+   "ratio": 0.98,
+   "disagree": false
+  },
+  "SHA/IMG_60.jpg": {
+   "true": 291,
+   "pet": 434.4,
+   "dm_count": 374,
+   "ratio": 1.16,
+   "disagree": false
+  },
+  "SHA/IMG_61.jpg": {
+   "true": 193,
+   "pet": 190.9,
+   "dm_count": 134,
+   "ratio": 1.42,
+   "disagree": false
+  },
+  "SHA/IMG_62.jpg": {
+   "true": 337,
+   "pet": 337.3,
+   "dm_count": 247,
+   "ratio": 1.36,
+   "disagree": false
+  },
+  "SHA/IMG_63.jpg": {
+   "true": 1121,
+   "pet": 417.8,
+   "dm_count": 715,
+   "ratio": 0.58,
+   "disagree": false
+  },
+  "SHA/IMG_64.jpg": {
+   "true": 287,
+   "pet": 359.6,
+   "dm_count": 396,
+   "ratio": 0.91,
+   "disagree": false
+  },
+  "SHA/IMG_65.jpg": {
+   "true": 214,
+   "pet": 248.1,
+   "dm_count": 218,
+   "ratio": 1.14,
+   "disagree": false
+  },
+  "SHA/IMG_66.jpg": {
+   "true": 823,
+   "pet": 834.8,
+   "dm_count": 789,
+   "ratio": 1.06,
+   "disagree": false
+  },
+  "SHA/IMG_67.jpg": {
+   "true": 192,
+   "pet": 230.1,
+   "dm_count": 231,
+   "ratio": 0.99,
+   "disagree": false
+  },
+  "SHA/IMG_68.jpg": {
+   "true": 212,
+   "pet": 212.0,
+   "dm_count": 197,
+   "ratio": 1.07,
+   "disagree": false
+  },
+  "SHA/IMG_69.jpg": {
+   "true": 166,
+   "pet": 179.3,
+   "dm_count": 146,
+   "ratio": 1.23,
+   "disagree": false
+  },
+  "SHA/IMG_70.jpg": {
+   "true": 412,
+   "pet": 448.1,
+   "dm_count": 573,
+   "ratio": 0.78,
+   "disagree": false
+  },
+  "SHA/IMG_71.jpg": {
+   "true": 602,
+   "pet": 629.6,
+   "dm_count": 903,
+   "ratio": 0.7,
+   "disagree": false
+  },
+  "SHA/IMG_72.jpg": {
+   "true": 589,
+   "pet": 657.5,
+   "dm_count": 820,
+   "ratio": 0.8,
+   "disagree": false
+  },
+  "SHA/IMG_73.jpg": {
+   "true": 153,
+   "pet": 175.4,
+   "dm_count": 203,
+   "ratio": 0.86,
+   "disagree": false
+  },
+  "SHA/IMG_74.jpg": {
+   "true": 855,
+   "pet": 996.8,
+   "dm_count": 845,
+   "ratio": 1.18,
+   "disagree": false
+  },
+  "SHA/IMG_75.jpg": {
+   "true": 665,
+   "pet": 370.7,
+   "dm_count": 566,
+   "ratio": 0.65,
+   "disagree": false
+  },
+  "SHA/IMG_76.jpg": {
+   "true": 485,
+   "pet": 466.4,
+   "dm_count": 548,
+   "ratio": 0.85,
+   "disagree": false
+  },
+  "SHA/IMG_77.jpg": {
+   "true": 207,
+   "pet": 213.9,
+   "dm_count": 194,
+   "ratio": 1.1,
+   "disagree": false
+  },
+  "SHA/IMG_78.jpg": {
+   "true": 271,
+   "pet": 261.4,
+   "dm_count": 252,
+   "ratio": 1.04,
+   "disagree": false
+  },
+  "SHA/IMG_79.jpg": {
+   "true": 186,
+   "pet": 173.5,
+   "dm_count": 125,
+   "ratio": 1.39,
+   "disagree": false
+  },
+  "SHA/IMG_80.jpg": {
+   "true": 157,
+   "pet": 153.1,
+   "dm_count": 121,
+   "ratio": 1.27,
+   "disagree": false
+  },
+  "SHA/IMG_81.jpg": {
+   "true": 356,
+   "pet": 510.2,
+   "dm_count": 410,
+   "ratio": 1.24,
+   "disagree": false
+  },
+  "SHA/IMG_82.jpg": {
+   "true": 217,
+   "pet": 213.9,
+   "dm_count": 176,
+   "ratio": 1.22,
+   "disagree": false
+  },
+  "SHA/IMG_83.jpg": {
+   "true": 218,
+   "pet": 240.5,
+   "dm_count": 216,
+   "ratio": 1.11,
+   "disagree": false
+  },
+  "SHA/IMG_84.jpg": {
+   "true": 122,
+   "pet": 129.7,
+   "dm_count": 159,
+   "ratio": 0.81,
+   "disagree": false
+  },
+  "SHA/IMG_85.jpg": {
+   "true": 97,
+   "pet": 86.0,
+   "dm_count": 82,
+   "ratio": 1.05,
+   "disagree": false
+  },
+  "SHA/IMG_86.jpg": {
+   "true": 579,
+   "pet": 539.3,
+   "dm_count": 562,
+   "ratio": 0.96,
+   "disagree": false
+  },
+  "SHA/IMG_87.jpg": {
+   "true": 417,
+   "pet": 427.9,
+   "dm_count": 462,
+   "ratio": 0.93,
+   "disagree": false
+  },
+  "SHA/IMG_88.jpg": {
+   "true": 86,
+   "pet": 88.0,
+   "dm_count": 72,
+   "ratio": 1.23,
+   "disagree": false
+  },
+  "SHA/IMG_89.jpg": {
+   "true": 383,
+   "pet": 397.6,
+   "dm_count": 435,
+   "ratio": 0.91,
+   "disagree": false
+  },
+  "SHA/IMG_90.jpg": {
+   "true": 2256,
+   "pet": 1988.4,
+   "dm_count": 1882,
+   "ratio": 1.06,
+   "disagree": false
+  },
+  "SHA/IMG_91.jpg": {
+   "true": 101,
+   "pet": 99.0,
+   "dm_count": 93,
+   "ratio": 1.06,
+   "disagree": false
+  },
+  "SHA/IMG_92.jpg": {
+   "true": 1366,
+   "pet": 1410.6,
+   "dm_count": 1773,
+   "ratio": 0.8,
+   "disagree": false
+  },
+  "SHA/IMG_93.jpg": {
+   "true": 255,
+   "pet": 245.3,
+   "dm_count": 206,
+   "ratio": 1.19,
+   "disagree": false
+  },
+  "SHA/IMG_94.jpg": {
+   "true": 69,
+   "pet": 72.9,
+   "dm_count": 61,
+   "ratio": 1.19,
+   "disagree": false
+  },
+  "SHA/IMG_95.jpg": {
+   "true": 190,
+   "pet": 181.2,
+   "dm_count": 139,
+   "ratio": 1.3,
+   "disagree": false
+  },
+  "SHA/IMG_96.jpg": {
+   "true": 246,
+   "pet": 238.6,
+   "dm_count": 210,
+   "ratio": 1.14,
+   "disagree": false
+  },
+  "SHA/IMG_97.jpg": {
+   "true": 521,
+   "pet": 542.9,
+   "dm_count": 577,
+   "ratio": 0.94,
+   "disagree": false
+  },
+  "SHA/IMG_98.jpg": {
+   "true": 153,
+   "pet": 160.9,
+   "dm_count": 133,
+   "ratio": 1.21,
+   "disagree": false
+  },
+  "SHA/IMG_99.jpg": {
+   "true": 242,
+   "pet": 237.7,
+   "dm_count": 177,
+   "ratio": 1.34,
+   "disagree": false
+  },
+  "SHA/IMG_100.jpg": {
+   "true": 389,
+   "pet": 439.0,
+   "dm_count": 422,
+   "ratio": 1.04,
+   "disagree": false
+  },
+  "SHA/IMG_101.jpg": {
+   "true": 211,
+   "pet": 211.0,
+   "dm_count": 270,
+   "ratio": 0.78,
+   "disagree": false
+  },
+  "SHA/IMG_102.jpg": {
+   "true": 223,
+   "pet": 225.3,
+   "dm_count": 221,
+   "ratio": 1.02,
+   "disagree": false
+  },
+  "SHA/IMG_103.jpg": {
+   "true": 431,
+   "pet": 524.8,
+   "dm_count": 578,
+   "ratio": 0.91,
+   "disagree": false
+  },
+  "SHA/IMG_104.jpg": {
+   "true": 1175,
+   "pet": 1346.9,
+   "dm_count": 1572,
+   "ratio": 0.86,
+   "disagree": false
+  },
+  "SHA/IMG_105.jpg": {
+   "true": 265,
+   "pet": 243.4,
+   "dm_count": 208,
+   "ratio": 1.17,
+   "disagree": false
+  },
+  "SHA/IMG_106.jpg": {
+   "true": 1232,
+   "pet": 1131.3,
+   "dm_count": 1461,
+   "ratio": 0.77,
+   "disagree": false
+  },
+  "SHA/IMG_107.jpg": {
+   "true": 289,
+   "pet": 207.2,
+   "dm_count": 195,
+   "ratio": 1.06,
+   "disagree": false
+  },
+  "SHA/IMG_108.jpg": {
+   "true": 182,
+   "pet": 198.6,
+   "dm_count": 144,
+   "ratio": 1.38,
+   "disagree": false
+  },
+  "SHA/IMG_109.jpg": {
+   "true": 379,
+   "pet": 339.2,
+   "dm_count": 391,
+   "ratio": 0.87,
+   "disagree": false
+  },
+  "SHA/IMG_110.jpg": {
+   "true": 1021,
+   "pet": 765.5,
+   "dm_count": 768,
+   "ratio": 1.0,
+   "disagree": false
+  },
+  "SHA/IMG_111.jpg": {
+   "true": 452,
+   "pet": 580.9,
+   "dm_count": 606,
+   "ratio": 0.96,
+   "disagree": false
+  },
+  "SHA/IMG_112.jpg": {
+   "true": 256,
+   "pet": 359.6,
+   "dm_count": 389,
+   "ratio": 0.93,
+   "disagree": false
+  },
+  "SHA/IMG_113.jpg": {
+   "true": 66,
+   "pet": 91.0,
+   "dm_count": 190,
+   "ratio": 0.48,
+   "disagree": false
+  },
+  "SHA/IMG_114.jpg": {
+   "true": 141,
+   "pet": 158.0,
+   "dm_count": 192,
+   "ratio": 0.82,
+   "disagree": false
+  },
+  "SHA/IMG_115.jpg": {
+   "true": 1191,
+   "pet": 1339.2,
+   "dm_count": 1031,
+   "ratio": 1.3,
+   "disagree": false
+  },
+  "SHA/IMG_116.jpg": {
+   "true": 288,
+   "pet": 373.5,
+   "dm_count": 373,
+   "ratio": 1.0,
+   "disagree": false
+  },
+  "SHA/IMG_117.jpg": {
+   "true": 1603,
+   "pet": 1472.4,
+   "dm_count": 1747,
+   "ratio": 0.84,
+   "disagree": false
+  },
+  "SHA/IMG_118.jpg": {
+   "true": 241,
+   "pet": 275.5,
+   "dm_count": 294,
+   "ratio": 0.94,
+   "disagree": false
+  },
+  "SHA/IMG_119.jpg": {
+   "true": 250,
+   "pet": 259.5,
+   "dm_count": 242,
+   "ratio": 1.07,
+   "disagree": false
+  },
+  "SHA/IMG_120.jpg": {
+   "true": 133,
+   "pet": 142.4,
+   "dm_count": 133,
+   "ratio": 1.07,
+   "disagree": false
+  },
+  "SHA/IMG_121.jpg": {
+   "true": 1210,
+   "pet": 1408.0,
+   "dm_count": 1341,
+   "ratio": 1.05,
+   "disagree": false
+  },
+  "SHA/IMG_122.jpg": {
+   "true": 1153,
+   "pet": 759.3,
+   "dm_count": 766,
+   "ratio": 0.99,
+   "disagree": false
+  },
+  "SHA/IMG_123.jpg": {
+   "true": 115,
+   "pet": 119.8,
+   "dm_count": 113,
+   "ratio": 1.06,
+   "disagree": false
+  },
+  "SHA/IMG_124.jpg": {
+   "true": 226,
+   "pet": 208.1,
+   "dm_count": 160,
+   "ratio": 1.3,
+   "disagree": false
+  },
+  "SHA/IMG_125.jpg": {
+   "true": 269,
+   "pet": 270.8,
+   "dm_count": 282,
+   "ratio": 0.96,
+   "disagree": false
+  },
+  "SHA/IMG_126.jpg": {
+   "true": 440,
+   "pet": 436.2,
+   "dm_count": 481,
+   "ratio": 0.91,
+   "disagree": false
+  },
+  "SHA/IMG_127.jpg": {
+   "true": 986,
+   "pet": 674.5,
+   "dm_count": 688,
+   "ratio": 0.98,
+   "disagree": false
+  },
+  "SHA/IMG_128.jpg": {
+   "true": 419,
+   "pet": 413.2,
+   "dm_count": 321,
+   "ratio": 1.29,
+   "disagree": false
+  },
+  "SHA/IMG_129.jpg": {
+   "true": 298,
+   "pet": 292.4,
+   "dm_count": 150,
+   "ratio": 1.95,
+   "disagree": false
+  },
+  "SHA/IMG_130.jpg": {
+   "true": 921,
+   "pet": 858.6,
+   "dm_count": 750,
+   "ratio": 1.15,
+   "disagree": false
+  },
+  "SHA/IMG_131.jpg": {
+   "true": 604,
+   "pet": 502.0,
+   "dm_count": 494,
+   "ratio": 1.02,
+   "disagree": false
+  },
+  "SHA/IMG_132.jpg": {
+   "true": 375,
+   "pet": 412.3,
+   "dm_count": 354,
+   "ratio": 1.17,
+   "disagree": false
+  },
+  "SHA/IMG_133.jpg": {
+   "true": 135,
+   "pet": 123.8,
+   "dm_count": 134,
+   "ratio": 0.92,
+   "disagree": false
+  },
+  "SHA/IMG_134.jpg": {
+   "true": 165,
+   "pet": 162.9,
+   "dm_count": 125,
+   "ratio": 1.31,
+   "disagree": false
+  },
+  "SHA/IMG_135.jpg": {
+   "true": 72,
+   "pet": 69.8,
+   "dm_count": 49,
+   "ratio": 1.43,
+   "disagree": false
+  },
+  "SHA/IMG_136.jpg": {
+   "true": 102,
+   "pet": 89.0,
+   "dm_count": 72,
+   "ratio": 1.23,
+   "disagree": false
+  },
+  "SHA/IMG_137.jpg": {
+   "true": 489,
+   "pet": 469.2,
+   "dm_count": 478,
+   "ratio": 0.98,
+   "disagree": false
+  },
+  "SHA/IMG_138.jpg": {
+   "true": 292,
+   "pet": 261.4,
+   "dm_count": 232,
+   "ratio": 1.13,
+   "disagree": false
+  },
+  "SHA/IMG_139.jpg": {
+   "true": 355,
+   "pet": 348.5,
+   "dm_count": 378,
+   "ratio": 0.92,
+   "disagree": false
+  },
+  "SHA/IMG_140.jpg": {
+   "true": 93,
+   "pet": 84.0,
+   "dm_count": 81,
+   "ratio": 1.04,
+   "disagree": false
+  },
+  "SHA/IMG_141.jpg": {
+   "true": 475,
+   "pet": 429.8,
+   "dm_count": 484,
+   "ratio": 0.89,
+   "disagree": false
+  },
+  "SHA/IMG_142.jpg": {
+   "true": 211,
+   "pet": 221.5,
+   "dm_count": 162,
+   "ratio": 1.37,
+   "disagree": false
+  },
+  "SHA/IMG_143.jpg": {
+   "true": 357,
+   "pet": 369.8,
+   "dm_count": 182,
+   "ratio": 2.03,
+   "disagree": false
+  },
+  "SHA/IMG_144.jpg": {
+   "true": 262,
+   "pet": 281.2,
+   "dm_count": 274,
+   "ratio": 1.03,
+   "disagree": false
+  },
+  "SHA/IMG_145.jpg": {
+   "true": 261,
+   "pet": 199.5,
+   "dm_count": 217,
+   "ratio": 0.92,
+   "disagree": false
+  },
+  "SHA/IMG_146.jpg": {
+   "true": 479,
+   "pet": 431.6,
+   "dm_count": 509,
+   "ratio": 0.85,
+   "disagree": false
+  },
+  "SHA/IMG_147.jpg": {
+   "true": 587,
+   "pet": 584.6,
+   "dm_count": 531,
+   "ratio": 1.1,
+   "disagree": false
+  },
+  "SHA/IMG_148.jpg": {
+   "true": 208,
+   "pet": 192.8,
+   "dm_count": 177,
+   "ratio": 1.09,
+   "disagree": false
+  },
+  "SHA/IMG_149.jpg": {
+   "true": 230,
+   "pet": 205.3,
+   "dm_count": 170,
+   "ratio": 1.2,
+   "disagree": false
+  },
+  "SHA/IMG_150.jpg": {
+   "true": 1303,
+   "pet": 1113.9,
+   "dm_count": 1132,
+   "ratio": 0.98,
+   "disagree": false
+  },
+  "SHA/IMG_151.jpg": {
+   "true": 253,
+   "pet": 275.5,
+   "dm_count": 178,
+   "ratio": 1.55,
+   "disagree": false
+  },
+  "SHA/IMG_152.jpg": {
+   "true": 277,
+   "pet": 275.5,
+   "dm_count": 234,
+   "ratio": 1.18,
+   "disagree": false
+  },
+  "SHA/IMG_153.jpg": {
+   "true": 395,
+   "pet": 355.9,
+   "dm_count": 385,
+   "ratio": 0.93,
+   "disagree": false
+  },
+  "SHA/IMG_154.jpg": {
+   "true": 495,
+   "pet": 441.7,
+   "dm_count": 530,
+   "ratio": 0.83,
+   "disagree": false
+  },
+  "SHA/IMG_155.jpg": {
+   "true": 165,
+   "pet": 184.1,
+   "dm_count": 249,
+   "ratio": 0.74,
+   "disagree": false
+  },
+  "SHA/IMG_156.jpg": {
+   "true": 199,
+   "pet": 183.2,
+   "dm_count": 160,
+   "ratio": 1.15,
+   "disagree": false
+  },
+  "SHA/IMG_157.jpg": {
+   "true": 390,
+   "pet": 514.8,
+   "dm_count": 562,
+   "ratio": 0.92,
+   "disagree": false
+  },
+  "SHA/IMG_158.jpg": {
+   "true": 308,
+   "pet": 369.8,
+   "dm_count": 416,
+   "ratio": 0.89,
+   "disagree": false
+  },
+  "SHA/IMG_159.jpg": {
+   "true": 199,
+   "pet": 202.4,
+   "dm_count": 211,
+   "ratio": 0.96,
+   "disagree": false
+  },
+  "SHA/IMG_160.jpg": {
+   "true": 121,
+   "pet": 127.7,
+   "dm_count": 111,
+   "ratio": 1.15,
+   "disagree": false
+  },
+  "SHA/IMG_161.jpg": {
+   "true": 266,
+   "pet": 233.9,
+   "dm_count": 197,
+   "ratio": 1.19,
+   "disagree": false
+  },
+  "SHA/IMG_162.jpg": {
+   "true": 219,
+   "pet": 277.4,
+   "dm_count": 250,
+   "ratio": 1.11,
+   "disagree": false
+  },
+  "SHA/IMG_163.jpg": {
+   "true": 162,
+   "pet": 198.6,
+   "dm_count": 221,
+   "ratio": 0.9,
+   "disagree": false
+  },
+  "SHA/IMG_164.jpg": {
+   "true": 302,
+   "pet": 362.4,
+   "dm_count": 305,
+   "ratio": 1.19,
+   "disagree": false
+  },
+  "SHA/IMG_165.jpg": {
+   "true": 1581,
+   "pet": 1232.9,
+   "dm_count": 1266,
+   "ratio": 0.97,
+   "disagree": false
+  },
+  "SHA/IMG_166.jpg": {
+   "true": 126,
+   "pet": 168.7,
+   "dm_count": 192,
+   "ratio": 0.88,
+   "disagree": false
+  },
+  "SHA/IMG_167.jpg": {
+   "true": 112,
+   "pet": 114.9,
+   "dm_count": 107,
+   "ratio": 1.07,
+   "disagree": false
+  },
+  "SHA/IMG_168.jpg": {
+   "true": 240,
+   "pet": 304.6,
+   "dm_count": 321,
+   "ratio": 0.95,
+   "disagree": false
+  },
+  "SHA/IMG_169.jpg": {
+   "true": 218,
+   "pet": 234.8,
+   "dm_count": 255,
+   "ratio": 0.92,
+   "disagree": false
+  },
+  "SHA/IMG_170.jpg": {
+   "true": 670,
+   "pet": 725.5,
+   "dm_count": 780,
+   "ratio": 0.93,
+   "disagree": false
+  },
+  "SHA/IMG_171.jpg": {
+   "true": 239,
+   "pet": 268.0,
+   "dm_count": 245,
+   "ratio": 1.09,
+   "disagree": false
+  },
+  "SHA/IMG_172.jpg": {
+   "true": 1171,
+   "pet": 985.4,
+   "dm_count": 1075,
+   "ratio": 0.92,
+   "disagree": false
+  },
+  "SHA/IMG_173.jpg": {
+   "true": 481,
+   "pet": 691.5,
+   "dm_count": 757,
+   "ratio": 0.91,
+   "disagree": false
+  },
+  "SHA/IMG_174.jpg": {
+   "true": 129,
+   "pet": 183.2,
+   "dm_count": 155,
+   "ratio": 1.18,
+   "disagree": false
+  },
+  "SHA/IMG_175.jpg": {
+   "true": 442,
+   "pet": 648.5,
+   "dm_count": 617,
+   "ratio": 1.05,
+   "disagree": false
+  },
+  "SHA/IMG_176.jpg": {
+   "true": 213,
+   "pet": 317.7,
+   "dm_count": 282,
+   "ratio": 1.13,
+   "disagree": false
+  },
+  "SHA/IMG_177.jpg": {
+   "true": 363,
+   "pet": 404.0,
+   "dm_count": 507,
+   "ratio": 0.8,
+   "disagree": false
+  },
+  "SHA/IMG_178.jpg": {
+   "true": 549,
+   "pet": 533.0,
+   "dm_count": 504,
+   "ratio": 1.06,
+   "disagree": false
+  },
+  "SHA/IMG_179.jpg": {
+   "true": 400,
+   "pet": 389.2,
+   "dm_count": 332,
+   "ratio": 1.17,
+   "disagree": false
+  },
+  "SHA/IMG_180.jpg": {
+   "true": 398,
+   "pet": 351.3,
+   "dm_count": 345,
+   "ratio": 1.02,
+   "disagree": false
+  },
+  "SHA/IMG_181.jpg": {
+   "true": 216,
+   "pet": 225.3,
+   "dm_count": 207,
+   "ratio": 1.09,
+   "disagree": false
+  },
+  "SHA/IMG_182.jpg": {
+   "true": 199,
+   "pet": 197.6,
+   "dm_count": 177,
+   "ratio": 1.12,
+   "disagree": false
+  },
+  "SHB/IMG_1.jpg": {
+   "true": 23,
+   "pet": 23.9,
+   "dm_count": 24,
+   "ratio": 0.99,
+   "disagree": false
+  },
+  "SHB/IMG_2.jpg": {
+   "true": 52,
+   "pet": 47.2,
+   "dm_count": 47,
+   "ratio": 1.0,
+   "disagree": false
+  },
+  "SHB/IMG_3.jpg": {
+   "true": 61,
+   "pet": 63.7,
+   "dm_count": 58,
+   "ratio": 1.1,
+   "disagree": false
+  },
+  "SHB/IMG_4.jpg": {
+   "true": 95,
+   "pet": 94.0,
+   "dm_count": 85,
+   "ratio": 1.1,
+   "disagree": false
+  },
+  "SHB/IMG_5.jpg": {
+   "true": 82,
+   "pet": 79.9,
+   "dm_count": 66,
+   "ratio": 1.21,
+   "disagree": false
+  },
+  "SHB/IMG_6.jpg": {
+   "true": 195,
+   "pet": 198.6,
+   "dm_count": 212,
+   "ratio": 0.94,
+   "disagree": false
+  },
+  "SHB/IMG_7.jpg": {
+   "true": 47,
+   "pet": 46.2,
+   "dm_count": 41,
+   "ratio": 1.14,
+   "disagree": false
+  },
+  "SHB/IMG_8.jpg": {
+   "true": 62,
+   "pet": 67.8,
+   "dm_count": 62,
+   "ratio": 1.09,
+   "disagree": false
+  },
+  "SHB/IMG_9.jpg": {
+   "true": 36,
+   "pet": 39.9,
+   "dm_count": 35,
+   "ratio": 1.13,
+   "disagree": false
+  },
+  "SHB/IMG_10.jpg": {
+   "true": 181,
+   "pet": 164.8,
+   "dm_count": 175,
+   "ratio": 0.94,
+   "disagree": false
+  },
+  "SHB/IMG_11.jpg": {
+   "true": 164,
+   "pet": 154.1,
+   "dm_count": 174,
+   "ratio": 0.89,
+   "disagree": false
+  },
+  "SHB/IMG_12.jpg": {
+   "true": 513,
+   "pet": 395.7,
+   "dm_count": 448,
+   "ratio": 0.88,
+   "disagree": false
+  },
+  "SHB/IMG_13.jpg": {
+   "true": 48,
+   "pet": 53.4,
+   "dm_count": 44,
+   "ratio": 1.22,
+   "disagree": false
+  },
+  "SHB/IMG_14.jpg": {
+   "true": 29,
+   "pet": 30.4,
+   "dm_count": 27,
+   "ratio": 1.14,
+   "disagree": false
+  },
+  "SHB/IMG_15.jpg": {
+   "true": 57,
+   "pet": 59.6,
+   "dm_count": 49,
+   "ratio": 1.21,
+   "disagree": false
+  },
+  "SHB/IMG_16.jpg": {
+   "true": 92,
+   "pet": 88.0,
+   "dm_count": 85,
+   "ratio": 1.04,
+   "disagree": false
+  },
+  "SHB/IMG_17.jpg": {
+   "true": 71,
+   "pet": 71.8,
+   "dm_count": 69,
+   "ratio": 1.04,
+   "disagree": false
+  },
+  "SHB/IMG_18.jpg": {
+   "true": 235,
+   "pet": 218.6,
+   "dm_count": 255,
+   "ratio": 0.86,
+   "disagree": false
+  },
+  "SHB/IMG_19.jpg": {
+   "true": 277,
+   "pet": 245.3,
+   "dm_count": 286,
+   "ratio": 0.86,
+   "disagree": false
+  },
+  "SHB/IMG_20.jpg": {
+   "true": 15,
+   "pet": 16.3,
+   "dm_count": 14,
+   "ratio": 1.14,
+   "disagree": false
+  },
+  "SHB/IMG_21.jpg": {
+   "true": 89,
+   "pet": 93.0,
+   "dm_count": 88,
+   "ratio": 1.06,
+   "disagree": false
+  },
+  "SHB/IMG_22.jpg": {
+   "true": 300,
+   "pet": 257.6,
+   "dm_count": 250,
+   "ratio": 1.03,
+   "disagree": false
+  },
+  "SHB/IMG_23.jpg": {
+   "true": 240,
+   "pet": 199.5,
+   "dm_count": 182,
+   "ratio": 1.1,
+   "disagree": false
+  },
+  "SHB/IMG_24.jpg": {
+   "true": 79,
+   "pet": 81.0,
+   "dm_count": 75,
+   "ratio": 1.08,
+   "disagree": false
+  },
+  "SHB/IMG_25.jpg": {
+   "true": 216,
+   "pet": 205.3,
+   "dm_count": 223,
+   "ratio": 0.92,
+   "disagree": false
+  },
+  "SHB/IMG_26.jpg": {
+   "true": 38,
+   "pet": 43.0,
+   "dm_count": 33,
+   "ratio": 1.32,
+   "disagree": false
+  },
+  "SHB/IMG_27.jpg": {
+   "true": 207,
+   "pet": 210.0,
+   "dm_count": 188,
+   "ratio": 1.12,
+   "disagree": false
+  },
+  "SHB/IMG_28.jpg": {
+   "true": 61,
+   "pet": 59.6,
+   "dm_count": 47,
+   "ratio": 1.26,
+   "disagree": false
+  },
+  "SHB/IMG_29.jpg": {
+   "true": 92,
+   "pet": 97.0,
+   "dm_count": 96,
+   "ratio": 1.01,
+   "disagree": false
+  },
+  "SHB/IMG_30.jpg": {
+   "true": 51,
+   "pet": 53.4,
+   "dm_count": 43,
+   "ratio": 1.25,
+   "disagree": false
+  },
+  "SHB/IMG_31.jpg": {
+   "true": 176,
+   "pet": 164.8,
+   "dm_count": 204,
+   "ratio": 0.81,
+   "disagree": false
+  },
+  "SHB/IMG_32.jpg": {
+   "true": 44,
+   "pet": 48.2,
+   "dm_count": 48,
+   "ratio": 1.0,
+   "disagree": false
+  },
+  "SHB/IMG_33.jpg": {
+   "true": 198,
+   "pet": 179.3,
+   "dm_count": 198,
+   "ratio": 0.91,
+   "disagree": false
+  },
+  "SHB/IMG_34.jpg": {
+   "true": 41,
+   "pet": 42.0,
+   "dm_count": 42,
+   "ratio": 1.01,
+   "disagree": false
+  },
+  "SHB/IMG_35.jpg": {
+   "true": 166,
+   "pet": 146.3,
+   "dm_count": 173,
+   "ratio": 0.85,
+   "disagree": false
+  },
+  "SHB/IMG_36.jpg": {
+   "true": 156,
+   "pet": 132.6,
+   "dm_count": 142,
+   "ratio": 0.94,
+   "disagree": false
+  },
+  "SHB/IMG_37.jpg": {
+   "true": 42,
+   "pet": 39.9,
+   "dm_count": 31,
+   "ratio": 1.28,
+   "disagree": false
+  },
+  "SHB/IMG_38.jpg": {
+   "true": 89,
+   "pet": 83.0,
+   "dm_count": 77,
+   "ratio": 1.07,
+   "disagree": false
+  },
+  "SHB/IMG_39.jpg": {
+   "true": 48,
+   "pet": 53.4,
+   "dm_count": 47,
+   "ratio": 1.14,
+   "disagree": false
+  },
+  "SHB/IMG_40.jpg": {
+   "true": 331,
+   "pet": 258.5,
+   "dm_count": 240,
+   "ratio": 1.08,
+   "disagree": false
+  },
+  "SHB/IMG_41.jpg": {
+   "true": 31,
+   "pet": 32.5,
+   "dm_count": 31,
+   "ratio": 1.03,
+   "disagree": false
+  },
+  "SHB/IMG_42.jpg": {
+   "true": 41,
+   "pet": 40.9,
+   "dm_count": 36,
+   "ratio": 1.15,
+   "disagree": false
+  },
+  "SHB/IMG_43.jpg": {
+   "true": 106,
+   "pet": 109.0,
+   "dm_count": 111,
+   "ratio": 0.98,
+   "disagree": false
+  },
+  "SHB/IMG_44.jpg": {
+   "true": 28,
+   "pet": 26.1,
+   "dm_count": 22,
+   "ratio": 1.17,
+   "disagree": false
+  },
+  "SHB/IMG_45.jpg": {
+   "true": 158,
+   "pet": 144.4,
+   "dm_count": 125,
+   "ratio": 1.16,
+   "disagree": false
+  },
+  "SHB/IMG_46.jpg": {
+   "true": 90,
+   "pet": 82.0,
+   "dm_count": 64,
+   "ratio": 1.28,
+   "disagree": false
+  },
+  "SHB/IMG_47.jpg": {
+   "true": 72,
+   "pet": 78.9,
+   "dm_count": 68,
+   "ratio": 1.15,
+   "disagree": false
+  },
+  "SHB/IMG_48.jpg": {
+   "true": 84,
+   "pet": 92.0,
+   "dm_count": 97,
+   "ratio": 0.95,
+   "disagree": false
+  },
+  "SHB/IMG_49.jpg": {
+   "true": 35,
+   "pet": 39.9,
+   "dm_count": 35,
+   "ratio": 1.15,
+   "disagree": false
+  },
+  "SHB/IMG_50.jpg": {
+   "true": 265,
+   "pet": 251.9,
+   "dm_count": 247,
+   "ratio": 1.02,
+   "disagree": false
+  },
+  "SHB/IMG_51.jpg": {
+   "true": 190,
+   "pet": 181.2,
+   "dm_count": 189,
+   "ratio": 0.96,
+   "disagree": false
+  },
+  "SHB/IMG_52.jpg": {
+   "true": 26,
+   "pet": 27.2,
+   "dm_count": 22,
+   "ratio": 1.23,
+   "disagree": false
+  },
+  "SHB/IMG_53.jpg": {
+   "true": 48,
+   "pet": 46.2,
+   "dm_count": 50,
+   "ratio": 0.93,
+   "disagree": false
+  },
+  "SHB/IMG_54.jpg": {
+   "true": 60,
+   "pet": 55.5,
+   "dm_count": 42,
+   "ratio": 1.33,
+   "disagree": false
+  },
+  "SHB/IMG_55.jpg": {
+   "true": 195,
+   "pet": 180.3,
+   "dm_count": 199,
+   "ratio": 0.9,
+   "disagree": false
+  },
+  "SHB/IMG_56.jpg": {
+   "true": 79,
+   "pet": 79.9,
+   "dm_count": 79,
+   "ratio": 1.01,
+   "disagree": false
+  },
+  "SHB/IMG_57.jpg": {
+   "true": 79,
+   "pet": 77.9,
+   "dm_count": 71,
+   "ratio": 1.09,
+   "disagree": false
+  },
+  "SHB/IMG_58.jpg": {
+   "true": 96,
+   "pet": 103.0,
+   "dm_count": 105,
+   "ratio": 0.98,
+   "disagree": false
+  },
+  "SHB/IMG_59.jpg": {
+   "true": 48,
+   "pet": 51.4,
+   "dm_count": 40,
+   "ratio": 1.27,
+   "disagree": false
+  },
+  "SHB/IMG_60.jpg": {
+   "true": 34,
+   "pet": 34.6,
+   "dm_count": 30,
+   "ratio": 1.16,
+   "disagree": false
+  },
+  "SHB/IMG_61.jpg": {
+   "true": 412,
+   "pet": 405.9,
+   "dm_count": 459,
+   "ratio": 0.88,
+   "disagree": false
+  },
+  "SHB/IMG_62.jpg": {
+   "true": 174,
+   "pet": 159.0,
+   "dm_count": 157,
+   "ratio": 1.01,
+   "disagree": false
+  },
+  "SHB/IMG_63.jpg": {
+   "true": 60,
+   "pet": 65.7,
+   "dm_count": 56,
+   "ratio": 1.17,
+   "disagree": false
+  },
+  "SHB/IMG_64.jpg": {
+   "true": 50,
+   "pet": 51.4,
+   "dm_count": 44,
+   "ratio": 1.18,
+   "disagree": false
+  },
+  "SHB/IMG_65.jpg": {
+   "true": 236,
+   "pet": 226.3,
+   "dm_count": 236,
+   "ratio": 0.96,
+   "disagree": false
+  },
+  "SHB/IMG_66.jpg": {
+   "true": 176,
+   "pet": 150.2,
+   "dm_count": 167,
+   "ratio": 0.9,
+   "disagree": false
+  },
+  "SHB/IMG_67.jpg": {
+   "true": 108,
+   "pet": 110.9,
+   "dm_count": 122,
+   "ratio": 0.91,
+   "disagree": false
+  },
+  "SHB/IMG_68.jpg": {
+   "true": 59,
+   "pet": 53.4,
+   "dm_count": 64,
+   "ratio": 0.84,
+   "disagree": false
+  },
+  "SHB/IMG_69.jpg": {
+   "true": 94,
+   "pet": 93.0,
+   "dm_count": 84,
+   "ratio": 1.1,
+   "disagree": false
+  },
+  "SHB/IMG_70.jpg": {
+   "true": 48,
+   "pet": 53.4,
+   "dm_count": 45,
+   "ratio": 1.2,
+   "disagree": false
+  },
+  "SHB/IMG_71.jpg": {
+   "true": 191,
+   "pet": 188.0,
+   "dm_count": 218,
+   "ratio": 0.86,
+   "disagree": false
+  },
+  "SHB/IMG_72.jpg": {
+   "true": 54,
+   "pet": 53.4,
+   "dm_count": 44,
+   "ratio": 1.21,
+   "disagree": false
+  },
+  "SHB/IMG_73.jpg": {
+   "true": 91,
+   "pet": 97.0,
+   "dm_count": 82,
+   "ratio": 1.18,
+   "disagree": false
+  },
+  "SHB/IMG_74.jpg": {
+   "true": 261,
+   "pet": 212.9,
+   "dm_count": 190,
+   "ratio": 1.12,
+   "disagree": false
+  },
+  "SHB/IMG_75.jpg": {
+   "true": 539,
+   "pet": 397.6,
+   "dm_count": 458,
+   "ratio": 0.87,
+   "disagree": false
+  },
+  "SHB/IMG_76.jpg": {
+   "true": 123,
+   "pet": 116.9,
+   "dm_count": 116,
+   "ratio": 1.01,
+   "disagree": false
+  },
+  "SHB/IMG_77.jpg": {
+   "true": 213,
+   "pet": 199.5,
+   "dm_count": 210,
+   "ratio": 0.95,
+   "disagree": false
+  },
+  "SHB/IMG_78.jpg": {
+   "true": 282,
+   "pet": 245.3,
+   "dm_count": 216,
+   "ratio": 1.14,
+   "disagree": false
+  },
+  "SHB/IMG_79.jpg": {
+   "true": 90,
+   "pet": 87.0,
+   "dm_count": 89,
+   "ratio": 0.97,
+   "disagree": false
+  },
+  "SHB/IMG_80.jpg": {
+   "true": 470,
+   "pet": 349.4,
+   "dm_count": 407,
+   "ratio": 0.86,
+   "disagree": false
+  },
+  "SHB/IMG_81.jpg": {
+   "true": 129,
+   "pet": 124.8,
+   "dm_count": 122,
+   "ratio": 1.02,
+   "disagree": false
+  },
+  "SHB/IMG_82.jpg": {
+   "true": 44,
+   "pet": 48.2,
+   "dm_count": 42,
+   "ratio": 1.14,
+   "disagree": false
+  },
+  "SHB/IMG_83.jpg": {
+   "true": 57,
+   "pet": 59.6,
+   "dm_count": 60,
+   "ratio": 1.0,
+   "disagree": false
+  },
+  "SHB/IMG_84.jpg": {
+   "true": 54,
+   "pet": 48.2,
+   "dm_count": 45,
+   "ratio": 1.07,
+   "disagree": false
+  },
+  "SHB/IMG_85.jpg": {
+   "true": 59,
+   "pet": 62.7,
+   "dm_count": 59,
+   "ratio": 1.06,
+   "disagree": false
+  },
+  "SHB/IMG_86.jpg": {
+   "true": 54,
+   "pet": 52.4,
+   "dm_count": 47,
+   "ratio": 1.11,
+   "disagree": false
+  },
+  "SHB/IMG_87.jpg": {
+   "true": 54,
+   "pet": 59.6,
+   "dm_count": 52,
+   "ratio": 1.14,
+   "disagree": false
+  },
+  "SHB/IMG_88.jpg": {
+   "true": 163,
+   "pet": 134.6,
+   "dm_count": 130,
+   "ratio": 1.04,
+   "disagree": false
+  },
+  "SHB/IMG_89.jpg": {
+   "true": 23,
+   "pet": 22.9,
+   "dm_count": 22,
+   "ratio": 1.05,
+   "disagree": false
+  },
+  "SHB/IMG_90.jpg": {
+   "true": 195,
+   "pet": 190.9,
+   "dm_count": 200,
+   "ratio": 0.95,
+   "disagree": false
+  },
+  "SHB/IMG_91.jpg": {
+   "true": 92,
+   "pet": 92.0,
+   "dm_count": 98,
+   "ratio": 0.94,
+   "disagree": false
+  },
+  "SHB/IMG_92.jpg": {
+   "true": 63,
+   "pet": 61.6,
+   "dm_count": 53,
+   "ratio": 1.16,
+   "disagree": false
+  },
+  "SHB/IMG_93.jpg": {
+   "true": 217,
+   "pet": 180.3,
+   "dm_count": 206,
+   "ratio": 0.88,
+   "disagree": false
+  },
+  "SHB/IMG_94.jpg": {
+   "true": 52,
+   "pet": 52.4,
+   "dm_count": 39,
+   "ratio": 1.33,
+   "disagree": false
+  },
+  "SHB/IMG_95.jpg": {
+   "true": 48,
+   "pet": 54.5,
+   "dm_count": 50,
+   "ratio": 1.1,
+   "disagree": false
+  },
+  "SHB/IMG_96.jpg": {
+   "true": 211,
+   "pet": 212.9,
+   "dm_count": 228,
+   "ratio": 0.93,
+   "disagree": false
+  },
+  "SHB/IMG_97.jpg": {
+   "true": 107,
+   "pet": 97.0,
+   "dm_count": 143,
+   "ratio": 0.68,
+   "disagree": false
+  },
+  "SHB/IMG_98.jpg": {
+   "true": 249,
+   "pet": 224.4,
+   "dm_count": 212,
+   "ratio": 1.06,
+   "disagree": false
+  },
+  "SHB/IMG_99.jpg": {
+   "true": 113,
+   "pet": 118.8,
+   "dm_count": 115,
+   "ratio": 1.04,
+   "disagree": false
+  },
+  "SHB/IMG_100.jpg": {
+   "true": 157,
+   "pet": 136.5,
+   "dm_count": 135,
+   "ratio": 1.01,
+   "disagree": false
+  },
+  "SHB/IMG_101.jpg": {
+   "true": 37,
+   "pet": 36.7,
+   "dm_count": 32,
+   "ratio": 1.16,
+   "disagree": false
+  },
+  "SHB/IMG_102.jpg": {
+   "true": 70,
+   "pet": 68.8,
+   "dm_count": 57,
+   "ratio": 1.2,
+   "disagree": false
+  },
+  "SHB/IMG_103.jpg": {
+   "true": 57,
+   "pet": 63.7,
+   "dm_count": 60,
+   "ratio": 1.07,
+   "disagree": false
+  },
+  "SHB/IMG_104.jpg": {
+   "true": 44,
+   "pet": 47.2,
+   "dm_count": 36,
+   "ratio": 1.3,
+   "disagree": false
+  },
+  "SHB/IMG_105.jpg": {
+   "true": 227,
+   "pet": 217.7,
+   "dm_count": 202,
+   "ratio": 1.08,
+   "disagree": false
+  },
+  "SHB/IMG_106.jpg": {
+   "true": 165,
+   "pet": 168.7,
+   "dm_count": 175,
+   "ratio": 0.97,
+   "disagree": false
+  },
+  "SHB/IMG_107.jpg": {
+   "true": 476,
+   "pet": 448.1,
+   "dm_count": 500,
+   "ratio": 0.9,
+   "disagree": false
+  },
+  "SHB/IMG_108.jpg": {
+   "true": 139,
+   "pet": 133.6,
+   "dm_count": 124,
+   "ratio": 1.08,
+   "disagree": false
+  },
+  "SHB/IMG_109.jpg": {
+   "true": 316,
+   "pet": 318.7,
+   "dm_count": 225,
+   "ratio": 1.42,
+   "disagree": false
+  },
+  "SHB/IMG_110.jpg": {
+   "true": 110,
+   "pet": 104.0,
+   "dm_count": 103,
+   "ratio": 1.01,
+   "disagree": false
+  },
+  "SHB/IMG_111.jpg": {
+   "true": 20,
+   "pet": 21.8,
+   "dm_count": 20,
+   "ratio": 1.1,
+   "disagree": false
+  },
+  "SHB/IMG_112.jpg": {
+   "true": 131,
+   "pet": 125.7,
+   "dm_count": 128,
+   "ratio": 0.98,
+   "disagree": false
+  },
+  "SHB/IMG_113.jpg": {
+   "true": 48,
+   "pet": 47.2,
+   "dm_count": 45,
+   "ratio": 1.04,
+   "disagree": false
+  },
+  "SHB/IMG_114.jpg": {
+   "true": 183,
+   "pet": 182.2,
+   "dm_count": 196,
+   "ratio": 0.93,
+   "disagree": false
+  },
+  "SHB/IMG_115.jpg": {
+   "true": 101,
+   "pet": 63.7,
+   "dm_count": 64,
+   "ratio": 0.99,
+   "disagree": false
+  },
+  "SHB/IMG_116.jpg": {
+   "true": 204,
+   "pet": 202.4,
+   "dm_count": 206,
+   "ratio": 0.98,
+   "disagree": false
+  },
+  "SHB/IMG_117.jpg": {
+   "true": 40,
+   "pet": 40.9,
+   "dm_count": 37,
+   "ratio": 1.12,
+   "disagree": false
+  },
+  "SHB/IMG_118.jpg": {
+   "true": 143,
+   "pet": 144.4,
+   "dm_count": 145,
+   "ratio": 1.0,
+   "disagree": false
+  },
+  "SHB/IMG_119.jpg": {
+   "true": 146,
+   "pet": 137.5,
+   "dm_count": 117,
+   "ratio": 1.18,
+   "disagree": false
+  },
+  "SHB/IMG_120.jpg": {
+   "true": 70,
+   "pet": 81.0,
+   "dm_count": 79,
+   "ratio": 1.02,
+   "disagree": false
+  },
+  "SHB/IMG_121.jpg": {
+   "true": 175,
+   "pet": 151.2,
+   "dm_count": 146,
+   "ratio": 1.04,
+   "disagree": false
+  },
+  "SHB/IMG_122.jpg": {
+   "true": 51,
+   "pet": 55.5,
+   "dm_count": 47,
+   "ratio": 1.17,
+   "disagree": false
+  },
+  "SHB/IMG_123.jpg": {
+   "true": 55,
+   "pet": 66.8,
+   "dm_count": 60,
+   "ratio": 1.11,
+   "disagree": false
+  },
+  "SHB/IMG_124.jpg": {
+   "true": 67,
+   "pet": 66.8,
+   "dm_count": 59,
+   "ratio": 1.13,
+   "disagree": false
+  },
+  "SHB/IMG_125.jpg": {
+   "true": 72,
+   "pet": 75.9,
+   "dm_count": 60,
+   "ratio": 1.27,
+   "disagree": false
+  },
+  "SHB/IMG_126.jpg": {
+   "true": 56,
+   "pet": 55.5,
+   "dm_count": 48,
+   "ratio": 1.17,
+   "disagree": false
+  },
+  "SHB/IMG_127.jpg": {
+   "true": 165,
+   "pet": 135.6,
+   "dm_count": 157,
+   "ratio": 0.86,
+   "disagree": false
+  },
+  "SHB/IMG_128.jpg": {
+   "true": 32,
+   "pet": 32.5,
+   "dm_count": 31,
+   "ratio": 1.04,
+   "disagree": false
+  },
+  "SHB/IMG_129.jpg": {
+   "true": 149,
+   "pet": 145.4,
+   "dm_count": 130,
+   "ratio": 1.12,
+   "disagree": false
+  },
+  "SHB/IMG_130.jpg": {
+   "true": 80,
+   "pet": 79.9,
+   "dm_count": 80,
+   "ratio": 0.99,
+   "disagree": false
+  },
+  "SHB/IMG_131.jpg": {
+   "true": 117,
+   "pet": 115.9,
+   "dm_count": 109,
+   "ratio": 1.07,
+   "disagree": false
+  },
+  "SHB/IMG_132.jpg": {
+   "true": 162,
+   "pet": 169.6,
+   "dm_count": 172,
+   "ratio": 0.99,
+   "disagree": false
+  },
+  "SHB/IMG_133.jpg": {
+   "true": 137,
+   "pet": 154.1,
+   "dm_count": 141,
+   "ratio": 1.09,
+   "disagree": false
+  },
+  "SHB/IMG_134.jpg": {
+   "true": 120,
+   "pet": 117.9,
+   "dm_count": 95,
+   "ratio": 1.25,
+   "disagree": false
+  },
+  "SHB/IMG_135.jpg": {
+   "true": 72,
+   "pet": 72.9,
+   "dm_count": 64,
+   "ratio": 1.14,
+   "disagree": false
+  },
+  "SHB/IMG_136.jpg": {
+   "true": 122,
+   "pet": 103.0,
+   "dm_count": 113,
+   "ratio": 0.91,
+   "disagree": false
+  },
+  "SHB/IMG_137.jpg": {
+   "true": 198,
+   "pet": 188.0,
+   "dm_count": 203,
+   "ratio": 0.93,
+   "disagree": false
+  },
+  "SHB/IMG_138.jpg": {
+   "true": 133,
+   "pet": 118.8,
+   "dm_count": 128,
+   "ratio": 0.93,
+   "disagree": false
+  },
+  "SHB/IMG_139.jpg": {
+   "true": 147,
+   "pet": 166.7,
+   "dm_count": 147,
+   "ratio": 1.13,
+   "disagree": false
+  },
+  "SHB/IMG_140.jpg": {
+   "true": 70,
+   "pet": 82.0,
+   "dm_count": 82,
+   "ratio": 1.0,
+   "disagree": false
+  },
+  "SHB/IMG_141.jpg": {
+   "true": 35,
+   "pet": 37.8,
+   "dm_count": 37,
+   "ratio": 1.02,
+   "disagree": false
+  },
+  "SHB/IMG_142.jpg": {
+   "true": 24,
+   "pet": 26.1,
+   "dm_count": 22,
+   "ratio": 1.19,
+   "disagree": false
+  },
+  "SHB/IMG_143.jpg": {
+   "true": 251,
+   "pet": 224.4,
+   "dm_count": 255,
+   "ratio": 0.88,
+   "disagree": false
+  },
+  "SHB/IMG_144.jpg": {
+   "true": 59,
+   "pet": 57.5,
+   "dm_count": 60,
+   "ratio": 0.97,
+   "disagree": false
+  },
+  "SHB/IMG_145.jpg": {
+   "true": 67,
+   "pet": 64.7,
+   "dm_count": 64,
+   "ratio": 1.0,
+   "disagree": false
+  },
+  "SHB/IMG_146.jpg": {
+   "true": 61,
+   "pet": 64.7,
+   "dm_count": 54,
+   "ratio": 1.2,
+   "disagree": false
+  },
+  "SHB/IMG_147.jpg": {
+   "true": 248,
+   "pet": 225.3,
+   "dm_count": 256,
+   "ratio": 0.88,
+   "disagree": false
+  },
+  "SHB/IMG_148.jpg": {
+   "true": 252,
+   "pet": 222.5,
+   "dm_count": 259,
+   "ratio": 0.86,
+   "disagree": false
+  },
+  "SHB/IMG_149.jpg": {
+   "true": 147,
+   "pet": 123.8,
+   "dm_count": 125,
+   "ratio": 0.99,
+   "disagree": false
+  },
+  "SHB/IMG_150.jpg": {
+   "true": 121,
+   "pet": 110.9,
+   "dm_count": 114,
+   "ratio": 0.98,
+   "disagree": false
+  },
+  "SHB/IMG_151.jpg": {
+   "true": 47,
+   "pet": 45.1,
+   "dm_count": 46,
+   "ratio": 0.97,
+   "disagree": false
+  },
+  "SHB/IMG_152.jpg": {
+   "true": 505,
+   "pet": 461.0,
+   "dm_count": 457,
+   "ratio": 1.01,
+   "disagree": false
+  },
+  "SHB/IMG_153.jpg": {
+   "true": 297,
+   "pet": 284.0,
+   "dm_count": 316,
+   "ratio": 0.9,
+   "disagree": false
+  },
+  "SHB/IMG_154.jpg": {
+   "true": 465,
+   "pet": 418.7,
+   "dm_count": 390,
+   "ratio": 1.07,
+   "disagree": false
+  },
+  "SHB/IMG_155.jpg": {
+   "true": 167,
+   "pet": 168.7,
+   "dm_count": 158,
+   "ratio": 1.07,
+   "disagree": false
+  },
+  "SHB/IMG_156.jpg": {
+   "true": 43,
+   "pet": 39.9,
+   "dm_count": 37,
+   "ratio": 1.08,
+   "disagree": false
+  },
+  "SHB/IMG_157.jpg": {
+   "true": 46,
+   "pet": 40.9,
+   "dm_count": 37,
+   "ratio": 1.1,
+   "disagree": false
+  },
+  "SHB/IMG_158.jpg": {
+   "true": 91,
+   "pet": 91.0,
+   "dm_count": 88,
+   "ratio": 1.03,
+   "disagree": false
+  },
+  "SHB/IMG_159.jpg": {
+   "true": 263,
+   "pet": 233.9,
+   "dm_count": 218,
+   "ratio": 1.07,
+   "disagree": false
+  },
+  "SHB/IMG_160.jpg": {
+   "true": 117,
+   "pet": 118.8,
+   "dm_count": 107,
+   "ratio": 1.11,
+   "disagree": false
+  },
+  "SHB/IMG_161.jpg": {
+   "true": 48,
+   "pet": 51.4,
+   "dm_count": 40,
+   "ratio": 1.27,
+   "disagree": false
+  },
+  "SHB/IMG_162.jpg": {
+   "true": 54,
+   "pet": 60.6,
+   "dm_count": 50,
+   "ratio": 1.22,
+   "disagree": false
+  },
+  "SHB/IMG_163.jpg": {
+   "true": 73,
+   "pet": 69.8,
+   "dm_count": 75,
+   "ratio": 0.93,
+   "disagree": false
+  },
+  "SHB/IMG_164.jpg": {
+   "true": 122,
+   "pet": 116.9,
+   "dm_count": 106,
+   "ratio": 1.11,
+   "disagree": false
+  },
+  "SHB/IMG_165.jpg": {
+   "true": 60,
+   "pet": 61.6,
+   "dm_count": 51,
+   "ratio": 1.21,
+   "disagree": false
+  },
+  "SHB/IMG_166.jpg": {
+   "true": 170,
+   "pet": 159.0,
+   "dm_count": 163,
+   "ratio": 0.98,
+   "disagree": false
+  },
+  "SHB/IMG_167.jpg": {
+   "true": 167,
+   "pet": 159.0,
+   "dm_count": 137,
+   "ratio": 1.16,
+   "disagree": false
+  },
+  "SHB/IMG_168.jpg": {
+   "true": 57,
+   "pet": 57.5,
+   "dm_count": 48,
+   "ratio": 1.21,
+   "disagree": false
+  },
+  "SHB/IMG_169.jpg": {
+   "true": 127,
+   "pet": 120.8,
+   "dm_count": 129,
+   "ratio": 0.94,
+   "disagree": false
+  },
+  "SHB/IMG_170.jpg": {
+   "true": 298,
+   "pet": 297.1,
+   "dm_count": 281,
+   "ratio": 1.06,
+   "disagree": false
+  },
+  "SHB/IMG_171.jpg": {
+   "true": 14,
+   "pet": 13.0,
+   "dm_count": 13,
+   "ratio": 1.02,
+   "disagree": false
+  },
+  "SHB/IMG_172.jpg": {
+   "true": 11,
+   "pet": 11.9,
+   "dm_count": 10,
+   "ratio": 1.15,
+   "disagree": false
+  },
+  "SHB/IMG_173.jpg": {
+   "true": 104,
+   "pet": 98.0,
+   "dm_count": 82,
+   "ratio": 1.2,
+   "disagree": false
+  },
+  "SHB/IMG_174.jpg": {
+   "true": 143,
+   "pet": 142.4,
+   "dm_count": 147,
+   "ratio": 0.97,
+   "disagree": false
+  },
+  "SHB/IMG_175.jpg": {
+   "true": 45,
+   "pet": 52.4,
+   "dm_count": 44,
+   "ratio": 1.18,
+   "disagree": false
+  },
+  "SHB/IMG_176.jpg": {
+   "true": 229,
+   "pet": 206.2,
+   "dm_count": 190,
+   "ratio": 1.09,
+   "disagree": false
+  },
+  "SHB/IMG_177.jpg": {
+   "true": 20,
+   "pet": 16.3,
+   "dm_count": 18,
+   "ratio": 0.89,
+   "disagree": false
+  },
+  "SHB/IMG_178.jpg": {
+   "true": 41,
+   "pet": 44.1,
+   "dm_count": 35,
+   "ratio": 1.25,
+   "disagree": false
+  },
+  "SHB/IMG_179.jpg": {
+   "true": 79,
+   "pet": 72.9,
+   "dm_count": 72,
+   "ratio": 1.01,
+   "disagree": false
+  },
+  "SHB/IMG_180.jpg": {
+   "true": 101,
+   "pet": 102.0,
+   "dm_count": 98,
+   "ratio": 1.04,
+   "disagree": false
+  },
+  "SHB/IMG_181.jpg": {
+   "true": 60,
+   "pet": 62.7,
+   "dm_count": 56,
+   "ratio": 1.13,
+   "disagree": false
+  },
+  "SHB/IMG_182.jpg": {
+   "true": 253,
+   "pet": 212.0,
+   "dm_count": 221,
+   "ratio": 0.96,
+   "disagree": false
+  },
+  "SHB/IMG_183.jpg": {
+   "true": 187,
+   "pet": 144.4,
+   "dm_count": 165,
+   "ratio": 0.88,
+   "disagree": false
+  },
+  "SHB/IMG_184.jpg": {
+   "true": 184,
+   "pet": 185.1,
+   "dm_count": 184,
+   "ratio": 1.01,
+   "disagree": false
+  },
+  "SHB/IMG_185.jpg": {
+   "true": 106,
+   "pet": 105.0,
+   "dm_count": 107,
+   "ratio": 0.98,
+   "disagree": false
+  },
+  "SHB/IMG_186.jpg": {
+   "true": 104,
+   "pet": 100.0,
+   "dm_count": 93,
+   "ratio": 1.07,
+   "disagree": false
+  },
+  "SHB/IMG_187.jpg": {
+   "true": 159,
+   "pet": 141.4,
+   "dm_count": 143,
+   "ratio": 0.99,
+   "disagree": false
+  },
+  "SHB/IMG_188.jpg": {
+   "true": 56,
+   "pet": 55.5,
+   "dm_count": 52,
+   "ratio": 1.07,
+   "disagree": false
+  },
+  "SHB/IMG_189.jpg": {
+   "true": 40,
+   "pet": 40.9,
+   "dm_count": 38,
+   "ratio": 1.08,
+   "disagree": false
+  },
+  "SHB/IMG_190.jpg": {
+   "true": 90,
+   "pet": 99.0,
+   "dm_count": 91,
+   "ratio": 1.09,
+   "disagree": false
+  },
+  "SHB/IMG_191.jpg": {
+   "true": 301,
+   "pet": 273.6,
+   "dm_count": 293,
+   "ratio": 0.93,
+   "disagree": false
+  },
+  "SHB/IMG_192.jpg": {
+   "true": 58,
+   "pet": 55.5,
+   "dm_count": 61,
+   "ratio": 0.91,
+   "disagree": false
+  },
+  "SHB/IMG_193.jpg": {
+   "true": 172,
+   "pet": 170.6,
+   "dm_count": 167,
+   "ratio": 1.02,
+   "disagree": false
+  },
+  "SHB/IMG_194.jpg": {
+   "true": 213,
+   "pet": 195.7,
+   "dm_count": 231,
+   "ratio": 0.85,
+   "disagree": false
+  },
+  "SHB/IMG_195.jpg": {
+   "true": 61,
+   "pet": 65.7,
+   "dm_count": 59,
+   "ratio": 1.11,
+   "disagree": false
+  },
+  "SHB/IMG_196.jpg": {
+   "true": 107,
+   "pet": 103.0,
+   "dm_count": 100,
+   "ratio": 1.03,
+   "disagree": false
+  },
+  "SHB/IMG_197.jpg": {
+   "true": 93,
+   "pet": 91.0,
+   "dm_count": 72,
+   "ratio": 1.26,
+   "disagree": false
+  },
+  "SHB/IMG_198.jpg": {
+   "true": 9,
+   "pet": 9.6,
+   "dm_count": 8,
+   "ratio": 1.19,
+   "disagree": false
+  },
+  "SHB/IMG_199.jpg": {
+   "true": 88,
+   "pet": 86.0,
+   "dm_count": 78,
+   "ratio": 1.1,
+   "disagree": false
+  },
+  "SHB/IMG_200.jpg": {
+   "true": 48,
+   "pet": 53.4,
+   "dm_count": 50,
+   "ratio": 1.08,
+   "disagree": false
+  },
+  "SHB/IMG_201.jpg": {
+   "true": 131,
+   "pet": 106.0,
+   "dm_count": 105,
+   "ratio": 1.01,
+   "disagree": false
+  },
+  "SHB/IMG_202.jpg": {
+   "true": 180,
+   "pet": 166.7,
+   "dm_count": 196,
+   "ratio": 0.85,
+   "disagree": false
+  },
+  "SHB/IMG_203.jpg": {
+   "true": 187,
+   "pet": 168.7,
+   "dm_count": 153,
+   "ratio": 1.1,
+   "disagree": false
+  },
+  "SHB/IMG_204.jpg": {
+   "true": 148,
+   "pet": 160.9,
+   "dm_count": 141,
+   "ratio": 1.14,
+   "disagree": false
+  },
+  "SHB/IMG_205.jpg": {
+   "true": 57,
+   "pet": 60.6,
+   "dm_count": 54,
+   "ratio": 1.12,
+   "disagree": false
+  },
+  "SHB/IMG_206.jpg": {
+   "true": 86,
+   "pet": 88.0,
+   "dm_count": 81,
+   "ratio": 1.08,
+   "disagree": false
+  },
+  "SHB/IMG_207.jpg": {
+   "true": 106,
+   "pet": 98.0,
+   "dm_count": 98,
+   "ratio": 1.0,
+   "disagree": false
+  },
+  "SHB/IMG_208.jpg": {
+   "true": 72,
+   "pet": 66.8,
+   "dm_count": 70,
+   "ratio": 0.95,
+   "disagree": false
+  },
+  "SHB/IMG_209.jpg": {
+   "true": 149,
+   "pet": 142.4,
+   "dm_count": 142,
+   "ratio": 1.01,
+   "disagree": false
+  },
+  "SHB/IMG_210.jpg": {
+   "true": 33,
+   "pet": 35.7,
+   "dm_count": 33,
+   "ratio": 1.1,
+   "disagree": false
+  },
+  "SHB/IMG_211.jpg": {
+   "true": 51,
+   "pet": 56.5,
+   "dm_count": 50,
+   "ratio": 1.14,
+   "disagree": false
+  },
+  "SHB/IMG_212.jpg": {
+   "true": 139,
+   "pet": 139.5,
+   "dm_count": 145,
+   "ratio": 0.96,
+   "disagree": false
+  },
+  "SHB/IMG_213.jpg": {
+   "true": 284,
+   "pet": 266.1,
+   "dm_count": 288,
+   "ratio": 0.92,
+   "disagree": false
+  },
+  "SHB/IMG_214.jpg": {
+   "true": 138,
+   "pet": 133.6,
+   "dm_count": 168,
+   "ratio": 0.79,
+   "disagree": false
+  },
+  "SHB/IMG_215.jpg": {
+   "true": 52,
+   "pet": 50.3,
+   "dm_count": 47,
+   "ratio": 1.08,
+   "disagree": false
+  },
+  "SHB/IMG_216.jpg": {
+   "true": 161,
+   "pet": 162.9,
+   "dm_count": 157,
+   "ratio": 1.04,
+   "disagree": false
+  },
+  "SHB/IMG_217.jpg": {
+   "true": 109,
+   "pet": 104.0,
+   "dm_count": 110,
+   "ratio": 0.94,
+   "disagree": false
+  },
+  "SHB/IMG_218.jpg": {
+   "true": 73,
+   "pet": 74.9,
+   "dm_count": 61,
+   "ratio": 1.22,
+   "disagree": false
+  },
+  "SHB/IMG_219.jpg": {
+   "true": 450,
+   "pet": 342.9,
+   "dm_count": 341,
+   "ratio": 1.01,
+   "disagree": false
+  },
+  "SHB/IMG_220.jpg": {
+   "true": 70,
+   "pet": 75.9,
+   "dm_count": 76,
+   "ratio": 1.0,
+   "disagree": false
+  },
+  "SHB/IMG_221.jpg": {
+   "true": 74,
+   "pet": 73.9,
+   "dm_count": 77,
+   "ratio": 0.96,
+   "disagree": false
+  },
+  "SHB/IMG_222.jpg": {
+   "true": 154,
+   "pet": 120.8,
+   "dm_count": 123,
+   "ratio": 0.98,
+   "disagree": false
+  },
+  "SHB/IMG_223.jpg": {
+   "true": 144,
+   "pet": 153.1,
+   "dm_count": 222,
+   "ratio": 0.69,
+   "disagree": false
+  },
+  "SHB/IMG_224.jpg": {
+   "true": 142,
+   "pet": 142.4,
+   "dm_count": 129,
+   "ratio": 1.1,
+   "disagree": false
+  },
+  "SHB/IMG_225.jpg": {
+   "true": 265,
+   "pet": 216.7,
+   "dm_count": 247,
+   "ratio": 0.88,
+   "disagree": false
+  },
+  "SHB/IMG_226.jpg": {
+   "true": 94,
+   "pet": 97.0,
+   "dm_count": 86,
+   "ratio": 1.13,
+   "disagree": false
+  },
+  "SHB/IMG_227.jpg": {
+   "true": 96,
+   "pet": 97.0,
+   "dm_count": 105,
+   "ratio": 0.92,
+   "disagree": false
+  },
+  "SHB/IMG_228.jpg": {
+   "true": 159,
+   "pet": 162.9,
+   "dm_count": 153,
+   "ratio": 1.06,
+   "disagree": false
+  },
+  "SHB/IMG_229.jpg": {
+   "true": 64,
+   "pet": 60.6,
+   "dm_count": 54,
+   "ratio": 1.12,
+   "disagree": false
+  },
+  "SHB/IMG_230.jpg": {
+   "true": 93,
+   "pet": 89.0,
+   "dm_count": 80,
+   "ratio": 1.11,
+   "disagree": false
+  },
+  "SHB/IMG_231.jpg": {
+   "true": 79,
+   "pet": 78.9,
+   "dm_count": 76,
+   "ratio": 1.04,
+   "disagree": false
+  },
+  "SHB/IMG_232.jpg": {
+   "true": 133,
+   "pet": 114.9,
+   "dm_count": 117,
+   "ratio": 0.98,
+   "disagree": false
+  },
+  "SHB/IMG_233.jpg": {
+   "true": 29,
+   "pet": 29.3,
+   "dm_count": 31,
+   "ratio": 0.96,
+   "disagree": false
+  },
+  "SHB/IMG_234.jpg": {
+   "true": 212,
+   "pet": 205.3,
+   "dm_count": 244,
+   "ratio": 0.84,
+   "disagree": false
+  },
+  "SHB/IMG_235.jpg": {
+   "true": 180,
+   "pet": 176.4,
+   "dm_count": 168,
+   "ratio": 1.05,
+   "disagree": false
+  },
+  "SHB/IMG_236.jpg": {
+   "true": 196,
+   "pet": 180.3,
+   "dm_count": 188,
+   "ratio": 0.96,
+   "disagree": false
+  },
+  "SHB/IMG_237.jpg": {
+   "true": 323,
+   "pet": 268.0,
+   "dm_count": 248,
+   "ratio": 1.08,
+   "disagree": false
+  },
+  "SHB/IMG_238.jpg": {
+   "true": 51,
+   "pet": 54.5,
+   "dm_count": 46,
+   "ratio": 1.18,
+   "disagree": false
+  },
+  "SHB/IMG_239.jpg": {
+   "true": 166,
+   "pet": 164.8,
+   "dm_count": 160,
+   "ratio": 1.03,
+   "disagree": false
+  },
+  "SHB/IMG_240.jpg": {
+   "true": 94,
+   "pet": 93.0,
+   "dm_count": 93,
+   "ratio": 1.0,
+   "disagree": false
+  },
+  "SHB/IMG_241.jpg": {
+   "true": 89,
+   "pet": 90.0,
+   "dm_count": 81,
+   "ratio": 1.11,
+   "disagree": false
+  },
+  "SHB/IMG_242.jpg": {
+   "true": 177,
+   "pet": 157.0,
+   "dm_count": 167,
+   "ratio": 0.94,
+   "disagree": false
+  },
+  "SHB/IMG_243.jpg": {
+   "true": 143,
+   "pet": 134.6,
+   "dm_count": 183,
+   "ratio": 0.73,
+   "disagree": false
+  },
+  "SHB/IMG_244.jpg": {
+   "true": 105,
+   "pet": 90.0,
+   "dm_count": 85,
+   "ratio": 1.06,
+   "disagree": false
+  },
+  "SHB/IMG_245.jpg": {
+   "true": 85,
+   "pet": 86.0,
+   "dm_count": 67,
+   "ratio": 1.28,
+   "disagree": false
+  },
+  "SHB/IMG_246.jpg": {
+   "true": 376,
+   "pet": 366.1,
+   "dm_count": 348,
+   "ratio": 1.05,
+   "disagree": false
+  },
+  "SHB/IMG_247.jpg": {
+   "true": 104,
+   "pet": 107.0,
+   "dm_count": 171,
+   "ratio": 0.63,
+   "disagree": false
+  },
+  "SHB/IMG_248.jpg": {
+   "true": 62,
+   "pet": 57.5,
+   "dm_count": 58,
+   "ratio": 0.99,
+   "disagree": false
+  },
+  "SHB/IMG_249.jpg": {
+   "true": 107,
+   "pet": 112.9,
+   "dm_count": 88,
+   "ratio": 1.29,
+   "disagree": false
+  },
+  "SHB/IMG_250.jpg": {
+   "true": 24,
+   "pet": 26.1,
+   "dm_count": 22,
+   "ratio": 1.2,
+   "disagree": false
+  },
+  "SHB/IMG_251.jpg": {
+   "true": 274,
+   "pet": 228.2,
+   "dm_count": 263,
+   "ratio": 0.87,
+   "disagree": false
+  },
+  "SHB/IMG_252.jpg": {
+   "true": 31,
+   "pet": 28.2,
+   "dm_count": 29,
+   "ratio": 0.97,
+   "disagree": false
+  },
+  "SHB/IMG_253.jpg": {
+   "true": 132,
+   "pet": 127.7,
+   "dm_count": 143,
+   "ratio": 0.89,
+   "disagree": false
+  },
+  "SHB/IMG_254.jpg": {
+   "true": 91,
+   "pet": 89.0,
+   "dm_count": 88,
+   "ratio": 1.01,
+   "disagree": false
+  },
+  "SHB/IMG_255.jpg": {
+   "true": 49,
+   "pet": 50.3,
+   "dm_count": 39,
+   "ratio": 1.29,
+   "disagree": false
+  },
+  "SHB/IMG_256.jpg": {
+   "true": 194,
+   "pet": 186.1,
+   "dm_count": 201,
+   "ratio": 0.93,
+   "disagree": false
+  },
+  "SHB/IMG_257.jpg": {
+   "true": 131,
+   "pet": 144.4,
+   "dm_count": 171,
+   "ratio": 0.84,
+   "disagree": false
+  },
+  "SHB/IMG_258.jpg": {
+   "true": 55,
+   "pet": 49.3,
+   "dm_count": 44,
+   "ratio": 1.11,
+   "disagree": false
+  },
+  "SHB/IMG_259.jpg": {
+   "true": 87,
+   "pet": 97.0,
+   "dm_count": 100,
+   "ratio": 0.97,
+   "disagree": false
+  },
+  "SHB/IMG_260.jpg": {
+   "true": 53,
+   "pet": 49.3,
+   "dm_count": 42,
+   "ratio": 1.16,
+   "disagree": false
+  },
+  "SHB/IMG_261.jpg": {
+   "true": 184,
+   "pet": 178.3,
+   "dm_count": 170,
+   "ratio": 1.05,
+   "disagree": false
+  },
+  "SHB/IMG_262.jpg": {
+   "true": 137,
+   "pet": 135.6,
+   "dm_count": 114,
+   "ratio": 1.19,
+   "disagree": false
+  },
+  "SHB/IMG_263.jpg": {
+   "true": 95,
+   "pet": 97.0,
+   "dm_count": 80,
+   "ratio": 1.21,
+   "disagree": false
+  },
+  "SHB/IMG_264.jpg": {
+   "true": 36,
+   "pet": 35.7,
+   "dm_count": 31,
+   "ratio": 1.16,
+   "disagree": false
+  },
+  "SHB/IMG_265.jpg": {
+   "true": 28,
+   "pet": 27.2,
+   "dm_count": 24,
+   "ratio": 1.15,
+   "disagree": false
+  },
+  "SHB/IMG_266.jpg": {
+   "true": 59,
+   "pet": 59.6,
+   "dm_count": 58,
+   "ratio": 1.03,
+   "disagree": false
+  },
+  "SHB/IMG_267.jpg": {
+   "true": 62,
+   "pet": 66.8,
+   "dm_count": 60,
+   "ratio": 1.11,
+   "disagree": false
+  },
+  "SHB/IMG_268.jpg": {
+   "true": 79,
+   "pet": 78.9,
+   "dm_count": 71,
+   "ratio": 1.11,
+   "disagree": false
+  },
+  "SHB/IMG_269.jpg": {
+   "true": 304,
+   "pet": 296.2,
+   "dm_count": 350,
+   "ratio": 0.85,
+   "disagree": false
+  },
+  "SHB/IMG_270.jpg": {
+   "true": 142,
+   "pet": 127.7,
+   "dm_count": 134,
+   "ratio": 0.95,
+   "disagree": false
+  },
+  "SHB/IMG_271.jpg": {
+   "true": 54,
+   "pet": 48.2,
+   "dm_count": 49,
+   "ratio": 0.98,
+   "disagree": false
+  },
+  "SHB/IMG_272.jpg": {
+   "true": 164,
+   "pet": 157.0,
+   "dm_count": 136,
+   "ratio": 1.16,
+   "disagree": false
+  },
+  "SHB/IMG_273.jpg": {
+   "true": 61,
+   "pet": 68.8,
+   "dm_count": 64,
+   "ratio": 1.07,
+   "disagree": false
+  },
+  "SHB/IMG_274.jpg": {
+   "true": 200,
+   "pet": 163.8,
+   "dm_count": 167,
+   "ratio": 0.98,
+   "disagree": false
+  },
+  "SHB/IMG_275.jpg": {
+   "true": 88,
+   "pet": 94.0,
+   "dm_count": 77,
+   "ratio": 1.22,
+   "disagree": false
+  },
+  "SHB/IMG_276.jpg": {
+   "true": 38,
+   "pet": 44.1,
+   "dm_count": 35,
+   "ratio": 1.27,
+   "disagree": false
+  },
+  "SHB/IMG_277.jpg": {
+   "true": 67,
+   "pet": 68.8,
+   "dm_count": 62,
+   "ratio": 1.11,
+   "disagree": false
+  },
+  "SHB/IMG_278.jpg": {
+   "true": 57,
+   "pet": 55.5,
+   "dm_count": 51,
+   "ratio": 1.09,
+   "disagree": false
+  },
+  "SHB/IMG_279.jpg": {
+   "true": 196,
+   "pet": 183.2,
+   "dm_count": 180,
+   "ratio": 1.02,
+   "disagree": false
+  },
+  "SHB/IMG_280.jpg": {
+   "true": 87,
+   "pet": 92.0,
+   "dm_count": 99,
+   "ratio": 0.93,
+   "disagree": false
+  },
+  "SHB/IMG_281.jpg": {
+   "true": 146,
+   "pet": 140.5,
+   "dm_count": 148,
+   "ratio": 0.95,
+   "disagree": false
+  },
+  "SHB/IMG_282.jpg": {
+   "true": 24,
+   "pet": 25.0,
+   "dm_count": 22,
+   "ratio": 1.13,
+   "disagree": false
+  },
+  "SHB/IMG_283.jpg": {
+   "true": 226,
+   "pet": 200.5,
+   "dm_count": 214,
+   "ratio": 0.94,
+   "disagree": false
+  },
+  "SHB/IMG_284.jpg": {
+   "true": 38,
+   "pet": 38.8,
+   "dm_count": 31,
+   "ratio": 1.24,
+   "disagree": false
+  },
+  "SHB/IMG_285.jpg": {
+   "true": 54,
+   "pet": 56.5,
+   "dm_count": 46,
+   "ratio": 1.23,
+   "disagree": false
+  },
+  "SHB/IMG_286.jpg": {
+   "true": 66,
+   "pet": 79.9,
+   "dm_count": 58,
+   "ratio": 1.38,
+   "disagree": false
+  },
+  "SHB/IMG_287.jpg": {
+   "true": 89,
+   "pet": 91.0,
+   "dm_count": 89,
+   "ratio": 1.02,
+   "disagree": false
+  },
+  "SHB/IMG_288.jpg": {
+   "true": 19,
+   "pet": 23.9,
+   "dm_count": 16,
+   "ratio": 1.49,
+   "disagree": false
+  },
+  "SHB/IMG_289.jpg": {
+   "true": 45,
+   "pet": 48.2,
+   "dm_count": 42,
+   "ratio": 1.15,
+   "disagree": false
+  },
+  "SHB/IMG_290.jpg": {
+   "true": 119,
+   "pet": 84.0,
+   "dm_count": 82,
+   "ratio": 1.03,
+   "disagree": false
+  },
+  "SHB/IMG_291.jpg": {
+   "true": 177,
+   "pet": 166.7,
+   "dm_count": 182,
+   "ratio": 0.91,
+   "disagree": false
+  },
+  "SHB/IMG_292.jpg": {
+   "true": 93,
+   "pet": 87.0,
+   "dm_count": 75,
+   "ratio": 1.16,
+   "disagree": false
+  },
+  "SHB/IMG_293.jpg": {
+   "true": 327,
+   "pet": 306.5,
+   "dm_count": 383,
+   "ratio": 0.8,
+   "disagree": false
+  },
+  "SHB/IMG_294.jpg": {
+   "true": 46,
+   "pet": 47.2,
+   "dm_count": 42,
+   "ratio": 1.12,
+   "disagree": false
+  },
+  "SHB/IMG_295.jpg": {
+   "true": 153,
+   "pet": 139.5,
+   "dm_count": 126,
+   "ratio": 1.1,
+   "disagree": false
+  },
+  "SHB/IMG_296.jpg": {
+   "true": 28,
+   "pet": 30.4,
+   "dm_count": 22,
+   "ratio": 1.38,
+   "disagree": false
+  },
+  "SHB/IMG_297.jpg": {
+   "true": 66,
+   "pet": 63.7,
+   "dm_count": 65,
+   "ratio": 0.97,
+   "disagree": false
+  },
+  "SHB/IMG_298.jpg": {
+   "true": 206,
+   "pet": 215.8,
+   "dm_count": 198,
+   "ratio": 1.09,
+   "disagree": false
+  },
+  "SHB/IMG_299.jpg": {
+   "true": 98,
+   "pet": 100.0,
+   "dm_count": 87,
+   "ratio": 1.15,
+   "disagree": false
+  },
+  "SHB/IMG_300.jpg": {
+   "true": 196,
+   "pet": 171.6,
+   "dm_count": 168,
+   "ratio": 1.02,
+   "disagree": false
+  },
+  "SHB/IMG_301.jpg": {
+   "true": 33,
+   "pet": 34.6,
+   "dm_count": 31,
+   "ratio": 1.12,
+   "disagree": false
+  },
+  "SHB/IMG_302.jpg": {
+   "true": 79,
+   "pet": 78.9,
+   "dm_count": 66,
+   "ratio": 1.2,
+   "disagree": false
+  },
+  "SHB/IMG_303.jpg": {
+   "true": 68,
+   "pet": 76.9,
+   "dm_count": 64,
+   "ratio": 1.19,
+   "disagree": false
+  },
+  "SHB/IMG_304.jpg": {
+   "true": 176,
+   "pet": 180.3,
+   "dm_count": 199,
+   "ratio": 0.91,
+   "disagree": false
+  },
+  "SHB/IMG_305.jpg": {
+   "true": 110,
+   "pet": 95.0,
+   "dm_count": 95,
+   "ratio": 1.0,
+   "disagree": false
+  },
+  "SHB/IMG_306.jpg": {
+   "true": 230,
+   "pet": 210.0,
+   "dm_count": 185,
+   "ratio": 1.14,
+   "disagree": false
+  },
+  "SHB/IMG_307.jpg": {
+   "true": 200,
+   "pet": 191.8,
+   "dm_count": 184,
+   "ratio": 1.05,
+   "disagree": false
+  },
+  "SHB/IMG_308.jpg": {
+   "true": 47,
+   "pet": 48.2,
+   "dm_count": 45,
+   "ratio": 1.07,
+   "disagree": false
+  },
+  "SHB/IMG_309.jpg": {
+   "true": 63,
+   "pet": 66.8,
+   "dm_count": 61,
+   "ratio": 1.1,
+   "disagree": false
+  },
+  "SHB/IMG_310.jpg": {
+   "true": 93,
+   "pet": 90.0,
+   "dm_count": 82,
+   "ratio": 1.1,
+   "disagree": false
+  },
+  "SHB/IMG_311.jpg": {
+   "true": 60,
+   "pet": 57.5,
+   "dm_count": 57,
+   "ratio": 1.0,
+   "disagree": false
+  },
+  "SHB/IMG_312.jpg": {
+   "true": 51,
+   "pet": 53.4,
+   "dm_count": 48,
+   "ratio": 1.11,
+   "disagree": false
+  },
+  "SHB/IMG_313.jpg": {
+   "true": 29,
+   "pet": 30.4,
+   "dm_count": 27,
+   "ratio": 1.12,
+   "disagree": false
+  },
+  "SHB/IMG_314.jpg": {
+   "true": 51,
+   "pet": 51.4,
+   "dm_count": 52,
+   "ratio": 0.98,
+   "disagree": false
+  },
+  "SHB/IMG_315.jpg": {
+   "true": 54,
+   "pet": 56.5,
+   "dm_count": 51,
+   "ratio": 1.11,
+   "disagree": false
+  },
+  "SHB/IMG_316.jpg": {
+   "true": 429,
+   "pet": 358.7,
+   "dm_count": 368,
+   "ratio": 0.98,
+   "disagree": false
+  }
+ }
+}

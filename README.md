@@ -23,8 +23,8 @@ with ordinary cameras.
 | **Home.** Pick what you have: a photo, a video clip, a live camera, or the demo map. | **Analyse a video.** Every head marked, zones turning amber and red as they fill, each zone over time. |
 | ![Site map of the Sangam at Prayagraj with zones and evacuation routes](docs/screenshots/map.jpg) | ![Evacuation plan: risk per zone and where to move people](docs/screenshots/plan.jpg) |
 | **Site map.** Zones on satellite imagery, people per m², and walking routes for moving people. | **Evacuation plan and alerts.** Each zone against its limits, and orders for every zone's team. |
-| ![A sample Indian photo counted: 74 by the model, 74 by hand](docs/screenshots/photo.jpg) | ![How accurate is it: hand-counted Indian photos and the known failure](docs/screenshots/accuracy.jpg) |
-| **Count people in a photo.** A sample from Mumbai's Ganesh festival: 74 by the model, 74 by hand. | **How accurate is it?** Every hand-counted Indian photo, including the one it gets wrong. |
+| ![A sample Indian photo counted: 74 by the model, 74 by hand](docs/screenshots/photo.jpg) | ![How accurate is it: hand-counted Indian photos, model against hand count](docs/screenshots/accuracy.jpg) |
+| **Count people in a photo.** A sample from Mumbai's Ganesh festival: 74 by the model, 74 by hand. | **How accurate is it?** Every hand-counted Indian photo, the model's count against the hand count. |
 
 The plan screenshot uses an example session with made-up counts.
 
@@ -133,7 +133,8 @@ streets (124 on average).
 |---|---|---|
 | Original app: YOLO boxes, faces add-on | **7%** accurate, off by 403 people per photo | **42%**, off by 72 |
 | DM-Count trained for this project | **84%**, off by 70 | **86%**, off by 17 |
-| **PET fine-tuned for this project, with count correction (the app's counter)** | **86.5%**, off by 58.5 | **92.7%**, off by 9.0 |
+| PET fine-tuned for this project, with count correction (first version) | **86.5%**, off by 58.5 | **92.7%**, off by 9.0 |
+| **PET, second version: also trained on UCF-QNRF (the app's counter)** | **86.1%**, off by 60.4 | **92.1%**, off by 9.8 |
 
 *Accuracy = 1 − total counting error ÷ total true count.* Full table, per-photo
 results and the code that made them: [results/shanghaitech](results/shanghaitech),
@@ -169,7 +170,11 @@ What we learned along the way:
   training round by looking at the test photos. Here 10% of the *training*
   photos were held back to pick it, so the test photos stayed unseen.
 
-Both trained models are published as releases ([PET](https://github.com/khushi-git-7/Crowd_shield/releases/tag/pet-shab-v1),
+The second version is level with the first on ShanghaiTech (the differences are within noise, see
+below) and far better on Indian crowds.
+
+The trained models are published as releases ([PET](https://github.com/khushi-git-7/Crowd_shield/releases/tag/pet-qnrf-v1),
+[first PET](https://github.com/khushi-git-7/Crowd_shield/releases/tag/pet-shab-v1),
 [DM-Count](https://github.com/khushi-git-7/Crowd_shield/releases/tag/dmcount-shab-v1))
 and download automatically, with a checksum check, the first time the app counts.
 
@@ -181,13 +186,34 @@ Chithirai festival), temples, stations, markets, stadiums and ghats, credited in
 [data/india_test](data/india_test). They are never used for training. Every head is being
 marked by hand, with ignore zones over people too far away to mark.
 
-On the first 10 hand-checked photos (3,507 people) the counter is about **90% accurate on 9
-of them**, but **66.7% overall**, because of one failure: on a Mumbai railway photo it counts the
-gravel between the tracks as heads (1,267 against 415). Fine-tuning on 23 photos of empty Indian
-tracks fixed that photo (379 against 415) but made the model miss people in smaller crowds, and it
-was slightly worse on ShanghaiTech, so the app keeps the current model. The **How accurate is it?**
-page in the app shows per-scene accuracy and every photo with the true and the model's head points.
-This is a pilot until the remaining photos are labelled.
+On the first 10 hand-checked photos (3,507 people) the first counter was only **66.7%** accurate,
+because of one failure: on a Mumbai railway photo it counted the gravel between the tracks as heads
+(1,267 against 415). A first fix, fine-tuning on those 10 photos and 23 photos of empty Indian tracks,
+fixed that photo but made the model miss people in smaller crowds, so it was not used.
+
+**The second version fixes it without touching the Indian test photos.** It was fine-tuned on
+ShanghaiTech (packed crowds twice over, so it would not forget them), the 1,201 dense and varied
+UCF-QNRF training photos, and the 23 empty-track photos as about 1% of the set. No Indian crowd photo
+was trained on. Every model was compared through the app's own counting code
+([eval/compare_models.py](eval/compare_models.py), [results/model_v2](results/model_v2)):
+
+| Test | First version | Second version | Difference, 95% interval |
+|---|---:|---:|---|
+| Indian photos (10), full detail | 66.6% | **91.6%** | +24.9 points (−3.6 to +84.9) |
+| Indian photos (10), online server | 67.9% | **86.1%** | +18.2 points (−1.4 to +61.9) |
+| UCF-QNRF test (334) | 82.8% | **85.5%** | **+2.7 points (+1.1 to +4.4)** |
+| ShanghaiTech A test (182) | 86.4% | 86.1% | −0.4 points (−2.2 to +1.3) |
+| ShanghaiTech B test (316) | 93.3% | 92.8% | −0.4 points (−1.1 to +0.3) |
+
+The intervals come from a paired bootstrap over the test photos
+([eval/bootstrap_compare.py](eval/bootstrap_compare.py)). The rule, set before the test, was to switch
+only if the ShanghaiTech interval included zero: it did, so the drop there is within noise. The gain on
+UCF-QNRF is real. The Indian gain is large, but 10 photos are too few to prove it, so labelling the rest
+of the India set comes next. The Mumbai photo is now counted as 455 (full detail) or 629 (online server).
+
+The **How accurate is it?** page in the app shows per-scene accuracy and every photo with the true and
+the model's head points (91.1% overall at full detail; the hardest photo is now Thane station, counted
+too low: 311 against 425).
 
 ### Spotting panic
 
@@ -262,6 +288,9 @@ Crowd Shield counts at 640 px; elsewhere it uses 2048 px. On the four test photo
 
 ### Counting on a small server: tiles
 
+*The measurements in this section and the next were made with the first point model. The second one
+has the same size and speed; its accuracy online is in the comparison above.*
+
 The free host has 3.2 GB of memory, too little to run the point model on a 1024 px photo in one pass.
 Shrinking photos to fit (704 px) cost accuracy. Instead, a small server now shrinks photos to 1024 px and
 counts them in tiles of at most 704 px, each with 48 px of overlap, keeping every head only in the tile
@@ -309,6 +338,11 @@ Measured on Kaggle over 603 photos ([results/second_opinion.json](results/second
 It adds about 3 s per photo, and runs only when at least 700 MB of memory is free, so it cannot crash a
 small server; `CROWDSHIELD_SECOND_OPINION=0` turns it off. With one confirmed failure to learn from, this
 is a cautious first rule, to be re-checked as more Indian photos are labelled.
+
+Re-run with the second point model ([results/model_v2/second_opinion.json](results/model_v2/second_opinion.json)):
+still 0 of the 498 ShanghaiTech photos, and the Mumbai photo is no longer flagged because it is now counted
+about right. Of the 95 unlabelled Indian photos it flags one, a false alarm: a crowd of about 8,000 where both
+models agree at full size, but DM-Count undercounts once the photo is shrunk to 768 px.
 
 ## Run it
 
@@ -387,7 +421,8 @@ moving?", never "who is this?".
 ## Limits
 
 - The India test is a pilot: 10 of its 105 photos are hand-checked so far, and the counter
-  fails on railway-track gravel seen from above.
+  can still miscount unusual scenes (it counts the Thane station photo too low). The Indian gain of
+  the second model is large but not yet statistically proven on 10 photos.
 - Density needs a calibrated, fixed camera. A moving phone video gives counts
   and speeds in pixels only.
 - The early warning extends the recent trend in a straight line. It is a

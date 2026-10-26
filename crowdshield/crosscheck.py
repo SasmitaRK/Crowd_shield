@@ -2,11 +2,15 @@
 
 PET can put dots on things that are not heads: railway gravel, waves at the horizon, rows of advertising
 boards. The density model (DM-Count) makes different mistakes, so when PET counts far more than DM-Count
-does, the photo is worth a second look. Measured on Kaggle (results/second_opinion.json): with DM-Count on
-the photo shrunk to 768 px and a ratio above 2.5, it flagged none of the 498 ShanghaiTech test photos and
-none of the 9 well-counted hand-labelled Indian photos, and it flagged the Mumbai railway photo (PET 1,282
-against 415 true). Of the 95 Indian photos without a hand count it flagged one, a stadium where PET put a
-band of dots along the advertising boards.
+does, the photo is worth a second look. Measured on Kaggle with the first point model
+(results/second_opinion.json): with DM-Count on the photo shrunk to 768 px and a ratio above 2.5, it
+flagged none of the 498 ShanghaiTech test photos and none of the 9 well-counted hand-labelled Indian
+photos, and it flagged the Mumbai railway photo (PET 1,282 against 415 true).
+
+Re-run with the current point model (results/model_v2/second_opinion.json): still none of the 498
+ShanghaiTech photos, and none of the 10 hand-labelled Indian photos, because it now counts the Mumbai
+photo about right. Of the 95 Indian photos without a hand count it flagged one, a false alarm: a crowd of
+about 8,000 where both models agree at full size, but DM-Count undercounts once the photo is shrunk.
 
 It never changes the count: the app still reports PET's number, with a warning to look at the dots.
 """
