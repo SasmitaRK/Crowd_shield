@@ -1,5 +1,7 @@
 """Runs the real detectors on a sample photo. Skipped where Ultralytics isn't installed."""
 
+from pathlib import Path
+
 import pytest
 
 pytest.importorskip("ultralytics")
@@ -19,6 +21,8 @@ def test_coco_model_counts_the_people_by_the_bus():
     assert det["count"] >= 3
 
 
+@pytest.mark.skipif(not (Path(__file__).resolve().parent.parent / "models" / "crowd_yolo.pt").exists(),
+                    reason="the original drone model is no longer shipped (see models/README.md)")
 def test_drone_model_loads_and_runs():
     det = detect_people(cv2.imread(str(BUS)), "crowd_yolo", allow_fallback=False)
     assert det["detector"] == "crowd_yolo"

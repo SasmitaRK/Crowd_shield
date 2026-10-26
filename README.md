@@ -34,7 +34,7 @@ The plan screenshot uses an example session with made-up counts.
 
 | | |
 |---|---|
-| **Count people** | A point model (PET) puts a dot on every head, so it keeps working when bodies overlap and shows exactly where people are. A density-map model (DM-Count) and YOLO are fallbacks. |
+| **Count people** | A point model (PET) puts a dot on every head, so it keeps working when bodies overlap and shows exactly where people are. A density-map model (DM-Count) is the fallback, and its second opinion flags suspicious counts. |
 | **People per m²** | Mark a rectangle of known size on the floor once (a few tiles, a doorway, parking lines). A homography maps every pixel to real ground area, so counts become densities. |
 | **Danger levels** | From crowd-safety research: about 2.2 people/m² is where normal walking breaks down (Fruin), above 5 is a serious risk (Still), and around 7 a crowd moves "almost as a fluid mass" (Fruin, quoted by Helbing et al.). |
 | **Crowd pressure** | Density × local velocity variance (Helbing, Johansson and Al-Abideen, 2007). In the 2006 Hajj disaster video, turbulent pushing began above 0.02 /s², and the crush came at its peak. |
@@ -317,10 +317,12 @@ pip install -r requirements.txt
 streamlit run main.py
 ```
 
-Python 3.10+. Counting with the density model needs PyTorch, which Ultralytics
-installs. Without it the app falls back to YOLO. Email alerts need
-`GMAIL_USER` and `GMAIL_APP_PASSWORD` environment variables; see the
-Settings page.
+Python 3.10+. The two counting models (PET and DM-Count) need PyTorch, which
+`requirements.txt` installs (CPU build); their weights download on first use
+(see [models/README.md](models/README.md)). The original YOLO detectors are an
+optional last fallback: `pip install ultralytics dill` to use them. Alerts need
+`TELEGRAM_BOT_TOKEN` and `TELEGRAM_CHAT_ID`, or `GMAIL_USER` and
+`GMAIL_APP_PASSWORD`, as environment variables; see Team and alerts in the app.
 
 Tests: `pytest`. GitHub Actions also runs the real detector and density model
 and renders every page.

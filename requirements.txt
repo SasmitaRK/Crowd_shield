@@ -5,11 +5,9 @@ torch
 torchvision
 streamlit>=1.50
 numpy>=1.24
-matplotlib>=3.8
-# Brings opencv-python. Don't add opencv-python-headless too: two OpenCV builds break cv2.
-ultralytics>=8.1
-# The custom crowd model (models/crowd_yolo.pt) was saved with dill.
-dill>=0.3
+# OpenCV without a display, which a server doesn't have. (Installing ultralytics too would bring the full
+# opencv-python as well, and two OpenCV builds break cv2.)
+opencv-python-headless>=4.8
 scipy>=1.10
 # Site map: Leaflet maps inside Streamlit.
 folium>=0.20

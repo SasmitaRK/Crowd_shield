@@ -38,3 +38,16 @@ jobs:
       # dill is needed to load the older custom crowd model.
       - run: pip install ultralytics dill scipy pytest
       - run: pytest -q tests/test_detection_smoke.py tests/test_density_smoke.py tests/test_points_smoke.py
+
+  deploy-requirements:
+    # Installs exactly what Streamlit Community Cloud installs, so a missing package fails here, not live.
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: sudo apt-get update && sudo apt-get install -y $(cat packages.txt)
+      - run: pip install -r requirements.txt pytest
+      - run: python -c "import cv2, torch, torchvision, streamlit, folium, streamlit_folium, imageio_ffmpeg, scipy; print('imports ok', cv2.__version__, torch.__version__)"
+      - run: pytest -q tests/test_app_pages.py tests/test_live_page.py tests/test_video_render.py tests/test_crosscheck.py tests/test_tiles.py
