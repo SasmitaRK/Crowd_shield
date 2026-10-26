@@ -10,7 +10,6 @@ import pytest
 
 pytest.importorskip("streamlit")
 pytest.importorskip("cv2")
-pytest.importorskip("matplotlib")
 
 from streamlit.testing.v1 import AppTest  # noqa: E402
 
