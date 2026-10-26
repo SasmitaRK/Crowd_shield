@@ -28,12 +28,12 @@ if not rows:
     st.stop()
 
 acc = accuracy(rows)
-mae = sum(abs(r["error"]) for r in rows) / len(rows)
+close = sum(abs(r["error"]) <= 0.25 * r["true"] for r in rows)
 worst = max(rows, key=lambda r: abs(r["error"]))
 others = [r for r in rows if r is not worst]
 kpi_cards([
     ("Accuracy, all photos", f"{acc:.1%}", "1 − total error ÷ total true count"),
-    ("Off by, per photo", f"{mae:,.0f}", "mean absolute error (people)"),
+    ("Photos within 25%", f"{close} of {len(rows)}", "of the hand count"),
     ("Without the worst photo", f"{accuracy(others):.1%}", f"leaving out {worst['image']}"),
     ("Heads checked by hand", f"{sum(r['true'] for r in rows):,}", f"in {len(rows)} photos"),
 ], accents=["#0d9488", "#2a78d6", "#94a3b8", "#1baf7a"])
@@ -55,7 +55,7 @@ with left:
     st.dataframe(scenes, hide_index=True, width="stretch", column_config={
         "scene": "Scene", "photos": "Photos", "people": st.column_config.NumberColumn("People", format="%d"),
         "accuracy": st.column_config.ProgressColumn("Accuracy", min_value=0.0, max_value=1.0, format="percent"),
-        "mae": st.column_config.NumberColumn("Off by (per photo)", format="%.0f"),
+        "mae": st.column_config.NumberColumn("Off by", help="Average people off, per photo", format="%.0f"),
     })
     st.caption("Accuracy below zero (more error than people) is shown as 0. Scenes with one or two "
                "photos are a hint, not a result, until more photos are labelled.")
@@ -65,9 +65,11 @@ with right:
     df = pd.DataFrame([{"Photo": r["image"], "Scene": r["scene"], "True": r["true"],
                         "Model": round(r["model"]), "Error": round(r["error"])} for r in rows])
     top = max(df["True"].max(), df["Model"].max()) * 1.08
-    line = alt.Chart(pd.DataFrame({"x": [1, top], "y": [1, top]})).mark_line(
-        color="#94a3b8", strokeDash=[4, 4]).encode(x="x", y="y")
-    dots = alt.Chart(df).mark_circle(size=110, color="#2a78d6", opacity=0.85,
+    line = alt.Chart(pd.DataFrame({"x": [10, top], "y": [10, top]})).mark_line(
+        color="#94a3b8", strokeDash=[4, 4], clip=True).encode(
+        x=alt.X("x:Q", scale=alt.Scale(type="log", domain=[10, top])),
+        y=alt.Y("y:Q", scale=alt.Scale(type="log", domain=[10, top])))
+    dots = alt.Chart(df).mark_circle(size=110, clip=True, color="#2a78d6", opacity=0.85,
                                      stroke="#ffffff", strokeWidth=1.5).encode(
         x=alt.X("True:Q", title="True count (hand-checked)", scale=alt.Scale(type="log", domain=[10, top])),
         y=alt.Y("Model:Q", title="Model count", scale=alt.Scale(type="log", domain=[10, top])),
