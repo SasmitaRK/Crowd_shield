@@ -6,7 +6,7 @@ from crowdshield import config
 from crowdshield.risk import thresholds_from_area
 from crowdshield.session import BadSession, export_session, import_session
 from shared_state import DEFAULT_LIMITS, DEFAULT_THRESHOLDS, FRUIN_PRESETS, GLOBAL_CSS, SEGMENTS, init_state, zone_label
-from ui import page_header, section
+from ui import next_step, page_header, section
 
 st.set_page_config(page_title="Settings • Crowd Shield", page_icon=None, layout="wide")
 st.markdown(GLOBAL_CSS, unsafe_allow_html=True)
@@ -180,3 +180,5 @@ with st.expander("About this server (for the curious)"):
     st.caption(f"Running from `{config.REPO_ROOT}`"
                f"{' (Streamlit Community Cloud)' if config.on_streamlit_cloud() else ''}.")
 
+next_step("With the limits set, count the people in a photo of each zone.", "pages/2_Upload.py",
+          "Count people in a photo", "/Upload", ":material/photo_camera:")

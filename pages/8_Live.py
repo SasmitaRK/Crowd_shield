@@ -28,8 +28,8 @@ RISK_BGR = {"Safe": (129, 185, 16), "Moderate": (11, 158, 245), "High Risk": (22
 DEMO_LAYOUT = {"Stairs and concourse": [("Stairs", 0.67, 0.25, 1.0, 1.0, 30), ("Concourse", 0.0, 0.53, 0.65, 1.0, 30)]}
 
 st.caption("It looks at one picture every 30 seconds or more, not at every frame (for sudden surges, use Analyse a "
-           "video). It runs while this page is open; to watch a camera all day, run it on a laptop "
-           "(docs/run-on-your-laptop.md).")
+           "video). It runs while this page is open; to watch a camera all day, "
+           "[run Crowd Shield on a laptop](https://github.com/khushi-git-7/Crowd_shield/blob/main/docs/run-on-your-laptop.md).")
 
 # ---- 1. Source ------------------------------------------------------------
 SOURCES = ["Demo feed (a recorded clip played as if live)", "A real public camera (live now)", "My own camera"]
@@ -52,7 +52,7 @@ else:
     if not link:
         st.info("Paste a camera address, or pick the demo or the public camera above. For a camera on your own "
                 "network (or a phone running the free IP Webcam app), run Crowd Shield on your computer with "
-                "`CROWDSHIELD_ALLOW_PRIVATE_URLS=1`; see docs/run-on-your-laptop.md.")
+                "`CROWDSHIELD_ALLOW_PRIVATE_URLS=1` ([how to run it on your computer](https://github.com/khushi-git-7/Crowd_shield/blob/main/docs/run-on-your-laptop.md)).")
         st.stop()
 if link:
     resolved = st.session_state.setdefault("live_streams", {})
