@@ -63,8 +63,8 @@ with mail:
 | `GMAIL_USER` | Gmail address that sends alerts |
 | `GMAIL_APP_PASSWORD` | 16-character app password from Google |
 
-1. Turn on 2-Step Verification at <https://myaccount.google.com/security>.
-2. Make an app password at <https://myaccount.google.com/apppasswords> (name it Crowd Shield).
+1. Turn on 2-Step Verification in your [Google account security settings](https://myaccount.google.com/security).
+2. Make an [app password](https://myaccount.google.com/apppasswords) and name it Crowd Shield.
 3. Add both as secrets (on Streamlit Community Cloud: **App settings → Secrets**).
         """)
 

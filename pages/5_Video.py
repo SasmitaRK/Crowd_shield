@@ -147,7 +147,7 @@ with tab_example:
                 "analysed by Crowd Shield. **Press play.**")
     show_result(SAMPLE_VIDEO.read_bytes(), pd.DataFrame(data["rows"]), data["events"],
                 {z["name"]: z["capacity"] for z in data["zones"]}, calibrated=False, key="example")
-    st.caption(SAMPLE_CREDIT + f" Analysed with the same code as your own clips ({data['counter']}, once a second). "
+    st.caption(SAMPLE_CREDIT + f" Analysed with the same code as your own clips, counting once a second with the {data['counter']}. "
                "The zone sizes (40 and 50 people) are examples, chosen for the demo.")
     nav_link("pages/8_Live.py", "Want this on a camera that is live right now? Watch a live camera",
              ":material/sensors:", "/Live")

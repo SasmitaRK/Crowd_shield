@@ -72,7 +72,7 @@ with st.sidebar:
         "<div style='margin-top:.7rem'>"
         "<a href='https://khushi-git-7.github.io/Crowd_shield/' target='_blank'>About the project</a> · "
         "<a href='https://github.com/khushi-git-7/Crowd_shield' target='_blank'>Code</a> · "
-        "<a href='https://github.com/khushi-git-7/Crowd_shield/issues/new?template=feedback.yml' target='_blank'>Send feedback</a>"
+        "<a href='https://github.com/khushi-git-7/Crowd_shield/issues/new?template=feedback.yml' target='_blank' title='Opens a short form on GitHub (needs a free account)'>Send feedback</a>"
         "</div></div>",
         unsafe_allow_html=True)
 

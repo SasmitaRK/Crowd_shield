@@ -13,7 +13,7 @@ from crowdshield.risk import plan_optimal
 from detection import risk_level
 from emailer import build_critical_email, build_receiving_email, email_configured, send_email
 from shared_state import GLOBAL_CSS, RISK_COLORS, SEGMENTS, get_seg_thresholds, init_state, limits_note, zone_label, zone_title
-from ui import compact, kpi_cards, nav_link, page_header, risk_pill, section
+from ui import compact, kpi_cards, nav_link, next_step, page_header, risk_pill, section
 
 st.set_page_config(page_title="Evacuation plan and alerts • Crowd Shield", page_icon=None, layout="wide")
 st.markdown(GLOBAL_CSS, unsafe_allow_html=True)
@@ -237,3 +237,6 @@ for seg, info in seg_info.items():
                      "; ".join(f"{p['target'] or 'nowhere'} ({p['move']})" for p in mine)])
 st.download_button("Download the counts and plan (CSV)", buf.getvalue(), file_name="crowd_shield_report.csv",
                    mime="text/csv", icon=":material/download:")
+
+next_step("See these zones on a satellite map, with the walking routes for each move.", "pages/6_Map.py",
+          "Open the site map", "/Map", ":material/map:")

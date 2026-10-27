@@ -31,16 +31,23 @@ acc = accuracy(rows)
 close = sum(abs(r["error"]) <= 0.25 * r["true"] for r in rows)
 worst = max(rows, key=lambda r: abs(r["error"]))
 others = [r for r in rows if r is not worst]
+
+
+def photo_name(r) -> str:
+    """A photo's Commons title, readable: "Crowded Thane station on 31 Dec 2012 01"."""
+    return r["title"].rsplit(".", 1)[0].replace("_", " ")
+
+
 kpi_cards([
     ("Accuracy, all photos", f"{acc:.1%}", "1 − total error ÷ total true count"),
     ("Photos within 25%", f"{close} of {len(rows)}", "of the hand count"),
-    ("Without the worst photo", f"{accuracy(others):.1%}", f"leaving out {worst['image']}"),
+    ("Without the worst photo", f"{accuracy(others):.1%}", f"leaving out {photo_name(worst)}"),
     ("Heads checked by hand", f"{sum(r['true'] for r in rows):,}", f"in {len(rows)} photos"),
 ], accents=["#0d9488", "#2a78d6", "#94a3b8", "#1baf7a"])
 
 st.markdown(
     f"<div class='card' style='margin-top:1rem;font-size:.9rem'><b>Hardest photo:</b> on "
-    f"<b>{html.escape(worst['title'])}</b> the model counted <b>{worst['model']:,.0f}</b> against "
+    f"<b>{html.escape(photo_name(worst))}</b> the model counted <b>{worst['model']:,.0f}</b> against "
     f"<b>{worst['true']:,}</b> real people ({'too few' if worst['error'] < 0 else 'too many'}).<br>"
     f"<b>What changed:</b> the first model took the gravel between Mumbai's railway tracks for heads and counted "
     f"1,267 people against 415. The current one also learned from 1,200 dense crowd photos (UCF-QNRF) and from "
@@ -89,7 +96,7 @@ section("Look at any photo", "Blue rings are the hand-checked heads, orange dots
         "Grey boxes are ignore zones, left out of both counts.")
 names = [r["image"] for r in rows]
 pick = st.selectbox("Photo", names, format_func=lambda n: next(
-    f"{r['image']} · {r['scene']} · true {r['true']:,}, model {r['model']:,.0f}" for r in rows if r["image"] == n))
+    f"{photo_name(r)} · {r['scene']} · true {r['true']:,}, model {r['model']:,.0f}" for r in rows if r["image"] == n))
 r = next(r for r in rows if r["image"] == pick)
 img = cv2.imread(str(INDIA / "images" / pick))
 if img is not None:
@@ -111,8 +118,8 @@ if img is not None:
     b.image(draw(r["model_points"], (52, 104, 235), False),
             caption=f"Model: {len(r['model_points']):,} points, {r['model']:,.0f} after count correction",
             width="stretch")
-    st.caption(f"Photo: {html.escape(r['author'] or 'unknown')}, {r['license']}, via Wikimedia Commons "
-               f"({r['source']}).")
+    st.caption(f"Photo: {html.escape(r['author'] or 'unknown')}, {r['license']}, via "
+               f"[Wikimedia Commons]({r['source']}).")
 
 with st.expander("How this is measured"):
     st.markdown("""
