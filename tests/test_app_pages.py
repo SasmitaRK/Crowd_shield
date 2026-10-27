@@ -133,12 +133,42 @@ def test_analysis_page_sends_one_telegram_message_for_the_team(monkeypatch):
     sent = []
     monkeypatch.setenv("TELEGRAM_BOT_TOKEN", "test-token")
     monkeypatch.setenv("TELEGRAM_CHAT_ID", "1")
-    monkeypatch.setattr(notify, "send_telegram", lambda text, image=None: sent.append(text) or (True, "Sent."))
+    monkeypatch.setattr(notify, "send_telegram",
+                        lambda text, image=None, chat_id=None: sent.append(text) or (True, "Sent."))
     crowd = {"A": zone_result(95), "B": zone_result(10)}
     app = render(PAGES["Analysis"], crowd_data=crowd)
     next(b for b in app.button if b.label == "Send alerts").click().run()
     assert not app.exception, [e.message for e in app.exception]
     assert len(sent) == 1 and "Zone A: CRITICAL, 95 people. Move ~" in sent[0]
+
+
+def test_a_visitor_connects_their_own_telegram_and_alerts_go_there(monkeypatch):
+    from crowdshield import notify
+
+    monkeypatch.setenv("TELEGRAM_BOT_TOKEN", "test-token")
+    monkeypatch.delenv("TELEGRAM_CHAT_ID", raising=False)
+    monkeypatch.setattr(notify, "bot_username", lambda: "CrowdShieldBot")
+    found = {}
+    monkeypatch.setattr(notify, "find_chat", lambda code: found.get(code))
+    sent = []
+    monkeypatch.setattr(notify, "send_telegram",
+                        lambda text, image=None, chat_id=None: sent.append((chat_id, text)) or (True, "Sent."))
+    app = render(PAGES["Agents"])
+    code = app.session_state.telegram_code
+    assert any(f"https://t.me/CrowdShieldBot?start={code}" in m.value for m in app.markdown)
+
+    next(b for b in app.button if b.label == "I pressed Start").click().run()  # not pressed in Telegram yet
+    assert any("Not yet" in w.value for w in app.warning) and "telegram_chat" not in app.session_state
+
+    found[code] = ("777", "Asha")
+    next(b for b in app.button if b.label == "I pressed Start").click().run()
+    assert app.session_state.telegram_chat == {"id": "777", "name": "Asha"}
+    assert sent[-1][0] == "777" and any("Asha" in s.value for s in app.success)
+
+    crowd = {"A": zone_result(95), "B": zone_result(10)}
+    plan = render(PAGES["Analysis"], crowd_data=crowd, telegram_chat={"id": "777", "name": "Asha"})
+    next(b for b in plan.button if b.label == "Send alerts").click().run()
+    assert sent[-1][0] == "777" and "Zone A: CRITICAL" in sent[-1][1]
 
 
 def test_analysis_page_points_to_settings_when_no_alert_channel_is_set_up(monkeypatch):

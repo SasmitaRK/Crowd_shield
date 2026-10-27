@@ -1,35 +1,100 @@
 """Alert channels: Telegram (free, works on a phone) and, if set up, email.
 
-Telegram needs two settings, TELEGRAM_BOT_TOKEN and TELEGRAM_CHAT_ID, as environment variables or
-Streamlit secrets. Nothing here is sent unless something calls it: the live monitor on a new alert, the
-"Send alerts" button on the evacuation plan, or a test button in Team and alerts. The token is never put in a message or an error.
+Telegram needs a bot token, TELEGRAM_BOT_TOKEN, as an environment variable or Streamlit secret, and a chat
+to write to. That chat is either a fixed one, TELEGRAM_CHAT_ID (a team running its own copy), or one a
+user links for their own session: they open the bot from a link with a one-time code and press Start, and
+`find_chat` reads the code back from the bot's updates. So on a shared, public app every visitor gets
+alerts on their own phone, and nobody can message a chat that did not ask for it.
+
+Nothing here is sent unless something calls it: the live monitor on a new alert, the "Send alerts"
+button on the evacuation plan, or a test button in Team and alerts. The token is never put in a message
+or an error.
 """
 
 from __future__ import annotations
 
 import json
 import os
+import secrets
 import urllib.error
 import urllib.parse
 import urllib.request
 
 API = "https://api.telegram.org"
 TIMEOUT_S = 10
+KEEP_UPDATES = 30  # recent /start messages kept, so links opened in the last few minutes are still found
 
 
 def _setting(name: str) -> str:
     return (os.environ.get(name) or "").strip()
 
 
-def telegram_configured() -> bool:
-    return bool(_setting("TELEGRAM_BOT_TOKEN") and _setting("TELEGRAM_CHAT_ID"))
+def bot_ready() -> bool:
+    """There is a bot, so users can link their own chat to it."""
+    return bool(_setting("TELEGRAM_BOT_TOKEN"))
 
 
-def ready_channels() -> list[str]:
+def _chat(chat_id: str | None) -> str:
+    return str(chat_id or _setting("TELEGRAM_CHAT_ID"))
+
+
+def telegram_configured(chat_id: str | None = None) -> bool:
+    """A bot and a chat to write to: `chat_id` (a user's own) or the fixed TELEGRAM_CHAT_ID."""
+    return bool(bot_ready() and _chat(chat_id))
+
+
+def ready_channels(chat_id: str | None = None) -> list[str]:
     """The alert channels that are set up, as the app names them: "Telegram" and/or "email"."""
     from emailer import email_configured
 
-    return [name for name, ready in (("Telegram", telegram_configured()), ("email", email_configured())) if ready]
+    return [name for name, ready in (("Telegram", telegram_configured(chat_id)), ("email", email_configured()))
+            if ready]
+
+
+_bot_names: dict[str, str] = {}
+
+
+def bot_username() -> str | None:
+    """The bot's @name, for the link that opens it; None if Telegram can't be reached."""
+    token = _setting("TELEGRAM_BOT_TOKEN")
+    if token and token not in _bot_names:
+        try:
+            reply = _post("getMe", {})
+        except Exception:
+            return None
+        if reply.get("ok"):
+            _bot_names[token] = reply["result"]["username"]
+    return _bot_names.get(token)
+
+
+def new_link_code() -> str:
+    """A one-time code for the link that opens the bot (letters and digits, as Telegram allows)."""
+    return secrets.token_hex(8)
+
+
+def connect_link(code: str) -> str | None:
+    name = bot_username()
+    return f"https://t.me/{name}?start={code}" if name else None
+
+
+def find_chat(code: str) -> tuple[str, str] | None:
+    """(chat id, first name) of whoever opened the bot with this code and pressed Start, if anyone has."""
+    try:
+        reply = _post("getUpdates", {"allowed_updates": '["message"]', "limit": 100})
+    except Exception:
+        return None
+    updates = reply.get("result", [])
+    if len(updates) > KEEP_UPDATES:  # Telegram keeps unread updates for a day; let go of all but the newest
+        try:
+            _post("getUpdates", {"offset": updates[-KEEP_UPDATES]["update_id"], "limit": 1})
+        except Exception:
+            pass
+    for update in reversed(updates):
+        message = update.get("message") or {}
+        if (message.get("text") or "").strip() == f"/start {code}":
+            chat = message["chat"]
+            return str(chat["id"]), chat.get("first_name") or chat.get("title") or ""
+    return None
 
 
 def _post(method: str, fields: dict, files: dict | None = None) -> dict:
@@ -52,11 +117,11 @@ def _post(method: str, fields: dict, files: dict | None = None) -> dict:
         return json.loads(response.read().decode())
 
 
-def send_telegram(text: str, image_bytes: bytes | None = None) -> tuple[bool, str]:
-    """Send a message (and optionally a photo) to the configured chat. Returns (ok, message)."""
-    if not telegram_configured():
-        return False, "Telegram is not set up (needs TELEGRAM_BOT_TOKEN and TELEGRAM_CHAT_ID)."
-    chat = _setting("TELEGRAM_CHAT_ID")
+def send_telegram(text: str, image_bytes: bytes | None = None, chat_id: str | None = None) -> tuple[bool, str]:
+    """Send a message (and optionally a photo) to `chat_id`, or the fixed chat. Returns (ok, message)."""
+    if not telegram_configured(chat_id):
+        return False, "Telegram is not set up: connect your Telegram in Team and alerts."
+    chat = _chat(chat_id)
     try:
         if image_bytes:
             reply = _post("sendPhoto", {"chat_id": chat, "caption": text[:1024]},
@@ -85,11 +150,12 @@ def alert_text(zone: str, name: str, risk: str, count: float, per_m2: float | No
     return "\n".join(lines)
 
 
-def broadcast(text: str, image_bytes: bytes | None = None, email_to: list[str] | None = None) -> list[str]:
+def broadcast(text: str, image_bytes: bytes | None = None, email_to: list[str] | None = None,
+              chat_id: str | None = None) -> list[str]:
     """Send an alert on every channel that is set up. Returns one status line per attempt."""
     results = []
-    if telegram_configured():
-        ok, message = send_telegram(text, image_bytes)
+    if telegram_configured(chat_id):
+        ok, message = send_telegram(text, image_bytes, chat_id)
         results.append(f"Telegram: {message}")
     if email_to:
         from emailer import email_configured, send_email
@@ -99,5 +165,5 @@ def broadcast(text: str, image_bytes: bytes | None = None, email_to: list[str] |
                 ok, message = send_email(address, "Crowd Shield alert", f"<pre>{text}</pre>", image_bytes)
                 results.append(f"Email {address}: {message}")
     if not results:
-        results.append("No alert channel is set up (add Telegram or Gmail in Team and alerts).")
+        results.append("No alert channel is set up (connect Telegram or add Gmail in Team and alerts).")
     return results

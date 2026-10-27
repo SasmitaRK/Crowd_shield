@@ -57,6 +57,11 @@ def limits_note() -> str:
     return note
 
 
+def telegram_chat() -> str | None:
+    """The Telegram chat this visitor linked in Team and alerts, if any (kept for this session only)."""
+    return (st.session_state.get("telegram_chat") or {}).get("id")
+
+
 def get_seg_thresholds(seg: str) -> dict:
     t = st.session_state.get("thresholds", {})
     if seg not in t:

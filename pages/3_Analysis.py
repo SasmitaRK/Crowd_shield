@@ -12,7 +12,7 @@ from crowdshield.config import COUNTER_LABELS
 from crowdshield.risk import plan_optimal
 from detection import risk_level
 from emailer import build_critical_email, build_receiving_email, email_configured, send_email
-from shared_state import GLOBAL_CSS, RISK_COLORS, SEGMENTS, get_seg_thresholds, init_state, limits_note, zone_label, zone_title
+from shared_state import GLOBAL_CSS, RISK_COLORS, SEGMENTS, get_seg_thresholds, init_state, limits_note, telegram_chat, zone_label, zone_title
 from ui import compact, kpi_cards, nav_link, next_step, page_header, risk_pill, section
 
 st.set_page_config(page_title="Evacuation plan and alerts • Crowd Shield", page_icon=None, layout="wide")
@@ -51,7 +51,7 @@ pairings = plan_optimal(seg_info, adjacency=adjacency)
 at_risk = [s for s, i in seg_info.items() if i["risk"] in ("High Risk", "Critical")]
 placed = sum(p["move"] for p in pairings if p["target"])
 stuck = sum(p["move"] for p in pairings if not p["target"])
-channels = notify.ready_channels()
+channels = notify.ready_channels(telegram_chat())
 
 kpi_cards([
     ("People counted", compact(sum(i["count"] for i in seg_info.values())), f"in {len(seg_info)} zone(s)"),
@@ -168,13 +168,13 @@ def team_message():
 if not pairings:
     st.success("No zone is at High Risk or Critical, so there is nothing to send.")
 elif not channels:
-    st.warning("No alert channel is set up. Add Telegram (free, on your phone) or Gmail in Team and alerts, then come "
+    st.warning("No alert channel is set up. Connect your Telegram (free, on your phone) or add Gmail in Team and alerts, then come "
                "back here to send.")
     nav_link("pages/1_Agents.py", "Set up alerts in Team and alerts", ":material/groups:", "/Agents")
 else:
     plan_lines = []
     if "Telegram" in channels:
-        plan_lines.append("**Telegram team chat:** one message listing every zone that needs action, with the "
+        plan_lines.append("**Telegram:** one message listing every zone that needs action, with the "
                           "busiest photo.")
     if "email" in channels:
         for seg in sorted({p["high"] for p in pairings}):
@@ -188,7 +188,7 @@ else:
         sent, failed = [], []
         if "Telegram" in channels:
             worst = max(at_risk, key=lambda s: seg_info[s]["count"] / seg_info[s]["thresholds"]["critical"])
-            ok, msg = notify.send_telegram(team_message(), peak_image(worst))
+            ok, msg = notify.send_telegram(team_message(), peak_image(worst), telegram_chat())
             (sent if ok else failed).append(f"Telegram: {msg}")
         if "email" in channels:
             for seg in sorted({p["high"] for p in pairings}):

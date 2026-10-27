@@ -25,7 +25,7 @@ if previous != "tests" and previous != stamp:  # also on the first run: modules 
     sys.crowdshield_code_stamp = stamp
 
 from crowdshield.notify import ready_channels  # noqa: E402
-from shared_state import init_state  # noqa: E402
+from shared_state import init_state, telegram_chat  # noqa: E402
 
 st.set_page_config(page_title="Crowd Shield", page_icon="assets/mark.svg", layout="wide",
                    initial_sidebar_state="auto")  # open on computers, closed on phones
@@ -61,7 +61,7 @@ page = st.navigation(PAGES)
 
 with st.sidebar:
     counted = len(st.session_state.crowd_data)
-    channels = ready_channels()
+    channels = ready_channels(telegram_chat())
     st.markdown(
         "<div class='rail-foot'>"
         "<div style='font-weight:700;color:#94a3b8;margin-bottom:.2rem'>This session</div>"

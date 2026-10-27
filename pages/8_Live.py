@@ -12,7 +12,7 @@ from ui import kpi_cards, next_step, page_header, section, working, zone_picker
 
 from crowdshield import counting, live, notify
 from crowdshield.config import NotEnoughMemory
-from shared_state import GLOBAL_CSS, init_state
+from shared_state import GLOBAL_CSS, init_state, telegram_chat
 
 st.set_page_config(page_title="Watch a live camera • Crowd Shield", page_icon=None, layout="wide")
 st.markdown(GLOBAL_CSS, unsafe_allow_html=True)
@@ -117,9 +117,9 @@ c1, c2, c3 = st.columns([2, 2, 3])
 interval = c1.slider("Seconds between counts", MIN_INTERVAL, 300, max(MIN_INTERVAL, 45),
                      help="Counting a frame takes a few seconds to a minute depending on the server, so "
                           f"on this app it can't go below {MIN_INTERVAL} s.")
-channels = notify.ready_channels()
+channels = notify.ready_channels(telegram_chat())
 send_alerts = c2.toggle("Send alerts", value=False, disabled=not channels,
-                        help="No alert channel is set up yet: add Telegram or Gmail in Team and alerts." if not channels
+                        help="No alert channel is set up yet: connect your Telegram (or add Gmail) in Team and alerts." if not channels
                         else f"Sends to {' and '.join(channels)}. A zone reaching High Risk or Critical is sent "
                              "once, then that zone stays quiet for 10 minutes.")
 running = c3.toggle("Monitoring", key="live_on", help="Start or stop counting.")
@@ -167,7 +167,7 @@ def tick():
         info = zones[event["zone"]]
         text = notify.alert_text(event["zone"], event["zone"], event["risk"], event["count"], event["per_m2"],
                                  None if event["eta_s"] is None else event["eta_s"] / 60)
-        sent = notify.broadcast(text) if send_alerts else ["alerts are off"]
+        sent = notify.broadcast(text, chat_id=telegram_chat()) if send_alerts else ["alerts are off"]
         state["alerts"].append({"time": time.strftime("%H:%M:%S"), "zone": event["zone"], "risk": event["risk"],
                                 "kind": event["kind"], "sent": "; ".join(sent)})
     state["last"] = result

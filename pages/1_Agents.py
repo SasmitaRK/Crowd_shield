@@ -7,7 +7,7 @@ import streamlit as st
 
 from crowdshield import notify
 from emailer import email_configured, send_email
-from shared_state import GLOBAL_CSS, SEGMENTS, init_state, zone_label
+from shared_state import GLOBAL_CSS, SEGMENTS, init_state, telegram_chat, zone_label
 from ui import kpi_cards, next_step, page_header, section
 
 st.set_page_config(page_title="Team and alerts • Crowd Shield", page_icon=None, layout="wide")
@@ -17,7 +17,7 @@ init_state()
 page_header("Team and alerts", "Choose who hears about danger. A Telegram chat gets one message for the whole team; "
             "each zone's contact gets an email with their own orders.", "Set up")
 
-channels = notify.ready_channels()
+channels = notify.ready_channels(telegram_chat())
 assigned = sum(1 for v in st.session_state.agents.values() if v)
 kpi_cards([
     ("Alerts", "Ready" if channels else "Off", " and ".join(channels) if channels else "set up below"),
@@ -29,22 +29,54 @@ section("1. Where alerts go", "Nothing is ever sent on its own: only when you pr
         "plan, switch alerts on while watching a live camera, or press a test button here.")
 tg, mail = st.columns(2)
 with tg:
-    st.markdown("**Telegram** (free, works on a phone)")
-    if notify.telegram_configured():
-        st.success("Telegram is set up.")
+    st.markdown("**Telegram** (free, on your phone)")
+    linked = st.session_state.get("telegram_chat")
+    if linked:
+        who = f" ({linked['name']})" if linked.get("name") else ""
+        st.success(f"Alerts go to your Telegram{who}.")
+        b1, b2 = st.columns(2)
+        if b1.button("Send a test message", key="tg_test", width="stretch"):
+            ok, message = notify.send_telegram("Crowd Shield test: alerts from this app reach this chat.",
+                                               chat_id=linked["id"])
+            (st.success if ok else st.error)(message)
+        if b2.button("Disconnect", key="tg_off", width="stretch"):
+            st.session_state.pop("telegram_chat", None)
+            st.rerun()
+    elif notify.telegram_configured():
+        st.success("Alerts go to this app's team chat.")
         if st.button("Send a test message", key="tg_test"):
             ok, message = notify.send_telegram("Crowd Shield test: alerts from this app reach this chat.")
             (st.success if ok else st.error)(message)
+    elif notify.bot_ready():
+        code = st.session_state.setdefault("telegram_code", notify.new_link_code())
+        link = notify.connect_link(code)
+        if not link:
+            st.warning("Telegram can't be reached right now. Try again in a minute.")
+        else:
+            st.markdown("Get this session's alerts on your own phone. No sign-up, nothing to type.")
+            st.markdown(f"1. [Open Crowd Shield in Telegram]({link}) and press **Start**.\n"
+                        "2. Come back here and press **I pressed Start**.")
+            if st.button("I pressed Start", key="tg_check", type="primary", icon=":material/link:"):
+                found = notify.find_chat(code)
+                if found:
+                    chat_id, name = found
+                    st.session_state.telegram_chat = {"id": chat_id, "name": name}
+                    st.session_state.pop("telegram_code", None)
+                    notify.send_telegram("Crowd Shield is connected. Alerts from your session will arrive here.",
+                                         chat_id=chat_id)
+                    st.rerun()
+                st.warning("Not yet: open the link above in Telegram, press Start, then try again.")
+            st.caption("Your chat is linked to this browser session only and forgotten when you close it.")
     else:
-        st.warning("Telegram is not set up.")
-    with st.expander("How to set up Telegram alerts (2 minutes)"):
+        st.warning("Telegram is not set up on this server.")
+    with st.expander("Running your own copy? Set up the Telegram bot"):
         st.markdown("""
 1. In Telegram, open **@BotFather**, send `/newbot`, pick a name, and copy the **token** it gives you.
-2. Open your new bot and press **Start** (a bot can only message people who started it).
-3. Open `https://api.telegram.org/bot<TOKEN>/getUpdates` in a browser (put your token in) and copy the
-   number after `"chat":{"id":`. For a group, add the bot to it first; its id starts with `-`.
-4. Add two secrets: `TELEGRAM_BOT_TOKEN` and `TELEGRAM_CHAT_ID`. On Streamlit Community Cloud this is
-   **App settings → Secrets**: `TELEGRAM_BOT_TOKEN = "123:abc"` and `TELEGRAM_CHAT_ID = "123456789"`.
+2. Add it as a secret: `TELEGRAM_BOT_TOKEN = "123:abc"` (on Streamlit Community Cloud: **App settings →
+   Secrets**; on a laptop: an environment variable). Each user can then connect their own Telegram here.
+3. Optional, for one fixed team chat (also used by the command-line monitor): open your bot, press
+   **Start**, open `https://api.telegram.org/bot<TOKEN>/getUpdates` and copy the number after
+   `"chat":{"id":`, then add it as `TELEGRAM_CHAT_ID`. For a group, add the bot first; its id starts with `-`.
         """)
 with mail:
     st.markdown("**Email** (Gmail), to each zone's contact below")
