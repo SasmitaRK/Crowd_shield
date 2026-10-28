@@ -33,7 +33,7 @@ with tg:
     linked = st.session_state.get("telegram_chat")
     if linked:
         who = f" ({linked['name']})" if linked.get("name") else ""
-        st.success(f"Alerts go to your Telegram{who}.")
+        st.success(f"Alerts go to Telegram{who}.")
         b1, b2 = st.columns(2)
         if b1.button("Send a test message", key="tg_test", width="stretch"):
             ok, message = notify.send_telegram("Crowd Shield test: alerts from this app reach this chat.",
@@ -49,14 +49,16 @@ with tg:
             (st.success if ok else st.error)(message)
     elif notify.bot_ready():
         code = st.session_state.setdefault("telegram_code", notify.new_link_code())
-        link = notify.connect_link(code)
+        link, group_link = notify.connect_link(code), notify.connect_link(code, group=True)
         if not link:
             st.warning("Telegram can't be reached right now. Try again in a minute.")
         else:
-            st.markdown("Get this session's alerts on your own phone. No sign-up, nothing to type.")
-            st.markdown(f"1. [Open Crowd Shield in Telegram]({link}) and press **Start**.\n"
-                        "2. Come back here and press **I pressed Start**.")
-            if st.button("I pressed Start", key="tg_check", type="primary", icon=":material/link:"):
+            st.markdown("Get this session's alerts in Telegram. No sign-up, nothing to type.")
+            st.markdown(f"1. Choose where alerts go: [just me]({link}), then press **Start**; or "
+                        f"[a team group]({group_link}), such as your police or volunteer group, then pick the "
+                        "group (you need to be its admin).\n"
+                        "2. Come back here and press **Done**.")
+            if st.button("Done", key="tg_check", type="primary", icon=":material/link:"):
                 found = notify.find_chat(code)
                 if found:
                     chat_id, name = found
@@ -65,7 +67,8 @@ with tg:
                     notify.send_telegram("Crowd Shield is connected. Alerts from your session will arrive here.",
                                          chat_id=chat_id)
                     st.rerun()
-                st.warning("Not yet: open the link above in Telegram, press Start, then try again.")
+                st.warning("Not found yet: open one of the links above in Telegram and finish there, then press "
+                           "Done again.")
             st.caption("Your chat is linked to this browser session only and forgotten when you close it.")
     else:
         st.warning("Telegram is not set up on this server.")

@@ -40,7 +40,7 @@ The plan screenshot uses an example session with made-up counts.
 | **Crowd pressure** | Density × local velocity variance (Helbing, Johansson and Al-Abideen, 2007). In the 2006 Hajj disaster video, turbulent pushing began above 0.02 /s², and the crush came at its peak. |
 | **Early warning** | "At the current trend, Zone B reaches 5 people per m² in about 4 minutes", from a robust (Theil-Sen) trend that one bad count can't swing. |
 | **Panic alarm** | Optical flow spots a crowd suddenly moving much faster than its own normal pace, or much more of the view starting to move. |
-| **Zone plans and alerts** | For photos: risk per zone, an optimised plan for moving people from crowded zones into zones with room along walkable routes, and alerts by Telegram (each user links their own chat) or email (each zone's contact). |
+| **Zone plans and alerts** | For photos: risk per zone, an optimised plan for moving people from crowded zones into zones with room along walkable routes, and alerts by Telegram (to the user or their team group, such as the police on duty) or email (each zone's contact). |
 | **Site map** | Zones drawn on satellite imagery. Each zone's ground area comes from its shape on the map (spherical-excess formula, the one Leaflet and Turf use), zones that touch become the walking routes, and the evacuation plan is drawn as animated arrows along them. |
 
 The **Map** page opens on the bathing area at the Sangam in Prayagraj, where a
@@ -94,7 +94,8 @@ network.
 
 **Alerts** go to Telegram (free, works on a phone) and/or email. With a bot token (`TELEGRAM_BOT_TOKEN`)
 set, each user presses **Connect** in Team and alerts: a link opens the bot with a one-time code, they press
-Start, and that session's alerts go to their own phone. Nobody types a token, and the bot can only write to
+Start, and that session's alerts go to their own phone. A second link adds the bot to a Telegram group instead,
+so one alert reaches a whole team, such as the police or volunteers on duty. Nobody types a token, and the bot can only write to
 chats that asked for it. A team running its own copy can instead fix one chat with `TELEGRAM_CHAT_ID`; email
 needs `GMAIL_USER` and `GMAIL_APP_PASSWORD`. Team and alerts has "send a test" buttons. Nothing is sent unless alerts
 are switched on, and a zone is announced once per level, then quiet for 10 minutes.

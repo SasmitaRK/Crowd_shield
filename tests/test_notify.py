@@ -102,6 +102,14 @@ def test_find_chat_matches_only_its_own_code(monkeypatch):
     assert notify.find_chat("nobody") is None
 
 
+def test_find_chat_finds_a_group_the_bot_was_added_to(monkeypatch):
+    configure(monkeypatch)
+    updates = [{"update_id": 3, "message": {"text": "/start@CSBot grp42",
+                                            "chat": {"id": -100123, "title": "Zone A police", "type": "group"}}}]
+    monkeypatch.setattr(notify, "_post", lambda method, fields: {"ok": True, "result": updates})
+    assert notify.find_chat("grp42") == ("-100123", "Zone A police")
+
+
 def test_find_chat_lets_go_of_old_updates(monkeypatch):
     configure(monkeypatch)
     calls = []
@@ -122,3 +130,4 @@ def test_the_connect_link_opens_the_bot_with_the_code(monkeypatch):
     monkeypatch.setattr(notify, "_post", lambda method, fields: {"ok": True, "result": {"username": "CSBot"}})
     code = notify.new_link_code()
     assert code.isalnum() and notify.connect_link(code) == f"https://t.me/CSBot?start={code}"
+    assert notify.connect_link(code, group=True) == f"https://t.me/CSBot?startgroup={code}"

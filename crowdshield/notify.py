@@ -72,13 +72,16 @@ def new_link_code() -> str:
     return secrets.token_hex(8)
 
 
-def connect_link(code: str) -> str | None:
+def connect_link(code: str, group: bool = False) -> str | None:
+    """The link that opens the bot with `code`: in a private chat, or (group=True) to add it to a group, such as
+    a team of police officers or volunteers, so one alert reaches all of them."""
     name = bot_username()
-    return f"https://t.me/{name}?start={code}" if name else None
+    return f"https://t.me/{name}?{'startgroup' if group else 'start'}={code}" if name else None
 
 
 def find_chat(code: str) -> tuple[str, str] | None:
-    """(chat id, first name) of whoever opened the bot with this code and pressed Start, if anyone has."""
+    """(chat id, name) of the chat that opened the bot with this code, if any has: a person who pressed Start
+    ("/start <code>"), or a group the bot was just added to ("/start@<bot> <code>")."""
     try:
         reply = _post("getUpdates", {"allowed_updates": '["message"]', "limit": 100})
     except Exception:
@@ -91,9 +94,10 @@ def find_chat(code: str) -> tuple[str, str] | None:
             pass
     for update in reversed(updates):
         message = update.get("message") or {}
-        if (message.get("text") or "").strip() == f"/start {code}":
+        words = (message.get("text") or "").split()
+        if len(words) == 2 and words[0].split("@")[0] == "/start" and words[1] == code:
             chat = message["chat"]
-            return str(chat["id"]), chat.get("first_name") or chat.get("title") or ""
+            return str(chat["id"]), chat.get("title") or chat.get("first_name") or ""
     return None
 
 
