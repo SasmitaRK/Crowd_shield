@@ -1,0 +1,42 @@
+{
+  "name": "Chithirai festival: Vaigai river and Meenakshi Temple, Madurai",
+  "short": "Chithirai festival, Madurai",
+  "centre": [78.1222, 9.9238],
+  "zoom": 16,
+  "touch_m": 250,
+  "story": "Every April, Madurai's Chithirai festival brings the Meenakshi Thirukalyanam (the celestial wedding at the Meenakshi Temple) and, days later, Lord Kallazhagar's entry into the Vaigai river, watched by more than five lakh people. On 16 April 2022 a crush among devotees on the Vaigai riverbank killed two people (police reports).",
+  "disclaimer": "Illustrative zones drawn on satellite imagery around the Albert Victor Bridge, the Vaigai banks, North Masi Street and the Meenakshi Temple. Not an official police or temple plan. Streets here connect zones up to 250 m apart.",
+  "scenario_note": "Simulated Kallazhagar-entry morning: densities chosen to show each risk level. Not real counts.",
+  "zones": {
+    "A": {
+      "name": "Vaigai riverbed (Kallazhagar entry)",
+      "ring": [[78.12614, 9.92736], [78.12864, 9.92601], [78.1282, 9.92301],
+               [78.12623, 9.92388], [78.12614, 9.92736]],
+      "scenario_density": 4.8
+    },
+    "B": {
+      "name": "North bank, Goripalayam side",
+      "ring": [[78.12507, 9.92792], [78.12882, 9.92592], [78.12918, 9.92665],
+               [78.12543, 9.92892], [78.12507, 9.92792]],
+      "scenario_density": 2.2
+    },
+    "C": {
+      "name": "South bank, Simmakkal side",
+      "ring": [[78.12454, 9.92465], [78.12623, 9.92388], [78.1282, 9.92301],
+               [78.12793, 9.92237], [78.12418, 9.92401], [78.12454, 9.92465]],
+      "scenario_density": 3.2
+    },
+    "D": {
+      "name": "North Masi Street",
+      "ring": [[78.1151, 9.92325], [78.1231, 9.92325], [78.1231, 9.92275],
+               [78.1151, 9.92275], [78.1151, 9.92325]],
+      "scenario_density": 0.8
+    },
+    "E": {
+      "name": "Meenakshi Temple and Chithirai streets",
+      "ring": [[78.11764, 9.92081], [78.121, 9.92081], [78.121, 9.91814],
+               [78.11764, 9.91814], [78.11764, 9.92081]],
+      "scenario_density": 0.6
+    }
+  }
+}

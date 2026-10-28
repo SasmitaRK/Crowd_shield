@@ -1,0 +1,31 @@
+{
+  "clips": 11,
+  "detected": 11,
+  "missed_clips": [],
+  "false_alarms": 0,
+  "median_alarm_vs_label_s": -0.7,
+  "latest_alarm_vs_label_s": 0.0,
+  "frame_auc_alarm_score": 0.7607526747432304,
+  "rule": "alarm when speed > 2.0x or movement energy > 8.0x the clip's normal for 15 frames; normal = median of the first 90 frames",
+  "label_lag_allowed_s": 2.0,
+  "held_out_scene_check": [
+    {
+      "held_out": "lawn",
+      "chosen_energy_ratio": 8.0,
+      "caught": "2/2",
+      "false_alarms": 0
+    },
+    {
+      "held_out": "indoor",
+      "chosen_energy_ratio": 8.0,
+      "caught": "6/6",
+      "false_alarms": 0
+    },
+    {
+      "held_out": "plaza",
+      "chosen_energy_ratio": 8.0,
+      "caught": "3/3",
+      "false_alarms": 0
+    }
+  ]
+}

@@ -1,0 +1,16 @@
+# CPU-only PyTorch: small enough for free hosting (Streamlit Community Cloud).
+# With an NVIDIA GPU, install the CUDA build of torch yourself first.
+--extra-index-url https://download.pytorch.org/whl/cpu
+torch
+torchvision
+streamlit>=1.50
+numpy>=1.24
+# OpenCV without a display, which a server doesn't have. (Installing ultralytics too would bring the full
+# opencv-python as well, and two OpenCV builds break cv2.)
+opencv-python-headless>=4.8
+scipy>=1.10
+# Site map: Leaflet maps inside Streamlit.
+folium>=0.20
+streamlit-folium>=0.27
+# Writes the annotated video as H.264 MP4, which every browser plays (brings its own ffmpeg).
+imageio-ffmpeg>=0.5

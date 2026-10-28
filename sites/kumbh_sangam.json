@@ -1,0 +1,71 @@
+{
+  "name": "Maha Kumbh: Triveni Sangam, Prayagraj",
+  "short": "Sangam, Prayagraj",
+  "centre": [81.8838, 25.4318],
+  "zoom": 16,
+  "story": "On 29 January 2025, the Mauni Amavasya bathing day of the Maha Kumbh, barricades gave way near the Sangam Nose and a crowd crush killed at least 30 people (Uttar Pradesh Police).",
+  "disclaimer": "Illustrative zones drawn around OpenStreetMap landmarks (Sangam Nose, Sangam Ghat, Kila Ghat Road, Shankaracharya Ghat). Not the official Mela layout; sandbanks and ghats are rebuilt every year.",
+  "scenario_note": "Simulated surge: densities chosen to show each risk level. Not real counts.",
+  "zones": {
+    "A": {
+      "name": "Sangam Nose bathing area",
+      "ring": [
+        [81.88611, 25.42781],
+        [81.88731, 25.42773],
+        [81.8874, 25.42708],
+        [81.88718, 25.42636],
+        [81.88651, 25.42612],
+        [81.88624, 25.42672],
+        [81.88611, 25.42781]
+      ],
+      "scenario_density": 4.8
+    },
+    "B": {
+      "name": "Sangam Ghat approach",
+      "ring": [
+        [81.88391, 25.43005],
+        [81.88597, 25.43005],
+        [81.88624, 25.42889],
+        [81.88611, 25.42781],
+        [81.88429, 25.42829],
+        [81.88391, 25.43005]
+      ],
+      "scenario_density": 2.4
+    },
+    "C": {
+      "name": "Kila Ghat Road",
+      "ring": [
+        [81.8792, 25.4334],
+        [81.8803, 25.4338],
+        [81.88391, 25.43005],
+        [81.8828, 25.4294],
+        [81.8792, 25.4334]
+      ],
+      "scenario_density": 3.4
+    },
+    "D": {
+      "name": "Shankaracharya Ghat bank",
+      "ring": [
+        [81.88242, 25.43517],
+        [81.8841, 25.4351],
+        [81.8844, 25.43372],
+        [81.88515, 25.43179],
+        [81.88597, 25.43005],
+        [81.8845, 25.43005],
+        [81.88242, 25.43517]
+      ],
+      "scenario_density": 0.6
+    },
+    "E": {
+      "name": "Northern holding area",
+      "ring": [
+        [81.88, 25.4372],
+        [81.8825, 25.4374],
+        [81.88242, 25.43517],
+        [81.8803, 25.4338],
+        [81.88, 25.4372]
+      ],
+      "scenario_density": 0.9
+    }
+  }
+}

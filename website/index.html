@@ -1,0 +1,564 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Crowd Shield: early warning for crowd crushes</title>
+<meta name="description" content="Open-source crowd-safety AI. Counts every head in CCTV, drone and phone photos, turns counts into people per square metre on satellite maps, and raises an alarm when a crowd surges.">
+<meta property="og:title" content="Crowd Shield: early warning for crowd crushes">
+<meta property="og:description" content="Counts every head, maps density in people per m², and spots surges before they become crushes. Tested on Indian crowds.">
+<link rel="icon" href="assets/mark.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<style>
+  :root {
+    --bg: #f5f7fa; --surface: #ffffff; --surface-2: #f8fafc; --border: #e3e8ef;
+    --text: #0f172a; --text-2: #334155; --muted: #64748b;
+    --brand: #0d9488; --brand-600: #0f766e; --brand-50: #f0fdfa; --brand-100: #ccfbf1; --brand-300: #5eead4;
+    --ink: #0b1220; --ink-2: #131d33; --ink-line: #1e293b;
+    --safe: #10b981; --moderate: #f59e0b; --high: #f97316; --critical: #ef4444;
+    --radius: 14px; --shadow: 0 1px 2px rgba(15,23,42,.05), 0 8px 24px rgba(15,23,42,.06);
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body { margin: 0; background: var(--bg); color: var(--text); font: 16px/1.6 Inter, "Segoe UI", system-ui, sans-serif;
+         -webkit-font-smoothing: antialiased; }
+  a { color: var(--brand-600); }
+  img { max-width: 100%; display: block; }
+  .wrap { max-width: 1120px; margin: 0 auto; padding: 0 24px; }
+  h1, h2, h3 { letter-spacing: -0.025em; line-height: 1.15; margin: 0; }
+  h2 { font-size: clamp(1.6rem, 3vw, 2.2rem); }
+  h3 { font-size: 1.08rem; }
+  p { margin: 0; }
+  .eyebrow { font-size: .74rem; font-weight: 800; letter-spacing: .16em; text-transform: uppercase; color: var(--brand); }
+  .lead { color: var(--text-2); font-size: 1.06rem; max-width: 720px; margin-top: .9rem; }
+  section { padding: 88px 0; scroll-margin-top: 64px; }
+  .sec-head { margin-bottom: 40px; }
+  .sec-head h2 { margin-top: .5rem; }
+
+  /* nav */
+  nav { position: sticky; top: 0; z-index: 1000; background: rgba(11,18,32,.88); backdrop-filter: blur(10px);
+        border-bottom: 1px solid var(--ink-line); }
+  nav .wrap { display: flex; align-items: center; gap: 28px; height: 64px; }
+  .brand { display: flex; align-items: center; gap: 10px; color: #fff; text-decoration: none; font-weight: 800; letter-spacing: -.01em; }
+  .brand img { width: 28px; height: 28px; }
+  nav .links { display: flex; gap: 22px; margin-left: auto; }
+  nav .links a { color: #94a3b8; text-decoration: none; font-size: .9rem; font-weight: 500; }
+  nav .links a:hover { color: #fff; }
+  .btn { display: inline-flex; align-items: center; gap: 8px; padding: 11px 20px; border-radius: 10px; font-weight: 600;
+         font-size: .95rem; text-decoration: none; transition: transform .15s ease, background .15s ease; white-space: nowrap; }
+  .btn:hover { transform: translateY(-1px); }
+  .btn.primary { background: var(--brand); color: #fff; }
+  .btn.primary:hover { background: var(--brand-600); }
+  .btn.ghost { color: #e2e8f0; border: 1px solid #334155; }
+  .btn.ghost:hover { background: rgba(255,255,255,.06); }
+  .btn.sm { padding: 8px 14px; font-size: .86rem; }
+
+  /* hero */
+  .hero { background: radial-gradient(1200px 500px at 80% -10%, rgba(20,184,166,.22), transparent 60%),
+                      radial-gradient(900px 400px at -10% 110%, rgba(239,68,68,.10), transparent 60%), var(--ink);
+          color: #e2e8f0; padding: 96px 0 72px; }
+  .hero .eyebrow { color: var(--brand-300); }
+  .hero h1 { font-size: clamp(2.3rem, 5.6vw, 4rem); color: #fff; margin-top: 1rem; max-width: 880px; font-weight: 800; }
+  .hero h1 span { background: linear-gradient(90deg, #5eead4, #2dd4bf 40%, #fbbf24); -webkit-background-clip: text;
+                  background-clip: text; color: transparent; }
+  .hero .lead { color: #cbd5e1; font-size: 1.14rem; }
+  .cta { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 32px; }
+  .stats { display: grid; grid-template-columns: repeat(5, 1fr); gap: 1px; margin-top: 64px; background: var(--ink-line);
+           border: 1px solid var(--ink-line); border-radius: var(--radius); overflow: hidden; }
+  .stat { background: var(--ink-2); padding: 20px 18px; }
+  .stat b { display: block; font-size: 1.9rem; color: #fff; letter-spacing: -.03em; line-height: 1.1; }
+  .stat span { font-size: .8rem; color: #94a3b8; }
+
+  /* video */
+  .video { background: var(--ink); padding: 0 0 80px; display: none; }
+  .video.on { display: block; }
+  .frame { position: relative; aspect-ratio: 16/9; border-radius: var(--radius); overflow: hidden; border: 1px solid var(--ink-line);
+           box-shadow: 0 30px 80px rgba(0,0,0,.45); }
+  .frame iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
+
+  /* live demo */
+  .demo { background: var(--ink); padding: 0 0 88px; }
+  .demo .sec-head h2 { color: #fff; } .demo .lead { color: #cbd5e1; } .demo .eyebrow { color: var(--brand-300); }
+  .window { border: 1px solid var(--ink-line); border-radius: var(--radius); overflow: hidden; background: var(--ink-2);
+            box-shadow: 0 30px 80px rgba(0,0,0,.45); }
+  .chrome { display: flex; align-items: center; gap: 8px; padding: 10px 14px; border-bottom: 1px solid var(--ink-line); }
+  .chrome i { width: 11px; height: 11px; border-radius: 50%; background: #334155; }
+  .chrome .url { margin-left: 10px; flex: 1; font-size: .78rem; color: #94a3b8; background: #0b1220; border: 1px solid var(--ink-line);
+                 border-radius: 7px; padding: 4px 10px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .chrome a { font-size: .78rem; color: var(--brand-300); text-decoration: none; white-space: nowrap; }
+  .stage { position: relative; height: 760px; }
+  .stage iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; background: #fff; }
+  .launch { position: absolute; inset: 0; display: grid; place-items: center; text-align: center; padding: 24px;
+            background: radial-gradient(600px 300px at 50% 40%, rgba(20,184,166,.18), transparent 70%), var(--ink-2); }
+  .launch p { color: #94a3b8; font-size: .9rem; margin-top: 12px; max-width: 460px; }
+  .launch ul { list-style: none; padding: 0; margin: 22px 0 0; display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; }
+  .wake { width: 220px; height: 4px; background: #1e293b; border-radius: 99px; overflow: hidden; margin: 18px auto 0; }
+  .wake i { display: block; width: 40%; height: 100%; background: var(--brand-300); border-radius: 99px; animation: wake 1.4s ease-in-out infinite; }
+  @keyframes wake { 0% { transform: translateX(-100%); } 100% { transform: translateX(260%); } }
+  .stage .launch#waking { z-index: 2; pointer-events: none; }
+  .launch li { font-size: .8rem; color: #cbd5e1; border: 1px solid #334155; border-radius: 99px; padding: 5px 12px; }
+
+  /* cards */
+  .grid { display: grid; gap: 20px; }
+  .g2 { grid-template-columns: repeat(2, 1fr); }
+  .g3 { grid-template-columns: repeat(3, 1fr); }
+  .g4 { grid-template-columns: repeat(4, 1fr); }
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 24px; box-shadow: var(--shadow); }
+  .card p { color: var(--text-2); font-size: .95rem; margin-top: .5rem; }
+  .card .k { font-size: .72rem; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); }
+  .incident { border-left: 4px solid var(--critical); }
+  .incident .big { font-size: 2.4rem; font-weight: 800; color: var(--critical); letter-spacing: -.03em; line-height: 1; margin-top: .6rem; }
+
+  /* density scale */
+  .scale { margin-top: 28px; }
+  .bar { display: grid; grid-template-columns: 2.2fr 2.8fr 2fr 1.4fr; height: 14px; border-radius: 99px; overflow: hidden; gap: 2px; }
+  .bar i:nth-child(1) { background: var(--safe); } .bar i:nth-child(2) { background: var(--moderate); }
+  .bar i:nth-child(3) { background: var(--high); } .bar i:nth-child(4) { background: var(--critical); }
+  .ticks { display: grid; grid-template-columns: 2.2fr 2.8fr 2fr 1.4fr; margin-top: 10px; font-size: .82rem; color: var(--text-2); }
+  .ticks div b { display: block; color: var(--text); }
+
+  /* steps */
+  .step .n { width: 34px; height: 34px; border-radius: 10px; background: var(--brand-50); color: var(--brand-600);
+             display: grid; place-items: center; font-weight: 800; border: 1px solid var(--brand-100); margin-bottom: 14px; }
+  .arch { margin-top: 28px; padding: 12px; }
+
+  /* map */
+  .maps { background: var(--ink); color: #e2e8f0; }
+  .maps h2 { color: #fff; } .maps .lead { color: #cbd5e1; } .maps .eyebrow { color: var(--brand-300); }
+  .map-shell { display: grid; grid-template-columns: 1fr 330px; border: 1px solid var(--ink-line); border-radius: var(--radius);
+               overflow: hidden; background: var(--ink-2); }
+  #map { height: 540px; background: #0b1220; }
+  .panel { padding: 20px; border-left: 1px solid var(--ink-line); display: flex; flex-direction: column; gap: 14px; overflow: auto; max-height: 540px; }
+  .panel { scrollbar-width: thin; scrollbar-color: #334155 transparent; }
+  .tabs { display: flex; gap: 6px; background: #0b1220; padding: 4px; border-radius: 10px; border: 1px solid var(--ink-line); }
+  .tabs button { flex: 1; border: 0; background: transparent; color: #94a3b8; font: 600 .84rem Inter, sans-serif; padding: 8px;
+                 border-radius: 7px; cursor: pointer; }
+  .tabs button.on { background: var(--brand); color: #fff; }
+  .story { font-size: .86rem; color: #cbd5e1; line-height: 1.55; }
+  .zone { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 10px; background: #0b1220;
+          border: 1px solid var(--ink-line); cursor: pointer; font-size: .86rem; }
+  .zone:hover { border-color: #334155; }
+  .zone .dot { width: 10px; height: 10px; border-radius: 50%; flex: none; }
+  .zone .nm { flex: 1; color: #e2e8f0; }
+  .zone .d { font-variant-numeric: tabular-nums; color: #fff; font-weight: 700; }
+  .pill { font-size: .7rem; font-weight: 700; padding: 2px 8px; border-radius: 99px; }
+  .note { font-size: .76rem; color: #64748b; line-height: 1.5; }
+  .leaflet-tooltip.zt { background: #0b1220; color: #e2e8f0; border: 1px solid #334155; border-radius: 8px; font: 13px/1.45 Inter, sans-serif;
+                        box-shadow: 0 8px 24px rgba(0,0,0,.4); padding: 8px 10px; }
+  .leaflet-tooltip.zt::before { display: none; }
+  .zlabel { background: none; border: 0; box-shadow: none; color: #fff; font: 800 14px Inter, sans-serif; text-shadow: 0 1px 3px #000; }
+  .zlabel::before { display: none; }
+
+  /* results */
+  table { width: 100%; border-collapse: collapse; font-size: .94rem; }
+  th, td { text-align: left; padding: 12px 10px; border-bottom: 1px solid var(--border); }
+  th { font-size: .72rem; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); font-weight: 700; }
+  td.num { font-variant-numeric: tabular-nums; font-weight: 700; width: 70px; text-align: right; }
+  .meter { height: 8px; background: var(--surface-2); border-radius: 99px; overflow: hidden; border: 1px solid var(--border); }
+  .meter i { display: block; height: 100%; border-radius: 99px; background: #94a3b8; }
+  .meter i.best { background: var(--brand); }
+  tr.best td { color: var(--text); }
+  .fig { border-radius: 10px; border: 1px solid var(--border); margin-top: 16px; }
+  .cap { font-size: .8rem; color: var(--muted); margin-top: 8px; }
+
+  /* honesty */
+  .lesson { display: grid; grid-template-columns: 40px 1fr; gap: 14px; }
+  .lesson .ic { width: 40px; height: 40px; border-radius: 10px; display: grid; place-items: center; font-size: 1.2rem;
+                background: #fff7ed; border: 1px solid #fed7aa; color: #c2410c; }
+
+  /* privacy band */
+  .band { background: var(--brand-50); border-top: 1px solid var(--brand-100); border-bottom: 1px solid var(--brand-100); padding: 56px 0; }
+  .band .grid div { font-size: .95rem; color: var(--text-2); }
+  .band b { display: block; color: var(--text); font-size: 1rem; margin-bottom: 4px; }
+
+  footer { background: var(--ink); color: #94a3b8; padding: 56px 0 40px; font-size: .88rem; }
+  footer .top { display: flex; justify-content: space-between; gap: 32px; flex-wrap: wrap; align-items: flex-start; }
+  footer a { color: var(--brand-300); text-decoration: none; }
+  footer .fine { margin-top: 32px; padding-top: 20px; border-top: 1px solid var(--ink-line); font-size: .78rem; color: #64748b; line-height: 1.6; }
+
+  @media (max-width: 960px) {
+    .stage { height: 640px; }
+    nav .links { display: none; }
+    nav .wrap .btn { margin-left: auto; }
+    .stats { grid-template-columns: repeat(2, 1fr); }
+    .stats .stat:last-child { grid-column: span 2; }
+    .g2, .g3, .g4 { grid-template-columns: 1fr; }
+    .map-shell { grid-template-columns: 1fr; }
+    #map { height: 420px; }
+    .panel { border-left: 0; border-top: 1px solid var(--ink-line); max-height: none; }
+    section { padding: 64px 0; }
+  }
+  @media (max-width: 520px) {
+    .wrap { padding: 0 16px; }
+    .ticks { font-size: .7rem; }
+    .hero { padding: 64px 0 48px; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="wrap">
+    <a class="brand" href="#top"><img src="assets/mark.svg" alt="">Crowd Shield</a>
+    <div class="links">
+      <a href="#problem">Why</a>
+      <a href="#demo">Live demo</a>
+      <a href="#how">How it works</a>
+      <a href="#map-section">Site maps</a>
+      <a href="#results">Results</a>
+      <a href="#lessons">What I learned</a>
+    </div>
+    <a class="btn primary sm" href="https://crowd-shield-india.streamlit.app" target="_blank" rel="noopener">Open the app →</a>
+  </div>
+</nav>
+
+<header class="hero" id="top">
+  <div class="wrap">
+    <div class="eyebrow">Open-source crowd-safety AI · built and tested for Indian crowds</div>
+    <h1>See a crowd crush coming, <span>before it happens.</span></h1>
+    <p class="lead">Crowd Shield counts every head in CCTV, drone and phone images, turns the count into
+      people per square metre on a satellite map, watches camera feeds for zones filling up or surging, and
+      plans where to move people.
+      These are the warning signs crowd-safety research says appear minutes before a crush.</p>
+    <div class="cta">
+      <a class="btn primary" href="#demo">Try the live demo</a>
+      <a class="btn ghost" href="report.pdf" target="_blank" rel="noopener">Technical report (PDF)</a>
+      <a class="btn ghost" href="https://github.com/khushi-git-7/Crowd_shield" target="_blank" rel="noopener">Source code</a>
+    </div>
+    <div class="stats">
+      <div class="stat"><b>91%</b><span>counting accuracy on<br>hand-counted Indian photos</span></div>
+      <div class="stat"><b>86.1%</b><span>counting accuracy, packed crowds<br>(ShanghaiTech A)</span></div>
+      <div class="stat"><b>92.1%</b><span>counting accuracy, streets<br>(ShanghaiTech B)</span></div>
+      <div class="stat"><b>11 / 11</b><span>crowd surges caught on UMN video</span></div>
+      <div class="stat"><b>0</b><span>false alarms on the same test</span></div>
+      <div class="stat"><b>105</b><span>freely licensed Indian crowd photos in the test set</span></div>
+    </div>
+  </div>
+</header>
+
+<!-- Demo video: set data-youtube to the video ID (the part after watch?v=) to show it. -->
+<div class="video" id="video" data-youtube="">
+  <div class="wrap"><div class="frame" id="frame"></div></div>
+</div>
+
+<section class="demo" id="demo">
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="eyebrow">Live demo</div>
+      <h2>Use the real app, right here</h2>
+      <p class="lead">This is the working system, not a recording. Count a crowd photo, run the Kumbh and Madurai
+        site maps, or see how accurate it is.</p>
+    </div>
+    <div class="window">
+      <div class="chrome"><i></i><i></i><i></i>
+        <span class="url">crowd-shield-india.streamlit.app</span>
+        <a href="https://crowd-shield-india.streamlit.app" target="_blank" rel="noopener">Open full screen ↗</a>
+      </div>
+      <div class="stage" id="stage">
+        <div class="launch">
+          <div>
+            <button class="btn primary" id="launch" type="button" style="border:0;cursor:pointer;font:inherit;font-weight:600">▶ Launch Crowd Shield</button>
+            <p>Runs on free hosting. If nobody has used it for a while it is asleep: press <b>Yes, get this app back up</b> if you see it, and give it about a minute.</p>
+            <ul><li>Count people in a photo</li><li>Analyse a video</li><li>Watch a live camera</li><li>Site maps</li><li>Evacuation plan and alerts</li><li>How accurate is it?</li></ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="inside">
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="eyebrow">Inside the app</div>
+      <h2>What you see when you use it</h2>
+    </div>
+    <div class="grid g2">
+      <div class="card"><div class="k">Analyse a video</div>
+        <img class="fig" src="assets/video.jpg" alt="Analyse a video: Every head marked, zones turning amber and red as they fill, and each zone over time." loading="lazy" style="width:100%">
+        <p class="cap">Every head marked, zones turning amber and red as they fill, and each zone over time.</p></div>
+      <div class="card"><div class="k">Site map</div>
+        <img class="fig" src="assets/map.jpg" alt="Site map: Zones on satellite imagery of the Sangam, people per m², and walking routes to move people." loading="lazy" style="width:100%">
+        <p class="cap">Zones on satellite imagery of the Sangam, people per m², and walking routes to move people.</p></div>
+      <div class="card"><div class="k">Evacuation plan and alerts</div>
+        <img class="fig" src="assets/plan.jpg" alt="Evacuation plan and alerts: Each zone against its limits, and orders for every zone's team (example numbers)." loading="lazy" style="width:100%">
+        <p class="cap">Each zone against its limits, and orders for every zone's team (example numbers).</p></div>
+      <div class="card"><div class="k">How accurate is it?</div>
+        <img class="fig" src="assets/accuracy.jpg" alt="How accurate is it?: Every hand-counted Indian photo, with the model's count and the true one." loading="lazy" style="width:100%">
+        <p class="cap">Every hand-counted Indian photo, with the model's count and the true one.</p></div>
+    </div>
+  </div>
+</section>
+
+<section id="problem">
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="eyebrow">Why this matters</div>
+      <h2>Crushes don't come from nowhere</h2>
+      <p class="lead">In a crush, people die standing up, squeezed until they can't breathe. Density and pressure
+        build for minutes before that happens. Crowd Shield measures both, using cameras that are already there.</p>
+    </div>
+    <div class="grid g2">
+      <div class="card incident">
+        <div class="k">Maha Kumbh, Prayagraj · 29 January 2025</div>
+        <div class="big">30+ killed</div>
+        <p>On the Mauni Amavasya bathing day, barricades gave way near the Sangam Nose and the crowd
+          surged (Uttar Pradesh Police).</p>
+      </div>
+      <div class="card incident">
+        <div class="k">Chithirai festival, Madurai · 16 April 2022</div>
+        <div class="big">2 killed</div>
+        <p>More than five lakh people gathered for Lord Kallazhagar's entry into the Vaigai river, and a
+          crush broke out on the riverbank (police reports).</p>
+      </div>
+    </div>
+    <div class="card scale">
+      <h3>The number that matters is people per square metre</h3>
+      <p>A head count alone can't tell you if a crowd is dangerous. You also need the ground area.</p>
+      <div style="margin-top:22px">
+        <div class="bar"><i></i><i></i><i></i><i></i></div>
+        <div class="ticks">
+          <div><b>0–2</b>free movement</div>
+          <div><b>≈ 2.2</b>normal walking breaks down (Fruin)</div>
+          <div><b>5+</b>serious risk (Still)</div>
+          <div><b>≈ 7</b>crowd moves like a fluid</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="how" style="background:var(--surface);border-top:1px solid var(--border);border-bottom:1px solid var(--border)">
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="eyebrow">How it works</div>
+      <h2>From a camera frame to an evacuation plan</h2>
+    </div>
+    <div class="grid g4">
+      <div class="card step"><div class="n">1</div><h3>Count every head</h3>
+        <p>A point model (PET) puts a dot on each head, even where bodies overlap. A density model and YOLO are the fallbacks.</p></div>
+      <div class="card step"><div class="n">2</div><h3>Measure the ground</h3>
+        <p>Zones drawn on satellite imagery give the real area in m², and a ground calibration does the same for a camera view.</p></div>
+      <div class="card step"><div class="n">3</div><h3>Read the danger</h3>
+        <p>Density sets the risk level. On video, optical flow tracks speed and crowd pressure, and an alarm fires on a sudden surge.</p></div>
+      <div class="card step"><div class="n">4</div><h3>Act</h3>
+        <p>An optimiser plans where to move people, only along routes they can walk and without overfilling any zone, and alerts each zone's team by Telegram or email.</p></div>
+    </div>
+    <div class="card arch"><img src="assets/architecture.svg" alt="Crowd Shield architecture: input, measure, understand, act"></div>
+  </div>
+</section>
+
+<section class="maps" id="map-section">
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="eyebrow">Site maps</div>
+      <h2>Density on the real ground</h2>
+      <p class="lead">Two of India's biggest gatherings, with zones drawn on satellite imagery. The colours show a
+        simulated surge using the Fruin "standard" thresholds. In the app, live counts fill these zones and
+        animated arrows show where to move people.</p>
+    </div>
+    <div class="map-shell">
+      <div id="map" role="img" aria-label="Satellite map with crowd zones coloured by risk"></div>
+      <aside class="panel">
+        <div class="tabs" role="tablist">
+          <button class="on" data-site="kumbh_sangam" role="tab">Maha Kumbh</button>
+          <button data-site="madurai_chithirai" role="tab">Madurai</button>
+        </div>
+        <p class="story" id="story"></p>
+        <div id="zones"></div>
+        <p class="note" id="disclaimer"></p>
+      </aside>
+    </div>
+  </div>
+</section>
+
+<section id="results">
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="eyebrow">Results</div>
+      <h2>Every number has its data and code</h2>
+      <p class="lead">Tested on held-out data only: no model was picked using the test images.
+        Accuracy = 1 − total counting error ÷ total true count.</p>
+    </div>
+    <div class="grid g2">
+      <div class="card">
+        <div class="k">Counting · ShanghaiTech test sets</div>
+        <h3 style="margin-top:.4rem">From 7% to 86% on packed crowds</h3>
+        <table aria-label="Counting accuracy by method">
+          <thead><tr><th>Method</th><th>Packed (A)</th><th></th><th>Streets (B)</th><th></th></tr></thead>
+          <tbody id="acc"></tbody>
+        </table>
+        <img class="fig" src="assets/accuracy_by_crowd_size.png" alt="Accuracy by crowd size" loading="lazy">
+        <p class="cap">PET stays accurate from small groups to crowds of over 1,000 people.</p>
+      </div>
+      <div class="grid" style="gap:20px">
+        <div class="card">
+          <div class="k">Surge alarm · UMN escape videos</div>
+          <h3 style="margin-top:.4rem">11 of 11 escapes caught, no false alarms</h3>
+          <p>The alarm fires a median of 0.7 s before the labelled start of the panic. It held up when each scene was
+            left out in turn while tuning: lawn 2/2, indoor 6/6, plaza 3/3.</p>
+          <img class="fig" src="assets/umn_timeline.png" alt="Alarm timeline on UMN clips" loading="lazy">
+        </div>
+        <div class="card">
+          <div class="k">India test set</div>
+          <h3 style="margin-top:.4rem">105 photos of melas, festivals, stations and temples</h3>
+          <p>All freely licensed from Wikimedia Commons, with credits. On the first 10 hand-checked photos the
+            first model scored 66.7%, because it took railway gravel for heads. The second, also trained on 1,200
+            dense crowd photos and on empty Indian tracks, scores 91% (86% on the free online server).</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="lessons" style="background:var(--surface);border-top:1px solid var(--border)">
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="eyebrow">What I learned</div>
+      <h2>Where it fails, and what I did about it</h2>
+      <p class="lead">A safety tool that hides its failures is dangerous. These are published in full.</p>
+    </div>
+    <div class="grid g3">
+      <div class="card lesson"><div class="ic"><svg width='22' height='22' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' aria-hidden='true'><path d='M7 3 4 21M17 3l3 18M5.5 8h13M5 13h14M4.5 18h15'/></svg></div><div><h3>Gravel looks like heads</h3>
+        <p>From above, railway ballast reads as a sea of heads: 1,262 counted where there were 415. Retraining
+          fixed that photo but hurt the others, so I kept the better model and documented the failure.</p></div></div>
+      <div class="card lesson"><div class="ic"><svg width='22' height='22' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' aria-hidden='true'><rect x='7' y='2' width='10' height='20' rx='2'/><path d='M11 18h2'/></svg></div><div><h3>Phones move</h3>
+        <p>All 15 freely licensed Indian crowd clips I found were filmed handheld, so speed readings measured the camera, not the crowd.
+          The app now detects a moving camera and hides motion results instead of guessing.</p></div></div>
+      <div class="card lesson"><div class="ic"><svg width='22' height='22' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' aria-hidden='true'><circle cx='12' cy='13' r='8'/><path d='M12 9v4l2.5 2.5M9 2h6'/></svg></div><div><h3>No GPU, still useful</h3>
+        <p>On a plain 4-core CPU, PET takes about 16 s per photo. The free server has 3.2 GB, so it counts big
+          photos in overlapping pieces: same accuracy, about 30 seconds each. A live feed is recounted every 30 s or
+          more; video-rate analysis would need a GPU.</p></div></div>
+    </div>
+    <div class="card" style="margin-top:20px">
+      <div class="k">Field test · Indian festival video</div>
+      <img class="fig" src="assets/field_test.jpg" alt="Head counts on Indian festival video frames" loading="lazy">
+      <p class="cap">Counting works on handheld Indian clips (Holi in Howrah, Bhagoriya, Gangasagar). Motion analysis
+        needs a fixed camera, such as CCTV.</p>
+    </div>
+  </div>
+</section>
+
+<div class="band">
+  <div class="wrap grid g4">
+    <div><b>No faces</b>It counts heads as points. It never recognises anyone.</div>
+    <div><b>No identities</b>Movement is measured per zone, never per person.</div>
+    <div><b>Nothing stored</b>Photos and clips stay in memory for your session only. No database.</div>
+    <div><b>Open source</b>Code, models, data credits and results are all public.</div>
+  </div>
+</div>
+
+<footer>
+  <div class="wrap">
+    <div class="top">
+      <div>
+        <a class="brand" href="#top"><img src="assets/mark.svg" alt="">Crowd Shield</a>
+        <p style="margin-top:10px;max-width:420px">Built by Khushi. Crowd Shield started as a final-year project with
+          Sasmita, and v2 is a ground-up rebuild.</p>
+      </div>
+      <div style="display:flex;gap:28px;flex-wrap:wrap">
+        <a href="https://crowd-shield-india.streamlit.app" target="_blank" rel="noopener">Live app</a>
+        <a href="https://github.com/khushi-git-7/Crowd_shield" target="_blank" rel="noopener">GitHub</a>
+        <a href="https://huggingface.co/Khushi-7/crowd-shield-counting" target="_blank" rel="noopener">Models</a>
+        <a href="report.pdf" target="_blank" rel="noopener">Report</a>
+      </div>
+    </div>
+    <p class="fine">Map imagery © Esri, Maxar, Earthstar Geographics. Site zones are illustrative and not official
+      Mela, police or temple plans; map densities are simulated. Datasets: ShanghaiTech (Zhang et al., 2016), UMN
+      unusual crowd activity. Indian photos and clips: Wikimedia Commons contributors, credited in the repository.
+      Crowd-safety science: J. J. Fruin, G. K. Still, D. Helbing.</p>
+  </div>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script>
+// Demo video slot
+(function () {
+  const v = document.getElementById("video"), id = v.dataset.youtube;
+  if (!id) return;
+  document.getElementById("frame").innerHTML =
+    `<iframe src="https://www.youtube-nocookie.com/embed/${encodeURIComponent(id)}" title="Crowd Shield demo"
+      allow="accelerometer; encrypted-media; picture-in-picture" allowfullscreen></iframe>`;
+  v.classList.add("on");
+})();
+
+// Live demo: load the app only when asked, so the page itself stays fast
+document.getElementById("launch").onclick = () => {
+  const stage = document.getElementById("stage");
+  stage.innerHTML =
+    '<div class="launch" id="waking"><div><p style="color:#e2e8f0;font-weight:600;margin:0">Starting Crowd Shield...</p>' +
+    '<p>Free hosting puts the app to sleep when nobody is using it. Waking it takes about a minute; if a <b>get this app back up</b> button appears, press it.</p>' +
+    '<div class="wake"><i></i></div></div></div>' +
+    '<iframe src="https://crowd-shield-india.streamlit.app/?embed=true&embed_options=light_theme" title="Crowd Shield live app"' +
+    ' allow="clipboard-write; fullscreen"></iframe>';
+  // the sleeping app answers with its own page first; give the real app a moment before the cover goes
+  setTimeout(() => document.getElementById("waking")?.remove(), 45000);   // never leave the cover up for good
+  stage.querySelector("iframe").addEventListener("load", () => setTimeout(() => document.getElementById("waking")?.remove(), 6000));
+};
+
+// Accuracy table (results/shanghaitech/comparison.md)
+(function () {
+  const rows = [["Original app (YOLO)", 7.1, 42.1], ["DM-Count", 83.8, 86.4], ["PET + correction", 86.5, 92.7], ["PET v2 (+ UCF-QNRF)", 86.1, 92.1]];
+  document.getElementById("acc").innerHTML = rows.map(([m, a, b], i) => {
+    const best = i === rows.length - 1 ? "best" : "";
+    return `<tr class="${best}"><td>${m}</td>
+      <td style="width:22%"><div class="meter"><i class="${best}" style="width:${a}%"></i></div></td><td class="num">${a}%</td>
+      <td style="width:22%"><div class="meter"><i class="${best}" style="width:${b}%"></i></div></td><td class="num">${b}%</td></tr>`;
+  }).join("");
+})();
+
+// Site maps (sites/*.json, Fruin "standard" thresholds from crowdshield/config.py)
+(function () {
+  const STD = { moderate: 1.0, high: 2.0, critical: 3.5 };
+  const LEVELS = {
+    "Safe": ["#10b981", "#ecfdf5", "#047857"], "Moderate": ["#f59e0b", "#fffbeb", "#b45309"],
+    "High Risk": ["#f97316", "#fff7ed", "#c2410c"], "Critical": ["#ef4444", "#fef2f2", "#b91c1c"],
+  };
+  const level = d => d >= STD.critical ? "Critical" : d >= STD.high ? "High Risk" : d >= STD.moderate ? "Moderate" : "Safe";
+  const map = L.map("map", { scrollWheelZoom: false, zoomControl: true, attributionControl: true });
+  L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
+    { maxZoom: 19, attribution: "Imagery © Esri, Maxar, Earthstar Geographics" }).addTo(map);
+  L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}",
+    { maxZoom: 19, opacity: .8 }).addTo(map);
+  let layer = null; const cache = {};
+
+  async function show(key) {
+    const site = cache[key] || (cache[key] = await (await fetch(`data/${key}.json`)).json());
+    if (layer) layer.remove();
+    // A Leaflet map needs a view before layers can be added to it.
+    map.setView([site.centre[1], site.centre[0]], site.zoom || 16);
+    layer = L.featureGroup().addTo(map);
+    const list = [];
+    for (const [id, z] of Object.entries(site.zones)) {
+      const d = z.scenario_density, lv = level(d), [c, bg, fg] = LEVELS[lv];
+      const poly = L.polygon(z.ring.map(([lon, lat]) => [lat, lon]),
+        { color: c, weight: 2.5, fillColor: c, fillOpacity: lv === "Critical" ? .45 : .32 }).addTo(layer);
+      poly.bindTooltip(`<b>Zone ${id} · ${z.name}</b><br>${d.toFixed(1)} people/m² · ${lv}`, { className: "zt", sticky: true });
+      L.tooltip({ permanent: true, direction: "center", className: "zlabel" }).setContent(id).setLatLng(poly.getBounds().getCenter()).addTo(layer);
+      list.push({ id, z, d, lv, c, bg, fg, poly });
+    }
+    map.fitBounds(layer.getBounds(), { padding: [30, 30] });
+    document.getElementById("story").textContent = site.story;
+    document.getElementById("disclaimer").textContent = `${site.scenario_note} ${site.disclaimer}`;
+    const box = document.getElementById("zones"); box.replaceChildren();
+    list.sort((a, b) => b.d - a.d).forEach(r => {
+      const el = document.createElement("div"); el.className = "zone"; el.style.marginBottom = "8px";
+      el.innerHTML = `<span class="dot" style="background:${r.c}"></span><span class="nm"></span>
+        <span class="d">${r.d.toFixed(1)}</span><span class="pill" style="background:${r.bg};color:${r.fg}">${r.lv}</span>`;
+      el.querySelector(".nm").textContent = `${r.id} · ${r.z.name}`;
+      el.onclick = () => { map.fitBounds(r.poly.getBounds(), { padding: [60, 60], maxZoom: 18 }); r.poly.openTooltip(); };
+      box.appendChild(el);
+    });
+  }
+  document.querySelectorAll(".tabs button").forEach(b => b.onclick = () => {
+    document.querySelectorAll(".tabs button").forEach(x => x.classList.toggle("on", x === b));
+    show(b.dataset.site);
+  });
+  show("kumbh_sangam").catch(() => { document.getElementById("story").textContent = "Map data could not load."; });
+})();
+</script>
+</body>
+</html>

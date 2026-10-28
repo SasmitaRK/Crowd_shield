@@ -1,0 +1,57 @@
+name: Feedback on Crowd Shield
+description: Tried the app? Tell us what worked and what didn't.
+title: "Feedback: "
+labels: ["feedback"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for trying Crowd Shield. Please don't include photos of people, names or contact details.
+  - type: dropdown
+    id: role
+    attributes:
+      label: Who are you?
+      options:
+        - Event or venue organiser
+        - Police, security or crowd-control staff
+        - Disaster-management or public-safety official
+        - Researcher or student
+        - Developer
+        - Other
+    validations:
+      required: true
+  - type: dropdown
+    id: tried
+    attributes:
+      label: What did you try?
+      multiple: true
+      options:
+        - Site map
+        - Counting a photo
+        - Sample photos
+        - Video monitor
+        - Live feed
+        - Alerts
+        - India benchmark
+  - type: dropdown
+    id: easy
+    attributes:
+      label: How easy was it to use?
+      options: ["1 - Very hard", "2", "3", "4", "5 - Very easy"]
+    validations:
+      required: true
+  - type: dropdown
+    id: trust
+    attributes:
+      label: Would you trust its count enough to act on it?
+      options: ["No", "Only with a person checking", "Yes, as an extra signal", "Yes"]
+  - type: textarea
+    id: worked
+    attributes:
+      label: What worked well?
+  - type: textarea
+    id: broke
+    attributes:
+      label: What was confusing, wrong or missing?
+    validations:
+      required: true

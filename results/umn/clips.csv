@@ -1,0 +1,12 @@
+clip,scene,start_s,label_s,detected,alarm_vs_label_s,false_alarms,caught_by
+1,lawn,0.0,17.5,True,-0.47,0,speed
+2,lawn,20.5,44.3,True,-0.4,0,speed
+3,indoor,48.0,60.2,True,-1.13,0,energy
+4,indoor,66.2,86.8,True,-0.7,0,energy
+5,indoor,89.5,107.3,True,-0.73,0,energy
+6,indoor,114.3,131.3,True,0.0,0,energy
+7,indoor,133.9,160.2,True,-0.43,0,energy
+8,indoor,164.3,180.7,True,-0.27,0,energy
+9,plaza,186.5,206.5,True,-0.9,0,speed
+10,plaza,207.8,229.4,True,-1.1,0,speed
+11,plaza,230.4,256.7,True,-0.73,0,speed
